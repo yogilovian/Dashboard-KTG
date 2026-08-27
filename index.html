@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Stasiun Ketapang</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Sidebar Navigasi -->
+    <nav class="sidebar">
+        <div class="sidebar-brand">
+            <h2>KAI <span>KETAPANG</span></h2>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="active"><a href="index.html">🏠 Dashboard Utama</a></li>
+            <li><a href="struktur.html">👥 Struktur Organisasi</a></li>
+        </ul>
+    </nav>
+
+    <!-- Konten Utama -->
+    <main class="main-content">
+        <header class="header">
+            <h1 id="welcome-title">Dashboard Operasional Stasiun Ketapang</h1>
+            <p id="current-date">Memuat Tanggal...</p>
+        </header>
+
+        <!-- Informasi Personil Dinas Hari Ini -->
+        <h2 style="color: #002F6C; margin-bottom: 15px;">Personil Berdinas Hari Ini</h2>
+        <section class="shift-container">
+            
+            <!-- Shift Pagi -->
+            <div class="shift-card">
+                <div class="shift-title">🌅 Shift Pagi (07:00 - 15:00)</div>
+                <div class="staff-list" id="shift-pagi">
+                    <!-- Data otomatis masuk lewat script.js -->
+                </div>
+            </div>
+
+            <!-- Shift Siang -->
+            <div class="shift-card">
+                <div class="shift-title">☀️ Shift Siang (15:00 - 23:00)</div>
+                <div class="staff-list" id="shift-siang">
+                    <!-- Data otomatis masuk lewat script.js -->
+                </div>
+            </div>
+
+            <!-- Shift Malam -->
+            <div class="shift-card">
+                <div class="shift-title">🌙 Shift Malam (23:00 - 07:00)</div>
+                <div class="staff-list" id="shift-malam">
+                    <!-- Data otomatis masuk lewat script.js -->
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Statistik Okupansi Penumpang -->
+        <section class="stats-section">
+            <h2 class="stats-title">📊 Statistik Okupansi Penumpang Banyuwangi</h2>
+            <div class="occupancy-box">
+                <!-- Ubah variabel --percentage di bawah sesuai tingkat keterisian (Contoh: 82%) -->
+                <div class="progress-circle" style="--percentage: 82%;">
+                    <div class="progress-inner">82%</div>
+                </div>
+                <div class="stats-info">
+                    <p><strong>Status Volume:</strong> Padat Terendali</p>
+                    <p><strong>Total Kapasitas Kursi:</strong> 2.450 / Hari</p>
+                    <p>Last Update: Real-time hari ini</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
