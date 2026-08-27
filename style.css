@@ -305,3 +305,68 @@ body {
             font-weight: 400;
             margin-top: 2px;
         }
+
+/* --- FITUR SIDEBAR INTERAKTIF --- */
+
+/* Tombol Toggle Hamburger */
+.toggle-btn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background-color: var(--kai-blue);
+    color: var(--white);
+    border: 2px solid var(--kai-orange);
+    padding: 10px 15px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.toggle-btn:hover {
+    background-color: var(--kai-orange);
+}
+
+/* Modifikasi Sidebar Default agar Mendukung Animasi Transisi */
+.sidebar {
+    transition: all 0.3s ease;
+    z-index: 999;
+}
+
+/* Kelas khusus saat sidebar disembunyikan */
+.sidebar.hidden {
+    left: -260px; /* Geser keluar layar ke arah kiri */
+}
+
+/* Modifikasi Konten Utama agar Menyesuaikan Lebar Layar */
+.main-content {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+    transition: all 0.3s ease;
+    padding-top: 60px; /* Jarak aman agar tidak tertutup tombol toggle */
+}
+
+/* Kelas khusus untuk konten utama saat sidebar sembunyi */
+.main-content.full-width {
+    margin-left: 0;
+    width: 100%;
+}
+
+/* Responsif: Otomatis sembunyikan sidebar di layar HP/Tablet */
+@media (max-width: 768px) {
+    .sidebar {
+        left: -260px;
+    }
+    .sidebar.active {
+        left: 0;
+    }
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 20px;
+        padding-top: 80px;
+    }
+}
+
