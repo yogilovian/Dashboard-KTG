@@ -26,34 +26,55 @@
             <p id="current-date">Memuat Tanggal...</p>
         </header>
 
-        <!-- Informasi Personil Dinas Hari Ini -->
-        <h2 style="color: #002F6C; margin-bottom: 15px;">Petugas Langsir yang Berdinas Hari Ini</h2>
+        <!-- BARIS 1: DINASAN PPKA -->
+        <h2 style="color: #002F6C; margin-bottom: 15px;">👮‍♂️ 1. PPKA Yang Berdinas Hari Ini</h2>
         <section class="shift-container">
-            
-            <!-- Shift Pagi -->
             <div class="shift-card">
-                <div class="shift-title">🌅 Shift Pagi (07:00 - 15:00)</div>
-                <div class="staff-list" id="shift-pagi">
-                    <!-- Data otomatis masuk lewat script.js -->
-                </div>
+                <div class="shift-title">🌅 Shift Pagi</div>
+                <div class="staff-list" id="ppka-pagi"></div>
             </div>
-
-            <!-- Shift Siang -->
             <div class="shift-card">
-                <div class="shift-title">☀️ Shift Siang (15:00 - 23:00)</div>
-                <div class="staff-list" id="shift-siang">
-                    <!-- Data otomatis masuk lewat script.js -->
-                </div>
+                <div class="shift-title">☀️ Shift Siang</div>
+                <div class="staff-list" id="ppka-siang"></div>
             </div>
-
-            <!-- Shift Malam -->
             <div class="shift-card">
-                <div class="shift-title">🌙 Shift Malam (23:00 - 07:00)</div>
-                <div class="staff-list" id="shift-malam">
-                    <!-- Data otomatis masuk lewat script.js -->
-                </div>
+                <div class="shift-title">🌙 Shift Malam</div>
+                <div class="staff-list" id="ppka-malam"></div>
             </div>
+        </section>
+        
+        <!-- BARIS 2: DINASAN PLR -->
+        <h2 style="color: #002F6C; margin-bottom: 15px;">👷 2. Petugas Langsir Yang Berdinas Hari Ini</h2>
+        <section class="shift-container">
+            <div class="shift-card" style="border-top-color: #002F6C;">
+                <div class="shift-title">🌅 Shift Pagi</div>
+                <div class="staff-list" id="plr-pagi"></div>
+            </div>
+            <div class="shift-card" style="border-top-color: #002F6C;">
+                <div class="shift-title">☀️ Shift Siang</div>
+                <div class="staff-list" id="plr-siang"></div>
+            </div>
+            <div class="shift-card" style="border-top-color: #002F6C;">
+                <div class="shift-title">🌙 Shift Malam</div>
+                <div class="staff-list" id="plr-malam"></div>
+            </div>
+        </section>
 
+        <!-- BARIS 3: DINASAN PRS -->
+        <h2 style="color: #002F6C; margin-bottom: 15px;">🚉 3. Petugas Rumah Sinyal Yang Berdinas Hari Ini</h2>
+        <section class="shift-container">
+            <div class="shift-card" style="border-top-color: #555;">
+                <div class="shift-title">🌅 Shift Pagi</div>
+                <div class="staff-list" id="prs-pagi"></div>
+            </div>
+            <div class="shift-card" style="border-top-color: #555;">
+                <div class="shift-title">☀️ Shift Siang</div>
+                <div class="staff-list" id="prs-siang"></div>
+            </div>
+            <div class="shift-card" style="border-top-color: #555;">
+                <div class="shift-title">🌙 Shift Malam</div>
+                <div class="staff-list" id="prs-malam"></div>
+            </div>
         </section>
 
         <!-- Statistik Okupansi Penumpang -->
