@@ -1,4 +1,23 @@
 document.addEventListener("DOMContentLoaded", function () {
+
+// --- LOGIKA BUKA/TUTUP SIDEBAR ---
+const sidebarToggle = document.getElementById('sidebarToggle');
+const sidebar = document.getElementById('mySidebar');
+const mainContent = document.querySelector('.main-content');
+
+if (sidebarToggle && sidebar && mainContent) {
+    sidebarToggle.addEventListener('click', function () {
+        // Jika layar laptop/komputer
+        if (window.innerWidth > 768) {
+            sidebar.classList.toggle('hidden');
+            mainContent.classList.toggle('full-width');
+        } else { 
+            // Jika layar HP / Tablet
+            sidebar.classList.toggle('active');
+        }
+    });
+}
+    
     // Tampilkan Tanggal Hari ini di Header
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const todayStr = new Date().toLocaleDateString('id-ID', options);
