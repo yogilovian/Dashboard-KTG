@@ -246,3 +246,62 @@ body {
     flex-wrap: wrap;
     justify-content: center;
 }
+/* CSS Khusus Pemisahan Blok Operasional */
+        .operational-row {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px dashed #002F6C;
+        }
+
+        .independent-col {
+            background: var(--white);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--kai-orange);
+            flex: 1;
+            min-width: 280px;
+            max-width: 360px;
+        }
+
+        .col-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--kai-blue);
+            text-align: center;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #F4F6F9;
+            padding-bottom: 8px;
+        }
+
+        .staff-grid-mini {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .staff-item-box {
+            background: #F8F9FA;
+            border: 1px solid #E9ECEF;
+            border-radius: 6px;
+            padding: 10px 5px;
+            font-size: 11px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .staff-item-box span {
+            display: block;
+            color: #888;
+            font-size: 9px;
+            font-weight: 400;
+            margin-top: 2px;
+        }
