@@ -1,9 +1,17 @@
-tanggal,nama,shift,foto
-2026-08-27,Qomarik al Faruq,pagi,qomarik.jpg
-2026-08-27,Ahmad Yoga Septian,pagi,yoga.jpg
-2026-08-27,Taufik Hidayat,siang,taufik.jpg
-2026-08-27,Yogi Lovian,siang,yogi.jpg
-2026-08-27,Danial Syuqron,malam,danial.jpg
-2026-08-27,Rafi Hartono,malam,rafi.jpg
-2026-08-28,Doni Perkasa,pagi,doni.jpg
-2026-08-28,Doni Perkasa,pagi,doni.jpg
+tanggal,nama,kelompok,shift,foto
+2026-08-27,Fadli,ppka,pagi,fadli.jpg
+2026-08-27,Alif Solehodin,ppka,siang,alif.jpg
+2026-08-27,Ibrahim,ppka,malam,ibrahim.jpg
+2026-08-27,Qomarik Al Faruq,plr,pagi,qomarik.jpg
+2026-08-27,Ahmad Yoga Septian,plr,pagi,yoga.jpg
+2026-08-27,Taufik Hidayat,plr,siang,taufik.jpg
+2026-08-27,Yogi Lovian,plr,siang,yogi.jpg
+2026-08-27,Danial Syukron,plr,malam,danial.jpg
+2026-08-27,Rafi Hartono,plr,malam,rafi.jpg
+2026-08-27,Deny Prastyo,prs,pagi,deny.jpg
+2026-08-27,Roby Prasetyo,prs,pagi,roby.jpg
+2026-08-27,Davin Egik Juniardi,prs,siang,davin.jpg
+2026-08-27,Masardi Sukma Ragenda,prs,siang,ragenda.jpg
+2026-08-27,Machrus Izunnahdi,prs,malam,machrus.jpg
+2026-08-27,Arif Saga,prs,malam,saga.jpg
+
