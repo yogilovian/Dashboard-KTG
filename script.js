@@ -4,14 +4,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const todayStr = new Date().toLocaleDateString('id-ID', options);
     document.getElementById("current-date").innerText = todayStr;
 
-    // Ambil tanggal format YYYY-MM-DD untuk dicocokkan dengan spreadsheet CSV
-    const todayISO = new Date().toISOString().split('T')[0];
+    // Ambil tanggal format YYYY-MM-DD
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const targetDate = `${year}-${month}-${day}`;
 
     // Mengambil file data_dinas.csv dari repositori
     fetch('data_dinas.csv')
         .then(response => response.text())
         .then(csvText => {
-            parseCSVAndRender(csvText, todayISO);
+            parseCSVAndRender(csvText, targetDate);
         })
         .catch(err => {
             console.error("Gagal membaca file data dinasan (.csv): ", err);
@@ -21,29 +25,34 @@ document.addEventListener("DOMContentLoaded", function () {
 function parseCSVAndRender(csvText, targetDate) {
     const lines = csvText.split('\n');
     
-    // Pembersihan kontainer html
-    document.getElementById('shift-pagi').innerHTML = '';
-    document.getElementById('shift-siang').innerHTML = '';
-    document.getElementById('shift-malam').innerHTML = '';
+    // ID Elemen yang ada di HTML
+    const elementIds = [
+        'ppka-pagi', 'ppka-siang', 'ppka-malam',
+        'plr-pagi', 'plr-siang', 'plr-malam',
+        'prs-pagi', 'prs-siang', 'prs-malam'
+    ];
 
-    let dataFound = false;
+    // Reset kontainer HTML
+    elementIds.forEach(id => {
+        document.getElementById(id).innerHTML = '';
+    });
 
-    // Mulai dari indeks 1 untuk melompati baris header CSV
+    let counters = {};
+    elementIds.forEach(id => counters[id] = 0);
+
     for (let i = 1; i < lines.length; i++) {
         if (!lines[i].trim()) continue;
         
-        // Memisah kolom menggunakan koma
+        // Parsing data baris CSV
         const columns = lines[i].split(',');
         const tanggal = columns[0].trim();
         const nama = columns[1].trim();
-        const shift = columns[2].trim().toLowerCase(); // pagi, siang, atau malam
-        const foto = columns[3].trim(); // nama file foto, misal: budi.jpg
+        const kelompok = columns[2].trim().toLowerCase(); // perjalanan, pelayanan, fasilitas
+        const shift = columns[3].trim().toLowerCase();    // pagi, siang, malam
+        const foto = columns[4].trim();
 
-        // Jika tanggal di baris csv cocok dengan tanggal hari ini
+        // Jika tanggal cocok dengan hari ini
         if (tanggal === targetDate) {
-            dataFound = true;
-            
-            // Buat element kartu profil bulat
             const profileHTML = `
                 <div class="staff-profile">
                     <div class="avatar-circle">
@@ -53,22 +62,20 @@ function parseCSVAndRender(csvText, targetDate) {
                 </div>
             `;
 
-            // Masukkan ke kolom shift yang sesuai
-            if (shift === 'pagi') {
-                document.getElementById('shift-pagi').innerHTML += profileHTML;
-            } else if (shift === 'siang') {
-                document.getElementById('shift-siang').innerHTML += profileHTML;
-            } else if (shift === 'malam') {
-                document.getElementById('shift-malam').innerHTML += profileHTML;
+            // Menentukan ID target gabungan (misal: 'perjalanan' + '-' + 'pagi')
+            const targetId = `${kelompok}-${shift}`;
+            
+            if (elementIds.includes(targetId)) {
+                document.getElementById(targetId).innerHTML += profileHTML;
+                counters[targetId]++;
             }
         }
     }
 
-    // fallback jika data hari ini kosong di spreadsheet
-    if (!dataFound) {
-        const fallbackMsg = "<p style='color:#888;font-size:13px;'>Tidak ada jadwal dinas terdata.</p>";
-        document.getElementById('shift-pagi').innerHTML = fallbackMsg;
-        document.getElementById('shift-siang').innerHTML = fallbackMsg;
-        document.getElementById('shift-malam').innerHTML = fallbackMsg;
-    }
+    // Pasang pesan kosong jika ada shift kelompok yang tidak terisi data hari ini
+    elementIds.forEach(id => {
+        if (counters[id] === 0) {
+            document.getElementById(id).innerHTML = "<p style='color:#888;font-size:11px;padding:5px;'>Kosong</p>";
+        }
+    });
 }
