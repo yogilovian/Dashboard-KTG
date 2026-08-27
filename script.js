@@ -51,7 +51,7 @@ function parseCSVAndRender(csvText, targetDate) {
         const shift = columns[3].trim().toLowerCase();    // pagi, siang, malam
         const foto = columns[4].trim();
 
-        // Jika tanggal cocok dengan hari ini
+        // Buat element kartu profil bulat
         if (tanggal === targetDate) {
             const profileHTML = `
                 <div class="staff-profile">
@@ -61,6 +61,16 @@ function parseCSVAndRender(csvText, targetDate) {
                     <div class="staff-name">${nama}</div>
                 </div>
             `;
+            // Masukkan ke kolom shift yang sesuai
+            if (shift === 'pagi') {
+                document.getElementById('shift-pagi').innerHTML += profileHTML;
+            } else if (shift === 'siang') {
+                document.getElementById('shift-siang').innerHTML += profileHTML;
+            } else if (shift === 'malam') {
+                document.getElementById('shift-malam').innerHTML += profileHTML;
+            }
+        }
+    }
 
             // Menentukan ID target gabungan (misal: 'perjalanan' + '-' + 'pagi')
             const targetId = `${kelompok}-${shift}`;
