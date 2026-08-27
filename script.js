@@ -51,31 +51,23 @@ function parseCSVAndRender(csvText, targetDate) {
         const shift = columns[3].trim().toLowerCase();    // pagi, siang, malam
         const foto = columns[4].trim();
 
-        // Buat element kartu profil bulat
+        // Cocokkan tanggal baris CSV dengan tanggal hari ini
         if (tanggal === targetDate) {
-            const profileHTML = `
-                <div class="staff-profile">
-                    <div class="avatar-circle">
-                        <img src="images/${foto}" alt="${nama}" onerror="this.src='https://placeholder.com'">
-                    </div>
-                    <div class="staff-name">${nama}</div>
-                </div>
-            `;
-            // Masukkan ke kolom shift yang sesuai
-            if (shift === 'pagi') {
-                document.getElementById('shift-pagi').innerHTML += profileHTML;
-            } else if (shift === 'siang') {
-                document.getElementById('shift-siang').innerHTML += profileHTML;
-            } else if (shift === 'malam') {
-                document.getElementById('shift-malam').innerHTML += profileHTML;
-            }
-        }
-    }
-
-            // Menentukan ID target gabungan (misal: 'perjalanan' + '-' + 'pagi')
+            // Gabungkan kata kunci untuk menembak ID HTML (contoh: 'perjalanan-pagi')
             const targetId = `${kelompok}-${shift}`;
             
+            // Periksa apakah gabungan ID tersebut terdaftar di sistem
             if (elementIds.includes(targetId)) {
+                const profileHTML = `
+                    <div class="staff-profile">
+                        <div class="avatar-circle">
+                            <img src="images/${foto}" alt="${nama}" onerror="this.src='https://placeholder.com'">
+                        </div>
+                        <div class="staff-name">${nama}</div>
+                    </div>
+                `;
+
+                // Masukkan kartu ke dalam ID kontainer yang tepat
                 document.getElementById(targetId).innerHTML += profileHTML;
                 counters[targetId]++;
             }
