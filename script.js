@@ -91,9 +91,12 @@ function parseCSVAndRender(csvText, targetDate) {
 
     for (let i = 1; i < lines.length; i++) {
         if (!lines[i].trim()) continue;
+
+        const columns = lines[i].split(',');
+        if (columns.length < 5) continue; 
         
         // Parsing data baris CSV
-        const columns = lines[i].split(',');
+        // const columns = lines[i].split(',');
         const tanggal = columns[0].trim();
         const nama = columns[1].trim();
         const kelompok = columns[2].trim().toLowerCase(); // ppka, plr, prs
