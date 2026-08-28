@@ -18,14 +18,17 @@ if (sidebarToggle && sidebar && mainContent) {
     });
 }
 
-    // --- FUNGSIONAL BARU: JAM DIGITAL & AUTO REFRESH ---
+    // --- FUNGSIONAL: JAM DIGITAL & AUTO REFRESH PERGANTIAN HARI ---
 function initDigitalClock() {
     const clockElement = document.getElementById('live-clock');
-    
-    // Variabel penyimpan tanggal hari ini untuk mendeteksi perubahan hari secara real-time
     let currentDayIndex = new Date().getDate();
 
-    setInterval(() => {
+    // Jalankan fungsi satu kali di awal agar jam langsung muncul tanpa menunggu 1 detik pertama
+    updateTime();
+
+    setInterval(updateTime, 1000); // Interval berjalan setiap 1 detik (1000ms)
+
+    function updateTime() {
         const now = new Date();
         
         // Format jam digital ke sistem HH:MM:SS
@@ -40,10 +43,9 @@ function initDigitalClock() {
         // CEK PERGANTIAN HARI: Jika tanggal saat ini berubah dibanding simpanan awal
         if (now.getDate() !== currentDayIndex) {
             currentDayIndex = now.getDate();
-            // Lakukan reload halaman otomatis agar data dinasan ditarik ulang dari CSV terbaru
-            window.location.reload();
+            window.location.reload(); // Reload halaman otomatis
         }
-    }, 1000); // Interval berjalan setiap 1 detik sekali
+    }
 }
 
     // Tampilkan Tanggal Hari ini di Header
@@ -94,7 +96,7 @@ function parseCSVAndRender(csvText, targetDate) {
         const columns = lines[i].split(',');
         const tanggal = columns[0].trim();
         const nama = columns[1].trim();
-        const kelompok = columns[2].trim().toLowerCase(); // perjalanan, pelayanan, fasilitas
+        const kelompok = columns[2].trim().toLowerCase(); // ppka, plr, prs
         const shift = columns[3].trim().toLowerCase();    // pagi, siang, malam
         const foto = columns[4].trim();
 
