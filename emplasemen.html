@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peta Emplasemen - Stasiun Ketapang</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Desain Area Kerja Canvas Emplasemen */
+        .emplasemen-container {
+            background: #111; /* Latar belakang gelap agar kontras gambar rel terlihat jelas */
+            border-radius: 12px;
+            margin-top: 20px;
+            height: calc(100vh - 180px);
+            width: 100%;
+            overflow: hidden; /* Sembunyikan scrollbar bawaan */
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+            cursor: grab;
+        }
+        
+        .emplasemen-container:active {
+            cursor: grabbing;
+        }
+
+        /* Pembungkus Gambar untuk Manipulasi Panzoom */
+        #panzoom-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #panzoom-wrapper img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        /* Panel Tombol Kontrol Zoom */
+        .zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .zoom-btn {
+            background-color: var(--kai-orange);
+            color: var(--white);
+            border: none;
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .zoom-btn:hover {
+            background-color: var(--kai-blue);
+            transform: scale(1.05);
+        }
+
+        .zoom-instructions {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Tombol Buka/Tutup Sidebar -->
+    <button class="toggle-btn" id="sidebarToggle">☰ Menu</button>
+
+    <!-- Sidebar Navigasi -->
+    <nav class="sidebar" id="mySidebar">
+        <div class="sidebar-brand">
+            <h2>KAI <span>KETAPANG</span></h2>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html">🏠 Dashboard Utama</a></li>
+            <li><a href="struktur.html">👥 Struktur Organisasi</a></li>
+            <li class="active"><a href="emplasemen.html">🛤️ Emplasemen</a></li>
+        </ul>
+    </nav>
+
+    <!-- Konten Utama -->
+    <main class="main-content">
+        <header class="header">
+            <h1>Layout Emplasemen Stasiun Ketapang</h1>
+            <p>Gunakan mouse scroll atau tombol kontrol untuk memperbesar detail jalur KA</p>
+        </header>
+
+        <!-- Wadah Interaktif Gambar -->
+        <section class="emplasemen-container">
+            <div class="zoom-instructions">🖱️ Scroll untuk Zoom | Klik & Geser untuk memindahkan peta</div>
+            
+            <div id="panzoom-wrapper">
+                <!-- Memanggil Gambar Emplasemen Anda -->
+                <img id="emplasemen-img" src="images/emplasemen_ktg.png" alt="Peta Emplasemen Stasiun Ketapang">
+            </div>
+
+            <!-- Tombol Navigasi Layar -->
+            <div class="zoom-controls">
+                <button class="zoom-btn" id="btn-zoom-in" title="Perbesar">+</button>
+                <button class="zoom-btn" id="btn-zoom-out" title="Perkecil">−</button>
+                <button class="zoom-btn" id="btn-reset" title="Kembalikan Semula">🔄</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Memanggil library Panzoom CDN agar bisa interaktif tanpa coding rumit -->
+    <script src="https://jsdelivr.net"></script>
+    <script src="script.js"></script>
+    <script>
+        // Inisialisasi Pustaka Zoom & Geser Gambar
+        const elem = document.getElementById('panzoom-wrapper');
+        const panzoom = Panzoom(elem, {
+            maxScale: 5, // Batas maksimal perbesaran (5x lipat)
+            minScale: 0.5, // Batas maksimal perkecil
+            contain: 'outside', // Gambar tidak akan hilang keluar batas wadah kotak
+            startScale: 1
+        });
+
+        // Hubungkan fungsi Zoom ke tombol fisik di kanan bawah
+        document.getElementById('btn-zoom-in').addEventListener('click', panzoom.zoomIn);
+        document.getElementById('btn-zoom-out').addEventListener('click', panzoom.zoomOut);
+        document.getElementById('btn-reset').addEventListener('click', panzoom.reset);
+
+        // Aktifkan juga fitur zoom menggunakan Scroll Roda Mouse
+        elem.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
+    </script>
+</body>
+</html>
