@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-// --- LOGIKA BUKA/TUTUP SIDEBAR UTAMA & STRUKTUR ---
+// --- LOGIKA BUKA/TUTUP SIDEBAR YANG STABIL ---
 const sidebarToggle = document.getElementById('sidebarToggle');
 const sidebar = document.getElementById('mySidebar');
 const mainContent = document.querySelector('.main-content');
@@ -8,18 +8,16 @@ const mainContent = document.querySelector('.main-content');
 if (sidebarToggle && sidebar && mainContent) {
     sidebarToggle.addEventListener('click', function () {
         if (window.innerWidth > 768) {
-            // Untuk layar komputer/laptop
+            // Komputer/Laptop
             sidebar.classList.toggle('hidden');
             mainContent.classList.toggle('full-width');
-            sidebarToggle.classList.toggle('moved'); // Geser tombol ke pojok kiri
         } else { 
-            // Untuk layar HP / Tablet
+            // Smartphone/Tablet
             sidebar.classList.toggle('active');
         }
     });
 }
 
-    
     // Tampilkan Tanggal Hari ini di Header
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const todayStr = new Date().toLocaleDateString('id-ID', options);
