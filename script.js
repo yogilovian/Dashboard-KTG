@@ -99,4 +99,20 @@ function parseCSVAndRender(csvText, targetDate) {
             document.getElementById(id).innerHTML = "<p style='color:#888;font-size:11px;padding:5px;'>Kosong</p>";
         }
     });
+    // Inisialisasi Pustaka Zoom & Geser Gambar
+        const elem = document.getElementById('panzoom-wrapper');
+        const panzoom = Panzoom(elem, {
+            maxScale: 5, // Batas maksimal perbesaran (5x lipat)
+            minScale: 0.5, // Batas maksimal perkecil
+            contain: 'outside', // Gambar tidak akan hilang keluar batas wadah kotak
+            startScale: 1
+        });
+
+        // Hubungkan fungsi Zoom ke tombol fisik di kanan bawah
+        document.getElementById('btn-zoom-in').addEventListener('click', panzoom.zoomIn);
+        document.getElementById('btn-zoom-out').addEventListener('click', panzoom.zoomOut);
+        document.getElementById('btn-reset').addEventListener('click', panzoom.reset);
+
+        // Aktifkan juga fitur zoom menggunakan Scroll Roda Mouse
+        elem.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
 }
