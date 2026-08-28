@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emplasemen Stasiun Ketapang</title>
+    <title>Peta Emplasemen - Stasiun Ketapang</title>
     <link rel="stylesheet" href="style.css">
     <style>
         /* Desain Area Kerja Canvas Emplasemen */
@@ -33,8 +33,8 @@
         }
 
         #panzoom-wrapper img {
-            max-width: 95%;
-            max-height: 95%;
+            max-width: 90%;
+            max-height: 90%;
             object-fit: contain;
             user-select: none;
             -webkit-user-drag: none;
@@ -77,7 +77,7 @@
             position: absolute;
             top: 15px;
             left: 20px;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.6);
             color: #fff;
             padding: 8px 15px;
             border-radius: 20px;
@@ -94,7 +94,7 @@
     <!-- Sidebar Navigasi -->
     <nav class="sidebar" id="mySidebar">
         <div class="sidebar-brand">
-            <h2>KAI<span>KETAPANG</span></h2>
+            <h2>KAI <span>KETAPANG</span></h2>
         </div>
         <ul class="sidebar-menu">
             <li><a href="index.html">🏠 Dashboard Utama</a></li>
@@ -107,12 +107,12 @@
     <main class="main-content">
         <header class="header">
             <h1>Layout Emplasemen Stasiun Ketapang</h1>
-            <p>GAPEKA 2025</p>
+            <p>Gunakan mouse scroll atau tombol kontrol untuk memperbesar detail jalur KA</p>
         </header>
 
         <!-- Wadah Interaktif Gambar -->
         <section class="emplasemen-container">
-            <div class="zoom-instructions">🖱️ Roda Mouse untuk Zoom | Klik & Geser untuk memindahkan peta</div>
+            <div class="zoom-instructions">🖱️ Scroll untuk Zoom | Klik & Geser untuk memindahkan peta</div>
             
             <div id="panzoom-wrapper">
                 <!-- Memanggil Gambar Emplasemen Anda -->
@@ -128,41 +128,8 @@
         </section>
     </main>
 
-    <!-- Memanggil library Panzoom CDN yang stabil dan mandiri -->
+    <!-- Memanggil library Panzoom CDN agar bisa interaktif tanpa coding rumit -->
     <script src="https://jsdelivr.net"></script>
-    <script>
-        // 1. LOGIKA INTERAKTIF ZOOM & PANNING (GESER) GAMBAR
-        const elem = document.getElementById('panzoom-wrapper');
-        const panzoom = Panzoom(elem, {
-            maxScale: 6,         // Maksimal perbesaran hingga 6x lipat gambar asli
-            minScale: 0.5,       // Maksimal diperkecil
-            contain: 'outside',  // Gambar tertahan di area container
-            startScale: 1
-        });
-
-        // Event listener untuk tombol kontrol
-        document.getElementById('btn-zoom-in').addEventListener('click', panzoom.zoomIn);
-        document.getElementById('btn-zoom-out').addEventListener('click', panzoom.zoomOut);
-        document.getElementById('btn-reset').addEventListener('click', panzoom.reset);
-
-        // Aktifkan zoom menggunakan scroll wheel mouse
-        elem.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
-
-        // 2. LOGIKA SIDEBAR MANDIRI (Mencegah Error dari script.js)
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const sidebar = document.getElementById('mySidebar');
-        const mainContent = document.querySelector('.main-content');
-
-        if (sidebarToggle && sidebar && mainContent) {
-            sidebarToggle.addEventListener('click', function () {
-                if (window.innerWidth > 768) {
-                    sidebar.classList.toggle('hidden');
-                    mainContent.classList.toggle('full-width');
-                } else { 
-                    sidebar.classList.toggle('active');
-                }
-            });
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
