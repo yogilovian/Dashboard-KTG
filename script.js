@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
-
+initDigitalClock();
+    
 // --- LOGIKA BUKA/TUTUP SIDEBAR YANG STABIL ---
 const sidebarToggle = document.getElementById('sidebarToggle');
 const sidebar = document.getElementById('mySidebar');
@@ -23,15 +24,9 @@ function initDigitalClock() {
     const clockElement = document.getElementById('live-clock');
     let currentDayIndex = new Date().getDate();
 
-    // Jalankan fungsi satu kali di awal agar jam langsung muncul tanpa menunggu 1 detik pertama
-    updateTime();
-
-    setInterval(updateTime, 1000); // Interval berjalan setiap 1 detik (1000ms)
-
+   // Format jam digital ke sistem HH:MM:SS
     function updateTime() {
         const now = new Date();
-        
-        // Format jam digital ke sistem HH:MM:SS
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const seconds = String(now.getSeconds()).padStart(2, '0');
@@ -46,6 +41,11 @@ function initDigitalClock() {
             window.location.reload(); // Reload halaman otomatis
         }
     }
+     // Jalankan fungsi satu kali di awal agar jam langsung muncul tanpa menunggu 1 detik pertama
+    updateTime();
+
+    setInterval(updateTime, 1000); // Interval berjalan setiap 1 detik (1000ms)
+
 }
 
     // Tampilkan Tanggal Hari ini di Header
