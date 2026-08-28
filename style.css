@@ -36,7 +36,7 @@ body {
     flex-direction: column;
     color: var(--white);
     box-shadow: 4px 0 10px rgba(0,0,0,0.1);
-    transition: left 0.3s ease;
+    transition: transform 0.3s ease;
     z-index: 999;
 }
 
@@ -91,7 +91,8 @@ body {
     margin-left: 260px;
     width: calc(100% - 260px);
     transition: margin-left 0.3s ease, width 0.3s ease;
-    padding-top: 60px; /* Jarak aman agar tidak tertutup tombol toggle */
+    padding: 40px;
+    position: relative;
 }
 
 /* Kelas khusus untuk konten utama saat sidebar sembunyi */
@@ -322,9 +323,9 @@ body {
 
         /* Tombol Toggle Hamburger */
         .toggle-btn {
-            position: fixed;
+            position: absolute; /* Mengikuti koordinat Main Content */
             top: 15px;
-            left: 275px;
+            left: 20px;
             background-color: var(--kai-blue);
             color: var(--white);
             border: 2px solid var(--kai-orange);
@@ -333,28 +334,34 @@ body {
             font-weight: bold;
             border-radius: 6px;
             cursor: pointer;
-            z-index: 1000;
-            transition: left 0.3s ease, background-color 0.3s ease; /* Transisi pergeseran kiri */
+            z-index: 1001;
+            transition: background-color 0.2s ease;
         }
 
         .toggle-btn:hover {
             background-color: var(--kai-orange);
         }
 
-/* Responsif: Otomatis sembunyikan sidebar di layar HP/Tablet */
+/* Responsif untuk Layar HP/Tablet */
 @media (max-width: 768px) {
     .sidebar {
-        left: -260px;
+        transform: translateX(-260px);
     }
     .sidebar.active {
-        left: 0;
+        transform: translateX(0);
     }
     .main-content {
         margin-left: 0;
         width: 100%;
         padding: 20px;
-        padding-top: 80px;
+        padding-top: 90px;
     }
-
+    .header {
+        padding-left: 0; /* Kembalikan normal di HP karena posisi tombol melayang */
+    }
+    .toggle-btn {
+        position: fixed; /* Menjadi melayang khusus di tampilan HP */
+        top: 15px;
+        left: 15px;
+    }
 }
-
