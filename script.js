@@ -18,6 +18,34 @@ if (sidebarToggle && sidebar && mainContent) {
     });
 }
 
+    // --- FUNGSIONAL BARU: JAM DIGITAL & AUTO REFRESH ---
+function initDigitalClock() {
+    const clockElement = document.getElementById('live-clock');
+    
+    // Variabel penyimpan tanggal hari ini untuk mendeteksi perubahan hari secara real-time
+    let currentDayIndex = new Date().getDate();
+
+    setInterval(() => {
+        const now = new Date();
+        
+        // Format jam digital ke sistem HH:MM:SS
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        
+        if (clockElement) {
+            clockElement.innerText = `${hours}:${minutes}:${seconds} WIB`;
+        }
+
+        // CEK PERGANTIAN HARI: Jika tanggal saat ini berubah dibanding simpanan awal
+        if (now.getDate() !== currentDayIndex) {
+            currentDayIndex = now.getDate();
+            // Lakukan reload halaman otomatis agar data dinasan ditarik ulang dari CSV terbaru
+            window.location.reload();
+        }
+    }, 1000); // Interval berjalan setiap 1 detik sekali
+}
+
     // Tampilkan Tanggal Hari ini di Header
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const todayStr = new Date().toLocaleDateString('id-ID', options);
