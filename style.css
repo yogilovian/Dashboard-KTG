@@ -36,7 +36,7 @@ body {
     flex-direction: column;
     color: var(--white);
     box-shadow: 4px 0 10px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
+    transition: left 0.3s ease;
     z-index: 999;
 }
 
@@ -90,7 +90,7 @@ body {
 .main-content {
     margin-left: 260px;
     width: calc(100% - 260px);
-    transition: all 0.3s ease;
+    transition: margin-left 0.3s ease, width 0.3s ease;
     padding-top: 60px; /* Jarak aman agar tidak tertutup tombol toggle */
 }
 
@@ -324,7 +324,7 @@ body {
         .toggle-btn {
             position: fixed;
             top: 15px;
-            left: 15px;
+            left: 275px;
             background-color: var(--kai-blue);
             color: var(--white);
             border: 2px solid var(--kai-orange);
@@ -334,7 +334,7 @@ body {
             border-radius: 6px;
             cursor: pointer;
             z-index: 1000;
-            transition: all 0.3s ease;
+            transition: left 0.3s ease, background-color 0.3s ease; /* Transisi pergeseran kiri */
         }
 
         .toggle-btn:hover {
