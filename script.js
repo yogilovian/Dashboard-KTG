@@ -3,6 +3,7 @@ initDigitalClock();
     
 // --- LOGIKA BUKA/TUTUP SIDEBAR YANG STABIL ---
 const sidebarToggle = document.getElementById('sidebarToggle');
+const closeSidebar = document.getElementById('closeSidebar');
 const sidebar = document.getElementById('mySidebar');
 const mainContent = document.querySelector('.main-content');
 
@@ -18,6 +19,12 @@ if (sidebarToggle && sidebar && mainContent) {
         }
     });
 }
+    // Fungsi khusus menutup sidebar ketika tombol (X) diklik di HP/Tablet
+    if (closeSidebar && sidebar) {
+        closeSidebar.addEventListener('click', function () {
+            sidebar.classList.remove('active'); // Hapus kelas active untuk menyembunyikan menu
+        });
+    }
 
     // --- FUNGSIONAL: JAM DIGITAL & AUTO REFRESH PERGANTIAN HARI ---
 function initDigitalClock() {
