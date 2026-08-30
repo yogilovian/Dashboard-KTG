@@ -21,9 +21,15 @@ if (sidebarToggle && sidebar && mainContent) {
 }
     // Fungsi khusus menutup sidebar ketika tombol (X) diklik di HP/Tablet
     if (closeSidebar && sidebar) {
+        // Mendukung klik biasa dan sentuhan layar HP (touchstart)
+        const closeAction = function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            sidebar.classList.remove('active');
+        };
         closeSidebar.addEventListener('click', function () {
             sidebar.classList.remove('active'); // Hapus kelas active untuk menyembunyikan menu
-        });
+        }
     }
 
     // --- FUNGSIONAL: JAM DIGITAL & AUTO REFRESH PERGANTIAN HARI ---
