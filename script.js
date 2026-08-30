@@ -19,17 +19,11 @@ if (sidebarToggle && sidebar && mainContent) {
         }
     });
 }
-    // Fungsi khusus menutup sidebar ketika tombol (X) diklik di HP/Tablet
-    if (closeSidebar && sidebar) {
-        // Mendukung klik biasa dan sentuhan layar HP (touchstart)
-        const closeAction = function (e) {
-            e.preventDefault();
-            e.stopPropagation();
+if (closeSidebar && sidebar) {
+        closeSidebar.addEventListener('click', function () {
             sidebar.classList.remove('active');
-        };
-        closeSidebar.addEventListener('click', closeAction);
-        closeSidebar.addEventListener('touchstart', closeAction);
-    }
+        });
+}
 
     // --- FUNGSIONAL: JAM DIGITAL & AUTO REFRESH PERGANTIAN HARI ---
 function initDigitalClock() {
