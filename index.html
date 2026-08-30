@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Stasiun Ketapang</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Hubungkan Pustaka CDN Tabler Icons -->
-    <link rel="stylesheet" href="https://jsdelivr.net">
 </head>
 <body>
     
@@ -14,9 +12,8 @@
     <nav class="sidebar" id="mySidebar">
         
     <!-- TOMBOL CLOSE BARU (KHUSUS HP/TABLET) -->
-    <button class="close-sidebar-btn" id="closeSidebar" aria-label="Tutup Menu">
-    <i class="ti ti-x"></i>
-    </button>
+   <!-- TOMBOL CLOSE BARU (KHUSUS HP/TABLET) -->
+    <button class="close-sidebar-btn" id="closeSidebar">X</button>
         
         <div class="sidebar-brand">
             <h2>KAI <span>KETAPANG</span></h2>
@@ -100,15 +97,14 @@
 
         <!-- Statistik Okupansi Penumpang -->
         <section class="stats-section">
-            <h2 class="stats-title">📊 Statistik Okupansi Penumpang Banyuwangi</h2>
+            <h2 class="stats-title">📊 Persentase Penumpang Staisun Ketapang</h2>
             <div class="occupancy-box">
                 <!-- Ubah variabel --percentage di bawah sesuai tingkat keterisian (Contoh: 82%) -->
-                <div class="progress-circle" style="--percentage: 82%;">
-                    <div class="progress-inner">82%</div>
+                <div class="progress-circle" style="--percentage: 92%;">
+                    <div class="progress-inner">92%</div>
                 </div>
                 <div class="stats-info">
-                    <p><strong>Status Volume:</strong> Padat Terendali</p>
-                    <p><strong>Total Kapasitas Kursi:</strong> 2.450 / Hari</p>
+                    <p><strong>Total Kapasitas Kursi:</strong> 2.550 / Hari</p>
                     <p>Last Update: Real-time hari ini</p>
                 </div>
             </div>
