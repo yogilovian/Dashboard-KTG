@@ -372,8 +372,11 @@ body {
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
-
-
+        .toggle-btn i {
+            margin-right: 5px;
+            vertical-align: middle;
+            font-size: 16px;
+        }
         .toggle-btn:hover {
             background-color: var(--kai-orange);
         }
@@ -384,29 +387,28 @@ body {
 }
 
 /* Responsif untuk Layar HP/Tablet */
-@media (max-width: 768px) {
-    
-    close-sidebar-btn {
-        display: block;
+@media (max-width: 768px) {  
+    .close-sidebar-btn {
+        display: block; /* Mengembalikan ke mode block default agar tidak mengunci di tengah */
         position: absolute;
-        top: 15px;
-        right: 20px;
-        background: rgba(255, 255, 255, 0.1);
+        top: 10px;        /* Mepet ke atas sudut sidebar */
+        right: 15px;      /* Mepet ke kanan sudut sidebar */
+        background: none; /* Menghilangkan bulatan latar belakang */
+        border: none;     /* Menghilangkan garis tepi bulat */
         color: var(--white);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        font-size: 24px;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        justify-content: center;
         cursor: pointer;
-        z-index: 9999; /* Nilai z-index tertinggi agar tidak tertutup elemen lain */
+        z-index: 10005;   /* Lapisan tertinggi */
+        padding: 5px;     /* Ruang sentuh jari */
+        transition: color 0.2s ease, transform 0.2s ease;
     }
-    .close-sidebar-btn:hover {
-        background-color: var(--kai-orange);
+    /* Ukuran khusus untuk elemen Icon Tabler */
+    .close-sidebar-btn i {
+        font-size: 26px; /* Ukuran ikon diperbesar sedikit agar mudah ditekan di pojok */
+    }
+    /* Efek visual saat ditekan di HP */
+    .close-sidebar-btn:hover, .close-sidebar-btn:active {
+        color: var(--kai-orange); /* Berubah warna khas oranye KAI */
+        transform: scale(1.1);    /* Sedikit membesar saat disentuh */
     }
     .sidebar {
         transform: translateX(-260px);
