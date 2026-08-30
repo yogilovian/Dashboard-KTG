@@ -1,88 +1,53 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emplasemen - Stasiun Ketapang</title>
+    <title>Peta Emplasemen - Stasiun Ketapang</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://jsdelivr.net">
     <style>
-        /* Desain Area Kerja Canvas Emplasemen */
-        .emplasemen-container {
-            background: #111; /* Latar belakang gelap agar kontras gambar rel terlihat jelas */
+        /* Tampilan Wadah Gambar yang Simpel & Menempel di Web */
+        .emplasemen-static-box {
+            background: #FFFFFF;
+            border: 2px solid var(--kai-blue);
             border-radius: 12px;
+            padding: 15px;
             margin-top: 20px;
-            height: calc(100vh - 180px);
-            width: 100%;
-            overflow: hidden; /* Sembunyikan scrollbar bawaan */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             position: relative;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
-            cursor: grab;
-        }
-        
-        .emplasemen-container:active {
-            cursor: grabbing;
         }
 
-        /* Pembungkus Gambar untuk Manipulasi Panzoom */
-        #panzoom-wrapper {
+        /* Gaya Gambar Emplasemen Utama */
+        .emplasemen-static-box img {
             width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #panzoom-wrapper img {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
-            user-select: none;
-            -webkit-user-drag: none;
-        }
-
-        /* Panel Tombol Kontrol Zoom */
-        .zoom-controls {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 10;
-        }
-
-        .zoom-btn {
-            background-color: var(--kai-orange);
-            color: var(--white);
-            border: none;
-            width: 45px;
-            height: 45px;
-            font-size: 20px;
-            font-weight: bold;
+            height: auto;
+            max-width: 100%;
+            display: block;
             border-radius: 8px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: all 0.2s ease;
+            cursor: zoom-in; /* Penanda bahwa gambar bisa diklik untuk diperbesar */
+            transition: transform 0.2s ease;
+        }
+
+        /* Kelas khusus saat gambar diklik untuk Zoom In */
+        .emplasemen-static-box img.zoomed {
+            transform: scale(2); /* Memperbesar gambar 2x lipat */
+            cursor: zoom-out;
+            z-index: 50;
+            position: relative;
+        }
+
+        /* Instruksi Singkat di Bawah Gambar */
+        .info-tips {
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
             display: flex;
             align-items: center;
-            justify-content: center;
-        }
-
-        .zoom-btn:hover {
-            background-color: var(--kai-blue);
-            transform: scale(1.05);
-        }
-
-        .zoom-instructions {
-            position: absolute;
-            top: 15px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.6);
-            color: #fff;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            pointer-events: none;
+            gap: 5px;
         }
     </style>
 </head>
@@ -92,15 +57,15 @@
     <nav class="sidebar" id="mySidebar">
 
     <!-- TOMBOL CLOSE BARU (KHUSUS HP/TABLET) -->
-    <button class="close-sidebar-btn" id="closeSidebar">x</button>
+    <button class="close-sidebar-btn" id="closeSidebar"><i class="ti ti-x"></i></button>
         
         <div class="sidebar-brand">
             <h2>KAI <span>KETAPANG</span></h2>
         </div>
         <ul class="sidebar-menu">
-            <li><a href="index.html">🏠 Dashboard Utama</a></li>
-            <li><a href="struktur.html">👥 Struktur Organisasi</a></li>
-            <li class="active"><a href="emplasemen.html">🛤️ Emplasemen</a></li>
+            <li class="active"><a href="index.html"><i class="ti ti-home"></i> Dashboard Utama</a></li>
+            <li><a href="struktur.html"><i class="ti ti-users"></i> Struktur Organisasi</a></li>
+            <li><a href="emplasemen.html"><i class="ti ti-track"></i> Emplasemen</a></li>
         </ul>
     </nav>
 
@@ -121,26 +86,15 @@
             <p>GAPEKA 2025</p>
         </header>
 
-        <!-- Wadah Interaktif Gambar -->
-        <section class="emplasemen-container">
-            <!-- <div class="zoom-instructions">🖱️ Scroll untuk Zoom | Klik & Geser untuk memindahkan peta</div> -->
-            
-            <div id="panzoom-wrapper">
-                <!-- Memanggil Gambar Emplasemen Anda -->
-                <img id="emplasemen-img" src="images/emplasemen_ktg.png" alt="Peta Emplasemen Stasiun Ketapang">
-            </div>
-
-            <!-- Tombol Navigasi Layar -->
-            <div class="zoom-controls">
-                <button class="zoom-btn" id="btn-zoom-in" title="Perbesar">+</button>
-                <button class="zoom-btn" id="btn-zoom-out" title="Perkecil">−</button>
-                <button class="zoom-btn" id="btn-reset" title="Kembalikan Semula">🔄</button>
-            </div>
-        </section>
+        <!-- Kotak Gambar Menempel Tanpa Scrollbar Hitam Panzoom -->
+        <div class="emplasemen-static-box">
+            <img id="static-img" src="images/emplasemen_ktg.png" alt="Peta Emplasemen Stasiun Ketapang">
+        </div>
+        
+        <div class="info-tips">
+            💡 <span>Klik langsung pada gambar untuk <strong>Zoom In (Perbesar)</strong> dan klik sekali lagi untuk <strong>Zoom Out (Perkecil)</strong>.</span>
+        </div>
     </main>
-
-    <!-- Memanggil library Panzoom CDN agar bisa interaktif tanpa coding rumit -->
-    <script src="https://jsdelivr.net"></script>
     <script src="script.js"></script>
 </body>
 </html>
