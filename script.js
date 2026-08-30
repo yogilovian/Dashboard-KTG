@@ -27,9 +27,8 @@ if (sidebarToggle && sidebar && mainContent) {
             e.stopPropagation();
             sidebar.classList.remove('active');
         };
-        closeSidebar.addEventListener('click', function () {
-            sidebar.classList.remove('active'); // Hapus kelas active untuk menyembunyikan menu
-        });
+        closeSidebar.addEventListener('click', closeAction);
+        closeSidebar.addEventListener('touchstart', closeAction);
     }
 
     // --- FUNGSIONAL: JAM DIGITAL & AUTO REFRESH PERGANTIAN HARI ---
