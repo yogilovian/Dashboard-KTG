@@ -389,22 +389,26 @@ body {
 /* Responsif untuk Layar HP/Tablet */
 @media (max-width: 768px) {  
     .close-sidebar-btn {
-        display: block; /* Mengembalikan ke mode block default agar tidak mengunci di tengah */
+        display: block;
         position: absolute;
-        top: 10px;        /* Mepet ke atas sudut sidebar */
-        right: 15px;      /* Mepet ke kanan sudut sidebar */
-        background: none; /* Menghilangkan bulatan latar belakang */
-        border: none;     /* Menghilangkan garis tepi bulat */
+        top: 15px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.1);
         color: var(--white);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 24px;
+        font-weight: bold;
         cursor: pointer;
-        z-index: 10005;   /* Lapisan tertinggi */
-        padding: 5px;     /* Ruang sentuh jari */
+        z-index: 9999; /* Nilai z-index tertinggi agar tidak tertutup elemen lain */
         transition: color 0.2s ease, transform 0.2s ease;
     }
     /* Ukuran khusus untuk elemen Icon Tabler */
-    .close-sidebar-btn i {
-        font-size: 26px; /* Ukuran ikon diperbesar sedikit agar mudah ditekan di pojok */
-    }
+    /* .close-sidebar-btn i {
+        font-size: 26px;
+    } */
     /* Efek visual saat ditekan di HP */
     .close-sidebar-btn:hover, .close-sidebar-btn:active {
         color: var(--kai-orange); /* Berubah warna khas oranye KAI */
