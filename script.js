@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
     initDigitalClock();
-    initTrackingClock();
     
 // --- LOGIKA BUKA/TUTUP SIDEBAR YANG STABIL ---
 const sidebarToggle = document.getElementById('sidebarToggle');
