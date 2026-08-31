@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Tracking KA - Stasiun Ketapang</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+    <style>
+        /* Gaya Khusus Panel Pemantauan Real-Time */
+        .tracking-table-card {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--kai-blue);
+            margin-bottom: 25px;
+            overflow-x: auto;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Variasi Warna Status Indikator KAI */
+        .status-ontime { background-color: #E2F0D9; color: #385723; }  /* Hijau: Tepat Waktu */
+        .status-delay { background-color: #FCE4D6; color: #C65911; }   /* Oranye: Terlambat */
+        .status-arrived { background-color: #DDEBF7; color: #1F4E78; } /* Biru: Masuk Jalur */
+        .status-departed { background-color: #FFF2CC; color: #7F6000; }/* Kuning: Berangkat */
+
+        /* Lampu Signal Detektor Indikator (Kedip) */
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #28a745;
+            border-radius: 50%;
+            display: inline-block;
+            animation: blinkDot 1.5s infinite;
+        }
+
+        @keyframes blinkDot {
+            0% { opacity: 0.2; }
+            50% { opacity: 1; }
+            100% { opacity: 0.2; }
+        }
+
+        /* Baris data yang sedang aktif di sepur stasiun diberi highlight */
+        .active-track-row {
+            background-color: #F2F4F8 !important;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Tombol untuk Buka/Tutup Sidebar -->
+<div class="top-bar-action">
+    <button class="toggle-btn" id="sidebarToggle">☰</button>
+  
+        <div class="digital-clock-container" style="background-color: var(--kai-orange); border-color: var(--kai-blue);">
+            <span class="live-dot"></span>
+            <span id="tracking-clock">00:00:00 WIB</span>
+        </div>
+    </div>
+
+    <!-- Sidebar Navigasi -->
+    <nav class="sidebar" id="mySidebar">
+      
+        <!-- TOMBOL CLOSE BARU (KHUSUS HP/TABLET) -->
+    <button class="close-sidebar-btn" id="closeSidebar"><i class="ti ti-x"></i></button>
+      
+        <div class="sidebar-brand">
+            <h2>KAI <span>KETAPANG</span></h2>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="active"><a href="index.html"><i class="ti ti-home"></i> Dashboard Utama</a></li>
+            <li><a href="struktur.html"><i class="ti ti-users"></i> Struktur Organisasi</a></li>
+            <li><a href="emplasemen.html"><i class="ti ti-yarn"></i></i> Emplasemen</a></li>
+            <li><a href="panjang_jalur.html"><i class="ti ti-track"></i> Panjang Jalur</a></li>
+        </ul>
+    </nav>
+
+    <!-- Konten Utama -->
+    <main class="main-content">
+        <header class="header">
+            <h1>Locotrack & Pemantauan KA Real-Time</h1>
+            <p>Papan integrasi posisi aktual, status kelandaian sepur, dan prediksi kedatangan armada di Stasiun Ketapang</p>
+        </header>
+
+        <!-- PAPAN MONITORING UTAMA -->
+        <div class="tracking-table-card">
+            <table class="kai-table" id="train-board">
+                <thead>
+                    <tr>
+                        <th>No KA</th>
+                        <th>Nama Kereta Api</th>
+                        <th>Relasi Perjalanan</th>
+                        <th>Jadwal Masuk</th>
+                        <th>Prediksi Aktual (ETA)</th>
+                        <th>Posisi Terakhir Lokomotif</th>
+                        <th>Alokasi Jalur</th>
+                        <th>Status Operasional</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Baris 1: KA Wijayakusuma -->
+                    <tr class="active-track-row">
+                        <td><strong>116</strong></td>
+                        <td>Wijayakusuma</td>
+                        <td>Cilacap - Ketapang</td>
+                        <td>05:45</td>
+                        <td style="color: #28a745;">05:45 (Tepat)</td>
+                        <td>🏁 Stasiun Ketapang</td>
+                        <td><span class="staff-item-box" style="padding: 2px 10px; background: var(--kai-blue); color:#fff;">Sepur III</span></td>
+                        <td><span class="status-badge status-arrived">Selesai Dinas</span></td>
+                    </tr>
+                    <!-- Baris 2: KA Blambangan Ekspres -->
+                    <tr>
+                        <td><strong>186</strong></td>
+                        <td>Blambangan Ekspres</td>
+                        <td>Pasar Senen - Ketapang</td>
+                        <td>16:40</td>
+                        <td class="eta-countdown" data-time="16:40" style="font-weight: 700;">Menghitung...</td>
+                        <td>🛰️ Petak Temuguruh - Singojuruh</td>
+                        <td><span class="staff-item-box" style="padding: 2px 10px;">Sepur II</span></td>
+                        <td><span class="status-badge status-ontime">🟢 Tepat Waktu</span></td>
+                    </tr>
+                    <!-- Baris 3: KA Sri Tanjung -->
+                    <tr>
+                        <td><strong>242</strong></td>
+                        <td>Sri Tanjung</td>
+                        <td>Lempuyangan - Ketapang</td>
+                        <td>20:10</td>
+                        <td class="eta-countdown" data-time="20:32" style="color: #dc3545; font-weight: 700;">Menghitung...</td>
+                        <td>🛰️ Pasuruan (Macet Sinyal)</td>
+                        <td><span class="staff-item-box" style="padding: 2px 10px;">Sepur I</span></td>
+                        <td><span class="status-badge status-delay">⚠️ Lambat 22 Mnt</span></td>
+                    </tr>
+                    <!-- Baris 4: KA Probowangi -->
+                    <tr>
+                        <td><strong>266</strong></td>
+                        <td>Probowangi</td>
+                        <td>Ketapang - Surabaya Gubeng</td>
+                        <td>10:00</td>
+                        <td>10:00 (Sesuai)</td>
+                        <td>🛤️ Lepas Blok Argopuro</td>
+                        <td><span class="staff-item-box" style="padding: 2px 10px;">Sepur IV</span></td>
+                        <td><span class="status-badge status-departed">⚪ Lepas Stasiun</span></td>
+                    </tr>
+                    <!-- Baris 5: KA Tawang Alun -->
+                    <tr>
+                        <td><strong>264</strong></td>
+                        <td>Tawang Alun</td>
+                        <td>Malang Kotalama - Ketapang</td>
+                        <td>23:45</td>
+                        <td class="eta-countdown" data-time="23:45">Menghitung...</td>
+                        <td>🛰️ Stasiun Kalisat</td>
+                        <td><span class="staff-item-box" style="padding: 2px 10px;">Sepur V</span></td>
+                        <td><span class="status-badge status-ontime">🟢 Tepat Waktu</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+</html>
