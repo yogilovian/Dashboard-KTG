@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
-initDigitalClock();
+    initDigitalClock();
+    initTrackingClock();
     
 // --- LOGIKA BUKA/TUTUP SIDEBAR YANG STABIL ---
 const sidebarToggle = document.getElementById('sidebarToggle');
@@ -142,44 +143,56 @@ function parseCSVAndRender(csvText, targetDate) {
 
 // 1. LOGIKA UTAMA: CLICK TO ZOOM IN / ZOOM OUT SIMPEL
 const img = document.getElementById('static-img');
-    if (img) {
+    if (!img) return;
         img.addEventListener('click', function () {
              // Toggle kelas .zoomed untuk memperbesar/memperkecil gambar
             this.classList.toggle('zoomed');
         });
     }
-        // 1. UTILITY: JAM REAL-TIME PADA LAYAR TRACKING
-        function initTrackingClock() {
-            const clockEl = document.getElementById('tracking-clock');
-            setInterval(() => {
-                const now = new Date();
-                clockEl.innerText = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')} WIB`;
-                updateETA(); // Perbarui perhitungan sisa menit kereta setiap detik
-            }, 1000);
+       / --- 6. LOGIKA ZOOM GAMBAR ---
+function initImageZoom() {
+    const img = document.getElementById('static-img');
+    if (!img) return;
+
+    img.addEventListener('click', function () {
+        this.classList.toggle('zoomed');
+    });
+}
+
+// --- 7. TIMING LIVE TRACKING KA (ETA) ---
+function initTrackingClock() {
+    const clockEl = document.getElementById('tracking-clock');
+    if (!clockEl) return; // Mencegah crash di halaman utama yang tidak ada elemen ini
+
+    setInterval(() => {
+        const now = new Date();
+        clockEl.innerText = now.toLocaleTimeString('id-ID', { hour12: false }) + " WIB";
+        updateETA(); 
+    }, 1000);
+}
+
+function updateETA() {
+    const now = new Date();
+    const currentHours = now.getHours();
+    const currentMinutes = now.getMinutes();
+
+    document.querySelectorAll('.eta-countdown').forEach(cell => {
+        const targetTimeStr = cell.getAttribute('data-time');
+        if (!targetTimeStr) return;
+
+        const [targetHours, targetMinutes] = targetTimeStr.split(':').map(Number);
+
+        const totalCurrentMinutes = (currentHours * 60) + currentMinutes;
+        const totalTargetMinutes = (targetHours * 60) + targetMinutes;
+
+        const selisihMenit = totalTargetMinutes - totalCurrentMinutes;
+
+        if (selisihMenit > 0) {
+            cell.innerHTML = `${targetTimeStr} <span style="font-weight:400; font-size:11px; color:#666;">(± ${selisihMenit} mnt lagi)</span>`;
+        } else if (selisihMenit === 0) {
+            cell.innerHTML = `<span style="color:#ED6A16; font-weight:bold; animation: blinkDot 1s infinite;">⚠️ KA Masuk Jalur</span>`;
+        } else {
+            cell.innerHTML = `${targetTimeStr} <span style="color:#888; font-weight:400; font-size:11px;">(Lewat)</span>`;
         }
-
-        // 2. LOGIKA UTAMA SIMULASI TIMING ETA (ESTIMATED TIME OF ARRIVAL)
-        function updateETA() {
-            const now = new Date();
-            const currentHours = now.getHours();
-            const currentMinutes = now.getMinutes();
-
-            document.querySelectorAll('.eta-countdown').forEach(cell => {
-                const targetTimeStr = cell.getAttribute('data-time');
-                const [targetHours, targetMinutes] = targetTimeStr.split(':').map(Number);
-
-                // Konversi waktu saat ini dan waktu target KA ke total hitungan menit
-                const totalCurrentMinutes = (currentHours * 60) + currentMinutes;
-                const totalTargetMinutes = (targetHours * 60) + targetMinutes;
-
-                const selisihMenit = totalTargetMinutes - totalCurrentMinutes;
-
-                if (selisihMenit > 0) {
-                    cell.innerHTML = `${targetTimeStr} <span style="font-weight:400; font-size:11px; color:#666;">(± ${selisihMenit} mnt lagi)</span>`;
-                } else if (selisihMenit === 0) {
-                    cell.innerHTML = `<span style="color:#ED6A16; animation: blinkDot 1s infinite;">⚠️ KA Masuk Jalur</span>`;
-                } else {
-                    cell.innerHTML = `${targetTimeStr} <span style="color:#888; font-weight:400; font-size:11px;">(Lewat)</span>`;
-                }
-            });
-        }
+    });
+}
