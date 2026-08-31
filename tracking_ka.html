@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Tracking KA - Stasiun Ketapang</title>
+    <title>Daftar KA - Stasiun Ketapang</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
     <style>
@@ -118,7 +118,7 @@
         </div>
         
         <header class="header">
-            <h1>Locotrack & Pemantauan KA Real-Time</h1>
+            <h1>Daftar Jadw</h1>
             <p>Papan integrasi posisi aktual, status kelandaian sepur, dan prediksi kedatangan armada di Stasiun Ketapang</p>
         </header>
 
@@ -130,47 +130,42 @@
                         <th>No KA</th>
                         <th>Nama Kereta Api</th>
                         <th>Relasi Perjalanan</th>
+                        <th>Jadwal Datang</th>
                         <th>Jadwal Masuk</th>
-                        <th>Prediksi Aktual (ETA)</th>
-                        <th>Posisi Terakhir Lokomotif</th>
-                        <th>Alokasi Jalur</th>
-                        <th>Status Operasional</th>
+                        <th>Masuk Jalur</th>
+                        <th>Berangkat Jalur</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Baris 1: KA Wijayakusuma -->
+                    <!-- Baris 1: KPJ -->
                     <tr class="active-track-row">
-                        <td><strong>116</strong></td>
-                        <td>Wijayakusuma</td>
-                        <td>Cilacap - Ketapang</td>
-                        <td>05:45</td>
-                        <!-- Ditambahkan data-time agar dibaca fungsi JS -->
-                        <td class="eta-countdown" data-time="05:45">Menghitung...</td> 
-                        <td>🏁 Stasiun Ketapang</td>
-                        <td><span class="staff-item-box">Sepur III</span></td>
-                        <td><span class="status-badge status-arrived">Selesai Dinas</span></td>
+                        <td><strong>D9/10426 - D9/10131</strong></td>
+                        <td>KPJ</td>
+                        <td>Ketapang - Kalibaru</td>
+                        <td>22:37</td>
+                        <td>00:05</td>
+                        <td><span class="staff-item-box">Jalur IV</span></td>
+                        <td><span class="staff-item-box">Jalur IV</span></td>
                     </tr>
-                    <!-- Baris 2: KA Blambangan Ekspres -->
+                    <!-- Baris 2: KA Mutim F -->
                     <tr>
-                        <td><strong>186</strong></td>
+                        <td><strong>211F - 212F</strong></td>
+                        <td>Mutiara Timur</td>
+                        <td>Ketapang - Surabaya Gubeng</td>
+                        <td>03:40</td>
+                        <td>08:40</td>
+                        <td><span class="staff-item-box gray">Jalur II</span></td>
+                        <<td><span class="staff-item-box">Jalur I</span></td>
+                    </tr>
+                    <!-- Baris 3: KA Blambangan Ekspres -->
+                    <tr>
+                        <td><strong>147 - 148</strong></td>
                         <td>Blambangan Ekspres</td>
-                        <td>Pasar Senen - Ketapang</td>
-                        <td>16:40</td>
-                        <td class="eta-countdown" data-time="16:40">Menghitung...</td>
-                        <td>🛰️ Petak Temuguruh - Singojuruh</td>
-                        <td><span class="staff-item-box gray">Sepur II</span></td>
-                        <td><span class="status-badge status-ontime">🟢 Tepat Waktu</span></td>
-                    </tr>
-                    <!-- Baris 3: KA Sri Tanjung -->
-                    <tr>
-                        <td><strong>242</strong></td>
-                        <td>Sri Tanjung</td>
-                        <td>Lempuyangan - Ketapang</td>
-                        <td>20:10</td>
-                        <td class="eta-countdown" data-time="20:32">Menghitung...</td>
-                        <td>🛰️ Pasuruan (Macet Sinyal)</td>
-                        <td><span class="staff-item-box gray">Sepur I</span></td>
-                        <td><span class="status-badge status-delay">⚠️ Lambat 22 Mnt</span></td>
+                        <td>Ketapang - Pasar Senen</td>
+                        <td>04:40</td>
+                        <td>15:45</td>
+                        <td><span class="staff-item-box gray">Jalur II</span></td>
+                        <td><span class="staff-item-box gray">Jalur I</span></td>
                     </tr>
                     <!-- Baris 4: KA Probowangi -->
                     <tr>
@@ -178,8 +173,6 @@
                         <td>Probowangi</td>
                         <td>Ketapang - Surabaya Gubeng</td>
                         <td>10:00</td>
-                        <td class="eta-countdown" data-time="10:00">Menghitung...</td>
-                        <td>🛤️ Lepas Blok Argopuro</td>
                         <td><span class="staff-item-box gray">Sepur IV</span></td>
                         <td><span class="status-badge status-departed">⚪ Lepas Stasiun</span></td>
                     </tr>
@@ -189,8 +182,6 @@
                         <td>Tawang Alun</td>
                         <td>Malang Kotalama - Ketapang</td>
                         <td>23:45</td>
-                        <td class="eta-countdown" data-time="23:45">Menghitung...</td>
-                        <td>🛰️ Stasiun Kalisat</td>
                         <td><span class="staff-item-box gray">Sepur V</span></td>
                         <td><span class="status-badge status-ontime">🟢 Tepat Waktu</span></td>
                     </tr>
