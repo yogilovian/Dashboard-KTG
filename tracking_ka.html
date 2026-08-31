@@ -12,20 +12,33 @@
         .kai-table {
             width: 100%;
             border-collapse: collapse;
-            text-align: left;
-            font-size: 14px;
-        }
-        .kai-table th, .kai-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #e0e0e0;
-            vertical-align: middle;
-        }
-        .kai-table th {
-            background-color: #f8f9fa;
-            color: #333;
-            font-weight: 700;
+            font-size: 13px;
+            text-align: center;
         }
 
+        .kai-table th, .kai-table td {
+            border: 1px solid #D2D6DE;
+            padding: 10px 8px;
+        }
+
+        .kai-table th {
+            background-color: var(--kai-blue);
+            color: var(--white);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+        .kai-table thead tr:first-child th {
+            background-color: #00224E; /* Variasi warna biru lebih gelap untuk header utama */
+        }
+
+        .kai-table tbody tr:nth-child(even) {
+            background-color: #F8F9FA;
+        }
+
+        .kai-table tbody tr:hover {
+            background-color: #FFF2EB; /* Efek highlight warna oranye tipis saat kursor di atas baris */
+        }
         .status-badge {
             padding: 6px 12px;
             border-radius: 20px;
@@ -109,7 +122,6 @@
         <!-- PAPAN MONITORING UTAMA -->
         <div class="tracking-table-card">
             <table class="kai-table" id="train-board">
-                <thead>
                     <tr>
                         <th>No KA</th>
                         <th>Nama Kereta Api</th>
@@ -119,10 +131,9 @@
                         <th>Masuk Jalur</th>
                         <th>Berangkat Jalur</th>
                     </tr>
-                </thead>
                 <tbody>
                     <!-- Baris 1: KPJ -->
-                    <tr class="active-track-row">
+                    <tr>
                         <td><strong>D9/10426 - D9/10131</strong></td>
                         <td>KPJ</td>
                         <td>Ketapang - Kalibaru</td>
@@ -132,7 +143,7 @@
                         <td><span class="staff-item-box">Jalur IV</span></td>
                     </tr>
                     <!-- Baris 2: KA Mutim F -->
-                    <tr class="active-track-row">
+                    <tr>
                         <td><strong>211F - 212F</strong></td>
                         <td>Mutiara Timur</td>
                         <td>Ketapang - Surabaya Gubeng</td>
@@ -142,7 +153,7 @@
                         <<td><span class="staff-item-box">Jalur I</span></td>
                     </tr>
                     <!-- Baris 3: KA Blambangan Ekspres -->
-                    <tr class="active-track-row">
+                    <tr>
                         <td><strong>147 - 148</strong></td>
                         <td>Blambangan Ekspres</td>
                         <td>Ketapang - Pasar Senen</td>
@@ -152,7 +163,7 @@
                         <td><span class="staff-item-box gray">Jalur I</span></td>
                     </tr>
                     <!-- Baris 4: KA Probowangi -->
-                    <tr class="active-track-row">
+                    <tr>
                         <td><strong>266</strong></td>
                         <td>Probowangi</td>
                         <td>Ketapang - Surabaya Gubeng</td>
@@ -162,7 +173,7 @@
                         <td><span class="staff-item-box gray">Sepur IV</span></td>
                     </tr>
                     <!-- Baris 5: KA Tawang Alun -->
-                    <tr class="active-track-row">
+                    <tr>
                         <td><strong>264</strong></td>
                         <td>Tawang Alun</td>
                         <td>Malang Kotalama - Ketapang</td>
