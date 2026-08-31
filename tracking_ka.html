@@ -7,7 +7,17 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
     <style>
-
+        /* Gaya Khusus Tabel Data Spesifikasi Jalur KAI */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            background: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            border-top: 4px solid var(--kai-orange);
+        }
         /* Perbaikan struktur dasar tabel agar rapi */
         .kai-table {
             width: 100%;
@@ -120,8 +130,8 @@
         </header>
 
         <!-- TABEL DAFTAR JALUR KA -->
-        <div class="tracking-table-card">
-            <table class="kai-table" id="train-board">
+        <div class="table-responsive">
+            <table class="kai-table">
                 <thead>
                     <tr>
                         <th>No KA</th>
