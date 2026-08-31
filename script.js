@@ -1,154 +1,149 @@
 document.addEventListener("DOMContentLoaded", function () {
+    // --- 1. INISIALISASI FUNGSI ---
     initDigitalClock();
-    
-// --- LOGIKA BUKA/TUTUP SIDEBAR YANG STABIL ---
-const sidebarToggle = document.getElementById('sidebarToggle');
-const closeSidebar = document.getElementById('closeSidebar');
-const sidebar = document.getElementById('mySidebar');
-const mainContent = document.querySelector('.main-content');
+    initSidebarLogic();
+    initHeaderDate();
+    initDinasanFetcher();
+    initImageZoom();
+    initTrackingClock();
+});
 
-if (sidebarToggle && sidebar && mainContent) {
-    sidebarToggle.addEventListener('click', function () {
-        if (window.innerWidth > 768) {
-            // Komputer/Laptop
-            sidebar.classList.toggle('hidden');
-            mainContent.classList.toggle('full-width');
-        } else { 
-            // Smartphone/Tablet
-            sidebar.classList.toggle('active');
-        }
-    });
-}
-if (closeSidebar && sidebar) {
+// --- 2. LOGIKA BUKA/TUTUP SIDEBAR ---
+function initSidebarLogic() {
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const closeSidebar = document.getElementById('closeSidebar');
+    const sidebar = document.getElementById('mySidebar');
+    const mainContent = document.querySelector('.main-content');
+
+    if (sidebarToggle && sidebar && mainContent) {
+        sidebarToggle.addEventListener('click', function () {
+            if (window.innerWidth > 768) {
+                sidebar.classList.toggle('hidden');
+                mainContent.classList.toggle('full-width');
+            } else { 
+                sidebar.classList.toggle('active');
+            }
+        });
+    }
+
+    if (closeSidebar && sidebar) {
         closeSidebar.addEventListener('click', function () {
             sidebar.classList.remove('active');
         });
+    }
 }
 
-    // --- FUNGSIONAL: JAM DIGITAL & AUTO REFRESH PERGANTIAN HARI ---
+// --- 3. JAM DIGITAL & REFRESH PERGANTIAN HARI ---
 function initDigitalClock() {
     const clockElement = document.getElementById('live-clock');
+    if (!clockElement) return;
+
     let currentDayIndex = new Date().getDate();
 
-   // Format jam digital ke sistem HH:MM:SS
     function updateTime() {
         const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const timeString = now.toLocaleTimeString('id-ID', { hour12: false });
         
-        if (clockElement) {
-            clockElement.innerText = `${hours}:${minutes}:${seconds} WIB`;
-        }
+        clockElement.innerText = `${timeString} WIB`;
 
-        // CEK PERGANTIAN HARI: Jika tanggal saat ini berubah dibanding simpanan awal
+        // Auto reload saat berganti hari
         if (now.getDate() !== currentDayIndex) {
             currentDayIndex = now.getDate();
-            window.location.reload(); // Reload halaman otomatis
+            window.location.reload();
         }
     }
-     // Jalankan fungsi satu kali di awal agar jam langsung muncul tanpa menunggu 1 detik pertama
     updateTime();
-
-    setInterval(updateTime, 1000); // Interval berjalan setiap 1 detik (1000ms)
-
+    setInterval(updateTime, 1000);
 }
 
-    // Tampilkan Tanggal Hari ini di Header
+// --- 4. TAMPILKAN TANGGAL HEADER ---
+function initHeaderDate() {
+    const dateElement = document.getElementById("current-date");
+    if (!dateElement) return;
+
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const todayStr = new Date().toLocaleDateString('id-ID', options);
-    document.getElementById("current-date").innerText = todayStr;
+    dateElement.innerText = new Date().toLocaleDateString('id-ID', options);
+}
 
-    // Ambil tanggal format YYYY-MM-DD
+// --- 5. AMBIL DATA DINASAN DARI CSV ---
+function initDinasanFetcher() {
+    // Format tanggal target ke YYYY-MM-DD sesuai ISO lokal
     const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    const targetDate = `${year}-${month}-${day}`;
+    const targetDate = today.getFullYear() + '-' + 
+                       String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                       String(today.getDate()).padStart(2, '0');
 
-    // Mengambil file data_dinas.csv dari repositori
     fetch('data_dinas.csv')
-        .then(response => response.text())
+        .then(response => {
+            if (!response.ok) throw new Error("File CSV tidak ditemukan");
+            return response.text();
+        })
         .then(csvText => {
             parseCSVAndRender(csvText, targetDate);
         })
         .catch(err => {
             console.error("Gagal membaca file data dinasan (.csv): ", err);
         });
-});
+}
 
 function parseCSVAndRender(csvText, targetDate) {
     const lines = csvText.split('\n');
-    
-    // ID Elemen yang ada di HTML
     const elementIds = [
         'ppka-pagi', 'ppka-siang', 'ppka-malam',
         'plr-pagi', 'plr-siang', 'plr-malam',
         'prs-pagi', 'prs-siang', 'prs-malam'
     ];
 
-    // Reset kontainer HTML
+    // Reset kontainer HTML dengan aman
     elementIds.forEach(id => {
-        document.getElementById(id).innerHTML = '';
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '';
     });
 
-    let counters = {};
-    elementIds.forEach(id => counters[id] = 0);
+    let counters = Object.fromEntries(elementIds.map(id => [id, 0]));
 
     for (let i = 1; i < lines.length; i++) {
         if (!lines[i].trim()) continue;
 
+        // Menggunakan regex untuk split agar aman dari celah koma di dalam teks jika ada
         const columns = lines[i].split(',');
         if (columns.length < 5) continue; 
         
-        // Parsing data baris CSV
-        // const columns = lines[i].split(',');
         const tanggal = columns[0].trim();
         const nama = columns[1].trim();
-        const kelompok = columns[2].trim().toLowerCase(); // ppka, plr, prs
-        const shift = columns[3].trim().toLowerCase();    // pagi, siang, malam
+        const kelompok = columns[2].trim().toLowerCase();
+        const shift = columns[3].trim().toLowerCase();
         const foto = columns[4].trim();
 
-        // Cocokkan tanggal baris CSV dengan tanggal hari ini
         if (tanggal === targetDate) {
-            // Gabungkan kata kunci untuk menembak ID HTML (contoh: 'ppka-pagi')
             const targetId = `${kelompok}-${shift}`;
+            const targetElement = document.getElementById(targetId);
             
-            // Periksa apakah gabungan ID tersebut terdaftar di sistem
-            if (elementIds.includes(targetId)) {
+            if (targetElement && elementIds.includes(targetId)) {
                 const profileHTML = `
                     <div class="staff-profile">
                         <div class="avatar-circle">
-                            <img src="images/${foto}" alt="${nama}" onerror="this.src='https://placeholder.com'">
+                            <img src="images/${foto}" alt="${nama}" onerror="this.src='https://placehold.co'">
                         </div>
                         <div class="staff-name">${nama}</div>
                     </div>
                 `;
-
-                // Masukkan kartu ke dalam ID kontainer yang tepat
-                document.getElementById(targetId).innerHTML += profileHTML;
+                targetElement.innerHTML += profileHTML;
                 counters[targetId]++;
             }
         }
     }
 
-    // Pasang pesan kosong jika ada shift kelompok yang tidak terisi data hari ini
+    // Beri info jika shift kosong
     elementIds.forEach(id => {
-        if (counters[id] === 0) {
-            document.getElementById(id).innerHTML = "<p style='color:#888;font-size:11px;padding:5px;'>Kosong</p>";
+        const el = document.getElementById(id);
+        if (el && counters[id] === 0) {
+            el.innerHTML = "<p style='color:#888;font-size:11px;padding:5px;'>Tidak Ada Dinasan</p>";
         }
     });
 }
 
-// 1. LOGIKA UTAMA: CLICK TO ZOOM IN / ZOOM OUT SIMPEL
-const img = document.getElementById('static-img');
-    if (!img) return;
-        img.addEventListener('click', function () {
-             // Toggle kelas .zoomed untuk memperbesar/memperkecil gambar
-            this.classList.toggle('zoomed');
-        });
-    }
-       / --- 6. LOGIKA ZOOM GAMBAR ---
+// --- 6. LOGIKA ZOOM GAMBAR ---
 function initImageZoom() {
     const img = document.getElementById('static-img');
     if (!img) return;
