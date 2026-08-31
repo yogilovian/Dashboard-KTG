@@ -139,6 +139,7 @@ function parseCSVAndRender(csvText, targetDate) {
         }
     });
 }
+
 // 1. LOGIKA UTAMA: CLICK TO ZOOM IN / ZOOM OUT SIMPEL
 const img = document.getElementById('static-img');
     if (img) {
@@ -146,6 +147,7 @@ const img = document.getElementById('static-img');
              // Toggle kelas .zoomed untuk memperbesar/memperkecil gambar
             this.classList.toggle('zoomed');
         });
+    }
         // 1. UTILITY: JAM REAL-TIME PADA LAYAR TRACKING
         function initTrackingClock() {
             const clockEl = document.getElementById('tracking-clock');
@@ -181,9 +183,3 @@ const img = document.getElementById('static-img');
                 }
             });
         }
-
-        // Jalankan fungsi saat dokumen siap
-        document.addEventListener("DOMContentLoaded", () => {
-            initTrackingClock();
-        });
-}
