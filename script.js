@@ -146,4 +146,44 @@ const img = document.getElementById('static-img');
              // Toggle kelas .zoomed untuk memperbesar/memperkecil gambar
             this.classList.toggle('zoomed');
         });
+        // 1. UTILITY: JAM REAL-TIME PADA LAYAR TRACKING
+        function initTrackingClock() {
+            const clockEl = document.getElementById('tracking-clock');
+            setInterval(() => {
+                const now = new Date();
+                clockEl.innerText = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')} WIB`;
+                updateETA(); // Perbarui perhitungan sisa menit kereta setiap detik
+            }, 1000);
+        }
+
+        // 2. LOGIKA UTAMA SIMULASI TIMING ETA (ESTIMATED TIME OF ARRIVAL)
+        function updateETA() {
+            const now = new Date();
+            const currentHours = now.getHours();
+            const currentMinutes = now.getMinutes();
+
+            document.querySelectorAll('.eta-countdown').forEach(cell => {
+                const targetTimeStr = cell.getAttribute('data-time');
+                const [targetHours, targetMinutes] = targetTimeStr.split(':').map(Number);
+
+                // Konversi waktu saat ini dan waktu target KA ke total hitungan menit
+                const totalCurrentMinutes = (currentHours * 60) + currentMinutes;
+                const totalTargetMinutes = (targetHours * 60) + targetMinutes;
+
+                const selisihMenit = totalTargetMinutes - totalCurrentMinutes;
+
+                if (selisihMenit > 0) {
+                    cell.innerHTML = `${targetTimeStr} <span style="font-weight:400; font-size:11px; color:#666;">(± ${selisihMenit} mnt lagi)</span>`;
+                } else if (selisihMenit === 0) {
+                    cell.innerHTML = `<span style="color:#ED6A16; animation: blinkDot 1s infinite;">⚠️ KA Masuk Jalur</span>`;
+                } else {
+                    cell.innerHTML = `${targetTimeStr} <span style="color:#888; font-weight:400; font-size:11px;">(Lewat)</span>`;
+                }
+            });
+        }
+
+        // Jalankan fungsi saat dokumen siap
+        document.addEventListener("DOMContentLoaded", () => {
+            initTrackingClock();
+        });
 }
