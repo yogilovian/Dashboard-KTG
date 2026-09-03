@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halaman Dalam Pengembangan - Stasiun Ketapang</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://jsdelivr.net" />
+    <style>
+        /* Gaya Khusus Halaman Pemeliharaan / Pengembangan */
+        .dev-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 70vh;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .dev-icon-container {
+            position: relative;
+            margin-bottom: 30px;
+            font-size: 80px;
+            color: #002F6C; /* Biru KAI */
+        }
+
+        /* Animasi Kereta Berjalan */
+        .train-animate {
+            display: inline-block;
+            animation: moveTrain 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes moveTrain {
+            0% { transform: translateX(-10px); }
+            100% { transform: translateX(10px); }
+        }
+
+        .dev-title {
+            font-size: 28px;
+            color: #002F6C;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .dev-subtitle {
+            font-size: 15px;
+            color: #555;
+            max-width: 500px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        /* Tombol Kembali yang Menarik */
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #ED6A16; /* Oranye KAI */
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 10px rgba(237, 106, 22, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            background-color: #d1560f;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(237, 106, 22, 0.4);
+        }
+
+        /* Indikator Progres Konstruksi */
+        .progress-bar-mini {
+            width: 200px;
+            height: 6px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 65%;
+            height: 100%;
+            background: linear-gradient(90deg, #002F6C, #ED6A16);
+            border-radius: 10px;
+            animation: progressPulse 2s infinite ease-in-out;
+        }
+
+        @keyframes progressPulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigasi -->
+    <nav class="sidebar" id="mySidebar">
+        <button class="close-sidebar-btn" id="closeSidebar"><i class="ti ti-x"></i></button>
+        <div class="sidebar-brand">
+            <h2>KAI <span>KETAPANG</span></h2>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="ti ti-home"></i> Dashboard Utama</a></li>
+            <li><a href="struktur.html"><i class="ti ti-users"></i> Struktur Organisasi</a></li>
+            <li><a href="emplasemen.html"><i class="ti ti-yarn"></i> Emplasemen</a></li>
+            <li><a href="panjang_jalur.html"><i class="ti ti-track"></i> Panjang Jalur</a></li>
+            <li><a href="tracking_ka.html"><i class="ti ti-train"></i> Live Tracking KA</a></li>
+            <li><a href=""><i class="ti ti-train"></i> Pantauan Stopblok & KA</a></li>
+        </ul>
+    </nav>
+
+    <!-- Konten Utama -->
+    <main class="main-content">
+        <!-- Top Bar Action -->
+        <div class="top-bar-action">
+            <button class="toggle-btn" id="sidebarToggle">☰</button>
+            <div class="digital-clock-container">
+                <span class="clock-icon">🕒</span>
+                <span id="live-clock">00:00:00 WIB</span>
+            </div>
+        </div>
+
+        <!-- Wadah Informasi Fitur Belum Siap -->
+        <div class="dev-wrapper">
+            <div class="dev-icon-container">
+                <span class="train-animate">🚂</span>🚧
+            </div>
+            
+            <h1 class="dev-title">Fitur Sedang Dalam Pengembangan</h1>
+            <p class="dev-subtitle">
+                Mohon maaf, halaman operasional ini sedang dioptimalkan oleh sistem IT Stasiun Ketapang untuk memastikan data yang disajikan akurat dan terintegrasi dengan baik.
+            </p>
+
+            <div class="progress-bar-mini">
+                <div class="progress-fill"></div>
+            </div>
+
+            <a href="index.html" class="btn-back">
+                <i class="ti ti-arrow-left"></i> Kembali ke Dashboard Utama
+            </a>
+        </div>
+    </main>
+
+    <!-- Memanggil script.js utama Anda untuk mengontrol jam & sidebar otomatis -->
+    <script src="script.js"></script>
+</body>
+</html>
