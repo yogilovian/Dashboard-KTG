@@ -12,6 +12,8 @@ document.addEventListener("DOMContentLoaded", function () {
     listenToCloudDatabase();
     setupCloudAutoSave();
 });
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js";
 
 // --- 2. LOGIKA BUKA/TUTUP SIDEBAR ---
 function initSidebarLogic() {
@@ -166,13 +168,6 @@ function initImageZoom() {
 }
 
 // Script khusus halaman pantauan stopblok
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   const firebaseConfig = {
     apiKey: "AIzaSyD2iwBlXPV32UpjO-6Svp-33BFpnCmo6cQ",
     authDomain: "dashboard-ketapang.firebaseapp.com",
