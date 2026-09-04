@@ -107,6 +107,16 @@
         .bg-gray {
             background-color: #f9f9f9;
         }
+        .manual-textarea {
+            resize: vertical;
+            min-height: 60px;
+            font-family: inherit;
+            font-size: 12px;
+            line-height: 1.4;
+            display: block;
+            margin-top: 5px;
+        }
+
     </style>
 </head>
 <body>
@@ -165,38 +175,49 @@
                     </thead>
                     <tbody>
                         <tr>
-                        <!-- Kolom Jalur I s/d VI dengan dropdown otomatis & manual yang sudah diperbaiki -->
+                            <!-- Kolom Jalur I s/d VI dengan Dropdown & Textarea Manual Panjang -->
                             <td>
                                 <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
-                                <!-- Diisi otomatis via JavaScript -->
-                            </select>
-                            <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                                    <!-- Diisi otomatis via JavaScript -->
+                                </select>
+                                <div class="custom-input-container hidden-input">
+                                    <textarea class="custom-input manual-textarea" placeholder="Isi No Rangkaian Panjang..."></textarea>
+                                </div>
                             </td>
                             <td>
                                 <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
                                 </select>
-                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                                <div class="custom-input-container hidden-input">
+                                    <textarea class="custom-input manual-textarea" placeholder="Isi No Rangkaian Panjang..."></textarea>
+                                </div>
                             </td>
                             <td>
                                 <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
                                 </select>
-                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                                <div class="custom-input-container hidden-input">
+                                    <textarea class="custom-input manual-textarea" placeholder="Isi No Rangkaian Panjang..."></textarea>
+                                </div>
                             </td>
                             <td>
                                 <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
                                 </select>
-                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                                <div class="custom-input-container hidden-input">
+                                    <textarea class="custom-input manual-textarea" placeholder="Isi No Rangkaian Panjang..."></textarea>
+                                </div>
                             </td>
                             <td>
                                 <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
                                 </select>
-                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                                <div class="custom-input-container hidden-input">
+                                    <textarea class="custom-input manual-textarea" placeholder="Isi No Rangkaian Panjang..."></textarea>
+                                </div>
                             </td>
-                            <td><textarea class="table-textarea" placeholder="Isi No. Rangkaian"></textarea></td>
                             <td>
                                 <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
                                 </select>
-                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                                <div class="custom-input-container hidden-input">
+                                    <textarea class="custom-input manual-textarea" placeholder="Isi No Rangkaian Panjang..."></textarea>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
