@@ -154,51 +154,46 @@
                 <table class="board-table">
                     <thead>
                         <tr>
-                            <th style="width: 16%;">I</th>
-                            <th style="width: 16%;">II</th>
-                            <th style="width: 16%;">III</th>
-                            <th style="width: 16%;">IV</th>
-                            <th style="width: 16%;">V</th>
-                            <th style="width: 16%;">VI</th>
-                            <th style="width: 16%;">Bongkar</th>
+                            <th style="width: 14%;">I</th>
+                            <th style="width: 14%;">II</th>
+                            <th style="width: 14%;">III</th>
+                            <th style="width: 14%;">IV</th>
+                            <th style="width: 14%;">V</th>
+                            <th style="width: 14%;">VI</th>
+                            <th style="width: 14%;">Bongkar</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <!-- Kolom Jalur I s/d VI dengan dropdown otomatis & manual -->
+                        <!-- Kolom Jalur I s/d VI dengan dropdown otomatis & manual yang sudah diperbaiki -->
                             <td>
-                                <select class="table-select track-dropdown" onchange="populateTrackDropdowns(this)">
-                                    <!-- Diisi otomatis via JavaScript -->
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                <!-- Diisi otomatis via JavaScript -->
+                            </select>
+                            <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                            </td>
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
                                 </select>
                                 <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
                             </td>
                             <td>
-                                <select class="table-select track-dropdown" onchange="populateTrackDropdowns(this)">
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
                                 </select>
                                 <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
                             </td>
                             <td>
-                                <select class="table-select track-dropdown" onchange="populateTrackDropdowns(this)">
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
                                 </select>
                                 <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
                             </td>
                             <td>
-                                <select class="table-select track-dropdown" onchange="populateTrackDropdowns(this)">
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
                                 </select>
                                 <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
                             </td>
                             <td>
-                                <select class="table-select track-dropdown" onchange="populateTrackDropdowns(this)">
-                                </select>
-                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
-                            </td>
-                            <td>
-                                <select class="table-select track-dropdown" onchange="populateTrackDropdowns(this)">
-                                </select>
-                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
-                            </td>
-                            <td>
-                                <select class="table-select track-dropdown" onchange="populateTrackDropdowns(this)">
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
                                 </select>
                                 <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
                             </td>
@@ -243,12 +238,22 @@
                     <tr>
                         <th style="width: 12%;">TANGGAL PEMASANGAN</th>
                         <th style="width: 8%;">JALUR</th>
+                        <tr>
+                            <td>I</td>
+                            <td>II</td>
+                            <td>III</td>
+                            <td>IV</td>
+                            <td>V</td>
+                            <td>VI</td>
+                            <td>CUCI 1</td>
+                            <td>CUCI 2</td>
+                        </tr>
                         <th style="width: 30%;">SARANA</th>
-                        <th style="width: 20%;">STOPBLOK</th>
+                        <th style="width: 17%;">STOPBLOK</th>
                         <th style="width: 12%;">NO. KA (EX/KA)</th>
-                        <th style="width: 6%;">JUMLAH STOPBLOK</th>
-                        <th style="width: 6%;">TERPASANG</th>
-                        <th style="width: 6%;">TERSEDIA</th>
+                        <th style="width: 7%;">JUMLAH STOPBLOK</th>
+                        <th style="width: 7%;">TERPASANG</th>
+                        <th style="width: 7%;">TERSEDIA</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -267,7 +272,7 @@
     </main>
     <script>
 // Array berisi daftar nomor KA operasional di Stasiun Ketapang
-const daftarNoKA =;
+const daftarNoKA =[211, 212, 147, 148, 293, 294, 159, 160, 249, 250, 279, 280, 492, 492, 297, 298, 209, 210, 239, 240, 7045, 7046];
 
 document.addEventListener("DOMContentLoaded", function() {
     populateTrackDropdowns();
