@@ -11,6 +11,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // HUBUNGKAN DAN LIVE-SYNC DATA DENGAN FIREBASE CLOUD
     listenToCloudDatabase();
     setupCloudAutoSave();
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
 });
 
 // --- 2. LOGIKA BUKA/TUTUP SIDEBAR ---
@@ -175,10 +178,6 @@ function initImageZoom() {
     appId: "1:893363056589:web:a070059c7819255d9bde84",
     measurementId: "G-5SE78JZH03"
   };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
 
     // Array berisi daftar nomor KA operasional di Stasiun Ketapang
     const daftarNoKA =[211, 212, 147, 148, 293, 294, 159, 160, 249, 250, 279, 280, 492, 492, 297, 298, 209, 210, 239, 240, 7045, 7046];
