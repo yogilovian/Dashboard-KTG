@@ -366,7 +366,23 @@
             </table>
         </div>
     </main>
+    <!-- LOAD SDK FIREBASE CORE & REALTIME DATABASE VIA CDN -->
+    <script src="https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js"></script>
     <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2iwBlXPV32UpjO-6Svp-33BFpnCmo6cQ",
+            authDomain: "dashboard-ketapang.firebaseapp.com",
+            projectId: "dashboard-ketapang",
+            storageBucket: "dashboard-ketapang.firebasestorage.app",
+            messagingSenderId: "893363056589",
+            appId: "1:893363056589:web:a070059c7819255d9bde84",
+            measurementId: "G-5SE78JZH03"
+        };
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    
     // Array berisi daftar nomor KA operasional di Stasiun Ketapang
     const daftarNoKA =[211, 212, 147, 148, 293, 294, 159, 160, 249, 250, 279, 280, 492, 492, 297, 298, 209, 210, 239, 240, 7045, 7046];
 
