@@ -11,9 +11,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // HUBUNGKAN DAN LIVE-SYNC DATA DENGAN FIREBASE CLOUD
     listenToCloudDatabase();
     setupCloudAutoSave();
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
 });
 
 // --- 2. LOGIKA BUKA/TUTUP SIDEBAR ---
@@ -168,16 +165,20 @@ function initImageZoom() {
     });
 }
 
-// Script khusus halaman pantauan stopblok
-  const firebaseConfig = {
-    apiKey: "AIzaSyD2iwBlXPV32UpjO-6Svp-33BFpnCmo6cQ",
-    authDomain: "dashboard-ketapang.firebaseapp.com",
-    projectId: "dashboard-ketapang",
-    storageBucket: "dashboard-ketapang.firebasestorage.app",
-    messagingSenderId: "893363056589",
-    appId: "1:893363056589:web:a070059c7819255d9bde84",
-    measurementId: "G-5SE78JZH03"
-  };
+// 1. REKATKAN KONFIGURASI SDK FIREBASE ANDA DI SINI
+    const firebaseConfig = {
+        apiKey: "AIzaSyA...",
+        authDomain: "://firebaseapp.com",
+        databaseURL: "https://firebaseio.com",
+        projectId: "dashboard-ketapang",
+        storageBucket: "://appspot.com",
+        messagingSenderId: "123456789",
+        appId: "1:1234:web:abcd"
+    };
+
+    // Inisialisasi Aplikasi Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
 
     // Array berisi daftar nomor KA operasional di Stasiun Ketapang
     const daftarNoKA =[211, 212, 147, 148, 293, 294, 159, 160, 249, 250, 279, 280, 492, 492, 297, 298, 209, 210, 239, 240, 7045, 7046];
