@@ -214,18 +214,18 @@ function populateTrackDropdowns() {
     // 3. Fungsi pengendali jika user memilih "Input Manual..."
     function handleDropdownChange(selectElement) {
         const container = selectElement.nextElementSibling;
-        const inputField = container.querySelector("input");
+        const textareaField = container.querySelector(".manual-textarea");
         
         if (selectElement.value === "custom") {
             container.classList.remove("hidden-input");
-            inputField.focus();
+            textareaField.focus();
         } else {
             container.classList.add("hidden-input");
-            inputField.value = "";
-            // Hapus memori input manual jika select diubah kembali ke utama
-            localStorage.removeItem(inputField.getAttribute("data-save-id")); 
+            textareaField.value = "";
+            // Hapus memori lama jika dropdown dikembalikan ke pilihan utama
+            localStorage.removeItem(textareaField.getAttribute("data-save-id")); 
         }
-        // Picu penyimpanan status dropdown terbaru
+        // Simpan status pilihan dropdown saat ini
         localStorage.setItem(selectElement.getAttribute("data-save-id"), selectElement.value);
     }
 
