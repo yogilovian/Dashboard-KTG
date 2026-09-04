@@ -72,18 +72,22 @@
             border: 1px solid #cccccc;
             border-radius: 4px;
             font-family: inherit;
-            font-size: 13px;
-            padding: 4px;
+            font-size: 14px; /* Diperbesar dari 13px */
+            padding: 6px;
         }
 
         .table-select {
             background-color: #ffffff;
             cursor: pointer;
+            font-weight: normal; /* Dropdown tetap normal agar rapi */
         }
 
-        .table-textarea {
+        .table-textarea, .manual-textarea {
+            font-size: 15px !important;   /* Ukuran huruf diperbesar agar jelas */
+            font-weight: 800 !important;  /* Membuat tulisan menjadi sangat tebal (Bold) */
+            color: #111111;               /* Warna tulisan hitam pekat */
             resize: vertical;
-            min-height: 50px;
+            min-height: 65px;
             display: block;
         }
 
