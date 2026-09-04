@@ -371,7 +371,7 @@
     </main>
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js";
+    import { getDatabase, ref, onValue, set, remove } from "https://gstatic.com";
 
     // Konfigurasi Kunci Proyek Firebase Stasiun Ketapang Anda
     const firebaseConfig = {
@@ -401,14 +401,6 @@
         listenToCloudDatabase();
         setupCloudAutoSave();
     });
-
-    function initDates() {
-        const headerDate = document.getElementById("current-date");
-        if (headerDate) headerDate.innerText = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        
-        const boardDate = document.getElementById("board-date");
-        if (boardDate) boardDate.innerText = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
-    }
 
     // --- LOGIKA UTAMA: SINKRONISASI OTOMATIS ANTAR-PERANGKAT (REAL-TIME CLOUD) ---
 
@@ -520,6 +512,16 @@
         });
     }
 
+    // fitur tanggal otomatis real time
+    function initDates() {
+        const headerDate = document.getElementById("current-date");
+        if (headerDate) headerDate.innerText = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        
+        const boardDate = document.getElementById("board-date");
+        if (boardDate) boardDate.innerText = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+    }
+
+    // fitur jam digital otomatis dan real-time
     function initDigitalClock() {
         const clockElement = document.getElementById('live-clock');
         if (!clockElement) return;
