@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pantauan Stopblok & KA - Stasiun Ketapang</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+    <style>
+        /* Gaya Visual Papan Tulis Operasional */
+        .board-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        @media (min-width: 1024px) {
+            .board-container {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+
+        .board-card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-top: 4px solid #002F6C;
+            padding: 15px;
+            overflow-x: auto;
+        }
+
+        .board-header-title {
+            background-color: #D6672A; /* Warna Oranye Papan */
+            color: white;
+            padding: 8px 15px;
+            font-weight: bold;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Desain Tabel Mirip Gambar */
+        .board-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .board-table th, .board-table td {
+            border: 2px solid #555555;
+            padding: 6px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .board-table th {
+            background-color: #F2F4F8;
+            color: #333;
+            font-weight: bold;
+        }
+
+        /* Form elemen kustom di dalam tabel */
+        .table-select, .table-textarea {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 13px;
+            padding: 4px;
+        }
+
+        .table-select {
+            background-color: #ffffff;
+            cursor: pointer;
+        }
+
+        .table-textarea {
+            resize: vertical;
+            min-height: 50px;
+            display: block;
+        }
+
+        .custom-input-container {
+            margin-top: 5px;
+        }
+
+        .custom-input {
+            width: 100%;
+            padding: 4px;
+            font-size: 12px;
+            border: 1px solid #ED6A16;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .hidden-input {
+            display: none;
+        }
+
+        .bg-gray {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigasi -->
+    <nav class="sidebar" id="mySidebar">
+        <button class="close-sidebar-btn" id="closeSidebar"><i class="ti ti-x"></i></button>
+        <div class="sidebar-brand">
+            <h2>KAI <span>KETAPANG</span></h2>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="ti ti-home"></i> Dashboard Utama</a></li>
+            <li><a href="struktur.html"><i class="ti ti-users"></i> Struktur Organisasi</a></li>
+            <li><a href="emplasemen.html"><i class="ti ti-yarn"></i> Emplasemen</a></li>
+            <li><a href="panjang_jalur.html"><i class="ti ti-track"></i> Panjang Jalur</a></li>
+            <li class="active"><a href="pantauan_stopblok.html"><i class="ti ti-barrier-block"></i> Pantauan Stopblok</a></li>
+            <li><a href="tracking_ka.html"><i class="ti ti-train"></i> Live Tracking KA</a></li>
+        </ul>
+    </nav>
+
+    <!-- Konten Utama -->
+    <main class="main-content">
+        <div class="top-bar-action">
+            <button class="toggle-btn" id="sidebarToggle">☰</button>
+            <div class="digital-clock-container">
+                <span class="clock-icon">🕒</span>
+                <span id="live-clock">00:00:00 WIB</span>
+            </div>
+        </div>
+
+        <header class="header">
+            <h1>Papan Pantauan Jalur, Stopblok & KA</h1>
+            <p id="current-date">Memuat Tanggal...</p>
+        </header>
+
+        <!-- BARIS ATAS: KONDISI JALUR & INFO KA -->
+        <div class="board-container">
+            
+            <!-- 1. KONDISI JALUR -->
+            <div class="board-card">
+                <div class="board-header-title">
+                    <span>📊 Kondisi Jalur</span>
+                    <span class="board-date-label">01-09-2026</span>
+                </div>
+                <table class="board-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 16%;">I</th>
+                            <th style="width: 16%;">II</th>
+                            <th style="width: 16%;">III</th>
+                            <th style="width: 16%;">IV</th>
+                            <th style="width: 16%;">V</th>
+                            <th style="width: 20%;">VI (Cuci)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <!-- Kolom Jalur I s/d VI dengan dropdown otomatis & manual -->
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                    <!-- Diisi otomatis via JavaScript -->
+                                </select>
+                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                            </td>
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                </select>
+                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                            </td>
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                </select>
+                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                            </td>
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                </select>
+                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                            </td>
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                </select>
+                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                            </td>
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                </select>
+                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 2. INFO KA -->
+            <div class="board-card">
+                <div class="board-header-title">
+                    <span>ℹ️ Info KA</span>
+                    <span class="board-date-label">01-09-2026</span>
+                </div>
+                <table class="board-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 33%;">BLB</th>
+                            <th style="width: 33%;">JALAN</th>
+                            <th style="width: 34%;">BATAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><textarea class="table-textarea" placeholder="Isi info BLB..."></textarea></td>
+                            <td><textarea class="table-textarea" placeholder="Isi info Jalan..."></textarea></td>
+                            <td><textarea class="table-textarea" placeholder="Isi info Batal..."></textarea></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- BARIS BAWAH: PANTAUAN STOPBLOK UTAMA -->
+        <div class="board-card" style="margin-bottom: 25px;">
+            <div class="board-header-title">
+                <span>🚧 PANTAUAN STOPBLOK</span>
+                <span class="board-date-label">01-09-2026</span>
+            </div>
+            <table class="board-table">
+                <thead>
+                    <tr>
+                        <th style="width: 12%;">TANGGAL PEMASANGAN</th>
+                        <th style="width: 8%;">JALUR</th>
+                        <th style="width: 30%;">SARANA</th>
+                        <th style="width: 20%;">STOPBLOK</th>
+                        <th style="width: 12%;">NO. KA (EX/KA)</th>
+                        <th style="width: 6%;">JUMLAH STOPBLOK</th>
+                        <th style="width: 6%;">TERPASANG</th>
+                        <th style="width: 6%;">TERSEDIA</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </main>
+    <script SRC="script.js"></script>
+    </body>
+</html>
