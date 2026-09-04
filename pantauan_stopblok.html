@@ -366,34 +366,35 @@
             </table>
         </div>
     </main>
-    <!-- LOAD SDK FIREBASE CORE & REALTIME DATABASE VIA CDN -->
-    <script src="https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js"></script>
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyD2iwBlXPV32UpjO-6Svp-33BFpnCmo6cQ",
-            authDomain: "dashboard-ketapang.firebaseapp.com",
-            projectId: "dashboard-ketapang",
-            storageBucket: "dashboard-ketapang.firebasestorage.app",
-            messagingSenderId: "893363056589",
-            appId: "1:893363056589:web:a070059c7819255d9bde84",
-            measurementId: "G-5SE78JZH03"
-        };
-    // Inisialisasi Aplikasi Firebase
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set, child, remove } from "https://gstatic.com";
+
+    // Konfigurasi Kunci Proyek Firebase Stasiun Ketapang Anda
+    const firebaseConfig = {
+        apiKey: "AIzaSyD2iwBlXPV32UpjO-6Svp-33BFpnCmo6cQ",
+        authDomain: "dashboard-ketapang.firebaseapp.com",
+        projectId: "dashboard-ketapang",
+        storageBucket: "dashboard-ketapang.firebasestorage.app",
+        messagingSenderId: "893363056589",
+        appId: "1:893363056589:web:a070059c7819255d9bde84",
+        measurementId: "G-5SE78JZH03"
+    };
+
+    // Inisialisasi Firebase & Akses ke Realtime Database Modul v12
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
 
     // Array berisi daftar nomor KA operasional di Stasiun Ketapang
     const daftarNoKA =[211, 212, 147, 148, 293, 294, 159, 160, 249, 250, 279, 280, 492, 492, 297, 298, 209, 210, 239, 240, 7045, 7046];
 
     document.addEventListener("DOMContentLoaded", function() {
-        // Fungsi Tanggal Header & Papan Tulis
         initDigitalClock();
         initDates();
-        initSidebarLogic();
         populateTrackDropdowns();
         populateGanjilDropdowns();
-        // HUBUNGKAN DAN LIVE-SYNC DATA DENGAN FIREBASE CLOUD
+        
+        // Memulai Live-Sync data sinkronisasi global
         listenToCloudDatabase();
         setupCloudAutoSave();
     });
@@ -408,11 +409,10 @@
 
     // --- LOGIKA UTAMA: SINKRONISASI OTOMATIS ANTAR-PERANGKAT (REAL-TIME CLOUD) ---
 
-    // Fungsi Mendengarkan Perubahan Data Cloud (Device Lain Mengisi -> Layar Ini Otomatis Update)
     function listenToCloudDatabase() {
-        const boardRef = database.ref('pantauan_stopblok_ketapang');
+        const boardRef = ref(database, 'pantauan_stopblok_ketapang');
         
-        boardRef.on('value', (snapshot) => {
+        onValue(boardRef, (snapshot) => {
             const data = snapshot.val();
             if (!data) return;
 
@@ -422,7 +422,6 @@
                 const saveId = input.getAttribute("data-save-id") || `input-field-${idx}`;
                 if (!input.getAttribute("data-save-id")) input.setAttribute("data-save-id", saveId);
                 
-                // Pastikan fokus ketikan tidak terganggu saat sinkronisasi data masuk
                 if (data[saveId] !== undefined && document.activeElement !== input) {
                     input.value = data[saveId];
                 }
@@ -436,7 +435,6 @@
                 if (data[saveId] !== undefined) {
                     select.value = data[saveId];
                     
-                    // Munculkan textarea manual jika di cloud statusnya terpilih 'custom'
                     if (select.classList.contains("track-dropdown")) {
                         const container = select.nextElementSibling;
                         if (container) {
@@ -452,9 +450,8 @@
         });
     }
 
-    // Fungsi Pengiriman Data ke Cloud (Setiap Ketikan / Perubahan Pilihan Langsung Terkirim Global)
     function setupCloudAutoSave() {
-        const boardRef = database.ref('pantauan_stopblok_ketapang');
+        const boardRef = ref(database, 'pantauan_stopblok_ketapang');
 
         // Deteksi ketikan pada textarea & manual input
         const inputs = document.querySelectorAll(".table-textarea, .custom-input, .manual-textarea");
@@ -462,7 +459,7 @@
             const saveId = input.getAttribute("data-save-id") || `input-field-${idx}`;
             
             input.addEventListener("input", function() {
-                boardRef.child(saveId).set(input.value);
+                set(ref(database, `pantauan_stopblok_ketapang/${saveId}`), input.value);
             });
         });
 
@@ -471,13 +468,13 @@
             const saveId = select.getAttribute("data-save-id") || `${select.classList.contains('track-dropdown')?'track':'ganjil'}-select-${idx}`;
             
             select.addEventListener("change", function() {
-                boardRef.child(saveId).set(select.value);
+                set(ref(database, `pantauan_stopblok_ketapang/${saveId}`), select.value);
             });
         });
     }
 
-    // Pengendali Dropdown Manual Textarea
-    function handleDropdownChange(selectElement) {
+    // Sambungkan fungsi pengendali dropdown manual ke lingkup modul global (window)
+    window.handleDropdownChange = function(selectElement) {
         const container = selectElement.nextElementSibling;
         const textareaField = container.querySelector(".manual-textarea");
         const saveId = selectElement.getAttribute("data-save-id");
@@ -488,13 +485,11 @@
         } else {
             container.classList.add("hidden-input");
             textareaField.value = "";
-            database.ref('pantauan_stopblok_ketapang').child(textareaField.getAttribute("data-save-id")).remove();
+            remove(ref(database, `pantauan_stopblok_ketapang/${textareaField.getAttribute("data-save-id")}`));
         }
-        // Kirim perubahan status dropdown ke Firebase cloud
-        database.ref('pantauan_stopblok_ketapang').child(saveId).set(selectElement.value);
+        set(ref(database, `pantauan_stopblok_ketapang/${saveId}`), selectElement.value);
     }
 
-    // Fungsi struktur pembentuk elemen dropdown (Tetap seperti sebelumnya)
     function populateTrackDropdowns() {
         document.querySelectorAll(".track-dropdown").forEach((select, idx) => {
             select.setAttribute("data-save-id", `track-select-${idx}`);
@@ -521,7 +516,7 @@
             });
         });
     }
-    // --- 1. JAM DIGITAL & REFRESH PERGANTIAN HARI ---
+
     function initDigitalClock() {
         const clockElement = document.getElementById('live-clock');
         if (!clockElement) return;
@@ -534,7 +529,6 @@
             
             clockElement.innerText = `${timeString} WIB`;
 
-            // Auto reload saat berganti hari
             if (now.getDate() !== currentDayIndex) {
                 currentDayIndex = now.getDate();
                 window.location.reload();
@@ -543,31 +537,6 @@
         updateTime();
         setInterval(updateTime, 1000);
     }
-
-    // --- 2. LOGIKA BUKA/TUTUP SIDEBAR ---
-    function initSidebarLogic() {
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const closeSidebar = document.getElementById('closeSidebar');
-        const sidebar = document.getElementById('mySidebar');
-        const mainContent = document.querySelector('.main-content');
-
-        if (sidebarToggle && sidebar && mainContent) {
-            sidebarToggle.addEventListener('click', function () {
-                if (window.innerWidth > 768) {
-                    sidebar.classList.toggle('hidden');
-                    mainContent.classList.toggle('full-width');
-                } else { 
-                    sidebar.classList.toggle('active');
-                }
-            });
-        }
-
-        if (closeSidebar && sidebar) {
-            closeSidebar.addEventListener('click', function () {
-                sidebar.classList.remove('active');
-            });
-        }
-    }
-    </script>
+</script>
 </body>
 </html>
