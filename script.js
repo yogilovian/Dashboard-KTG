@@ -152,3 +152,84 @@ function initImageZoom() {
         this.classList.toggle('zoomed');
     });
 }
+
+// SCRIPT UNTUK HALAMAN PANTAUAN STOPBLOK & KA
+// Array berisi daftar nomor KA operasional di Stasiun Ketapang
+const daftarNoKA =;
+
+document.addEventListener("DOMContentLoaded", function() {
+    populateTrackDropdowns();
+    populateGanjilDropdowns();
+});
+
+// 1 & 2. Mengisi Dropdown Kondisi Jalur I - VI (Semua KA + Custom Manual)
+function populateTrackDropdowns() {
+    const dropdowns = document.querySelectorAll(".track-dropdown");
+    dropdowns.forEach(select => {
+        select.innerHTML = "";
+
+        // Pilihan 1: Kosong
+        const optEmpty = document.createElement("option");
+        optEmpty.value = "";
+        optEmpty.text = "- Kosong -";
+        select.appendChild(optEmpty);
+        
+        // Pilihan 2: KPJ
+        const optKpj = document.createElement("option");
+        optKpj.value = "kpj";
+        optKpj.text = "KPJ";
+        select.appendChild(optKpj);
+        
+        // Tambahkan daftar Nomer KA dengan aturan Ganjil (Ex KA) & Genap (KA)
+        daftarNoKA.forEach(no => {
+            const opt = document.createElement("option");
+            opt.value = no;
+            if (no % 2 === 0) {
+                opt.text = `KA ${no}`; // Perbaikan: menggunakan backtick (`)
+            } else {
+                opt.text = `Ex KA ${no}`; // Perbaikan: menggunakan backtick (`)
+            }
+            select.appendChild(opt);
+        });
+        
+        // Pilihan Akhir: Isian Kustom Manual
+        const optCustom = document.createElement("option");
+        optCustom.value = "custom";
+        optCustom.text = "📝 Input Manual...";
+        select.appendChild(optCustom);
+    });
+}
+
+// Fungsi pengendali jika user memilih "Input Manual..."
+function handleDropdownChange(selectElement) {
+    const container = selectElement.nextElementSibling;
+    if (selectElement.value === "custom") {
+        container.classList.remove("hidden-input");
+        container.querySelector("input").focus();
+    } else {
+        container.classList.add("hidden-input");
+        container.querySelector("input").value = "";
+    }
+}
+
+// 4. Mengisi Dropdown Keterangan Khusus Nomor KA Ganjil Saja
+function populateGanjilDropdowns() {
+    const dropdowns = document.querySelectorAll(".ganjil-dropdown");
+    dropdowns.forEach(select => {
+        select.innerHTML = "";
+        
+        const optEmpty = document.createElement("option");
+        optEmpty.value = "";
+        optEmpty.text = "-";
+        select.appendChild(optEmpty);
+        
+        // Filter hanya mengambil No KA yang bernilai Ganjil
+        const ganjilKA = daftarNoKA.filter(no => no % 2 !== 0);
+        ganjilKA.forEach(no => {
+            const opt = document.createElement("option");
+            opt.value = no;
+            opt.text = `Ex KA ${no}`; // Perbaikan: menggunakan backtick (`)
+            select.appendChild(opt);
+        });
+    });
+}
