@@ -6,6 +6,11 @@ document.addEventListener("DOMContentLoaded", function () {
     initDinasanFetcher();
     initImageZoom();
     initTrackingClock();
+    populateTrackDropdowns();
+    populateGanjilDropdowns();
+    // HUBUNGKAN DAN LIVE-SYNC DATA DENGAN FIREBASE CLOUD
+    listenToCloudDatabase();
+    setupCloudAutoSave();
 });
 
 // --- 2. LOGIKA BUKA/TUTUP SIDEBAR ---
@@ -182,17 +187,10 @@ function initImageZoom() {
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
 
-// Array berisi daftar nomor KA operasional di Stasiun Ketapang
-const daftarNoKA =[211, 212, 147, 148, 293, 294, 159, 160, 249, 250, 279, 280, 492, 492, 297, 298, 209, 210, 239, 240, 7045, 7046];
+    // Array berisi daftar nomor KA operasional di Stasiun Ketapang
+    const daftarNoKA =[211, 212, 147, 148, 293, 294, 159, 160, 249, 250, 279, 280, 492, 492, 297, 298, 209, 210, 239, 240, 7045, 7046];
 
-document.addEventListener("DOMContentLoaded", function() {
-    populateTrackDropdowns();
-    populateGanjilDropdowns();
-     // HUBUNGKAN DAN LIVE-SYNC DATA DENGAN FIREBASE CLOUD
-    listenToCloudDatabase();
-    setupCloudAutoSave();
-});
-// --- LOGIKA UTAMA: SINKRONISASI OTOMATIS ANTAR-PERANGKAT (REAL-TIME CLOUD) ---
+    // --- LOGIKA UTAMA: SINKRONISASI OTOMATIS ANTAR-PERANGKAT (REAL-TIME CLOUD) ---
 
     // Fungsi Mendengarkan Perubahan Data Cloud (Device Lain Mengisi -> Layar Ini Otomatis Update)
     function listenToCloudDatabase() {
@@ -262,43 +260,43 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-// 1 & 2. Mengisi Dropdown Kondisi Jalur I - VI (Semua KA + Custom Manual)
-function populateTrackDropdowns() {
-    const dropdowns = document.querySelectorAll(".track-dropdown");
-    dropdowns.forEach(select => {
-        select.innerHTML = "";
+    // 1 & 2. Mengisi Dropdown Kondisi Jalur I - VI (Semua KA + Custom Manual)
+    function populateTrackDropdowns() {
+        const dropdowns = document.querySelectorAll(".track-dropdown");
+        dropdowns.forEach(select => {
+            select.innerHTML = "";
 
-        // Pilihan 1: Kosong
-        const optEmpty = document.createElement("option");
-        optEmpty.value = "";
-        optEmpty.text = "- Kosong -";
-        select.appendChild(optEmpty);
-        
-        // Pilihan 2: KPJ
-        const optKpj = document.createElement("option");
-        optKpj.value = "kpj";
-        optKpj.text = "KPJ";
-        select.appendChild(optKpj);
-        
-        // Tambahkan daftar Nomer KA dengan aturan Ganjil (Ex KA) & Genap (KA)
-        daftarNoKA.forEach(no => {
-            const opt = document.createElement("option");
-            opt.value = no;
-            if (no % 2 === 0) {
-                opt.text = `KA ${no}`; // Perbaikan: menggunakan backtick (`)
-            } else {
-                opt.text = `Ex KA ${no}`; // Perbaikan: menggunakan backtick (`)
-            }
-            select.appendChild(opt);
+            // Pilihan 1: Kosong
+            const optEmpty = document.createElement("option");
+            optEmpty.value = "";
+            optEmpty.text = "- Kosong -";
+            select.appendChild(optEmpty);
+            
+            // Pilihan 2: KPJ
+            const optKpj = document.createElement("option");
+            optKpj.value = "kpj";
+            optKpj.text = "KPJ";
+            select.appendChild(optKpj);
+            
+            // Tambahkan daftar Nomer KA dengan aturan Ganjil (Ex KA) & Genap (KA)
+            daftarNoKA.forEach(no => {
+                const opt = document.createElement("option");
+                opt.value = no;
+                if (no % 2 === 0) {
+                    opt.text = `KA ${no}`; // Perbaikan: menggunakan backtick (`)
+                } else {
+                    opt.text = `Ex KA ${no}`; // Perbaikan: menggunakan backtick (`)
+                }
+                select.appendChild(opt);
+            });
+            
+            // Pilihan Akhir: Isian Kustom Manual
+            const optCustom = document.createElement("option");
+            optCustom.value = "custom";
+            optCustom.text = "📝 Input Manual...";
+            select.appendChild(optCustom);
         });
-        
-        // Pilihan Akhir: Isian Kustom Manual
-        const optCustom = document.createElement("option");
-        optCustom.value = "custom";
-        optCustom.text = "📝 Input Manual...";
-        select.appendChild(optCustom);
-    });
-}
+    }
 
     // Fungsi pengendali jika user memilih "Input Manual..."
     function handleDropdownChange(selectElement) {
