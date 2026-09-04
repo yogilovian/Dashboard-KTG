@@ -223,6 +223,13 @@
                                     <textarea class="custom-input manual-textarea" placeholder="Isi No Rangkaian Panjang..."></textarea>
                                 </div>
                             </td>
+                            td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                </select>
+                                <div class="custom-input-container hidden-input">
+                                    <textarea class="custom-input manual-textarea" placeholder="Isi No Rangkaian Panjang..."></textarea>
+                                </div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -232,7 +239,7 @@
             <div class="board-card" style="margin-bottom: 25px;">
                 <div class="board-header-title">
                     <span>ℹ️ Info KA</span>
-                    <span class="board-date">Memuat Tanggal...</span>
+                    <!-- <span class="board-table">Memuat Tanggal...</span> -->
                 </div>
                 <table class="board-table">
                     <thead>
@@ -257,15 +264,14 @@
         <div class="board-card" style="margin-bottom: 25px;">
             <div class="board-header-title">
                 <span>🚧 PANTAUAN STOPBLOK</span>
-                <span class="board-date">Memuat Tanggal...</span>
+                <!-- <span class="board-table">Memuat Tanggal...</span> -->
             </div>
             <table class="board-table">
                 <thead>
                     <tr>
-                        <th style="width: 12%;">TANGGAL PEMASANGAN</th>
                         <th style="width: 8%;">JALUR</th>
                         <th style="width: 30%;">SARANA</th>
-                        <th style="width: 17%;">STOPBLOK</th>
+                        <th style="width: 29%;">STOPBLOK</th>
                         <th style="width: 12%;">NO. KA (EX/KA)</th>
                         <th style="margin-bottom: 25px;">JUMLAH STOPBLOK</th>
                         <th style="margin-bottom: 25px;">TERPASANG</th>
