@@ -64,6 +64,13 @@ function initHeaderDate() {
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     dateElement.innerText = new Date().toLocaleDateString('id-ID', options);
 }
+// 4.1. Mengisi Tanggal Pendek di Board Card (Contoh: 04-09-2026)
+    const boardDateElement = document.getElementById("board-date");
+    if (boardDateElement) {
+        // Format tanggal ringkas DD-MM-YYYY sesuai standar papan operasional
+        const tglSistem = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+        boardDateElement.innerText = tglSistem;
+    }
 
 // --- 5. AMBIL DATA DINASAN DARI CSV ---
 function initDinasanFetcher() {
