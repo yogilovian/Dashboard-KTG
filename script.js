@@ -161,18 +161,106 @@ function initImageZoom() {
 }
 
 // Script khusus halaman pantauan stopblok
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyD2iwBlXPV32UpjO-6Svp-33BFpnCmo6cQ",
+    authDomain: "dashboard-ketapang.firebaseapp.com",
+    projectId: "dashboard-ketapang",
+    storageBucket: "dashboard-ketapang.firebasestorage.app",
+    messagingSenderId: "893363056589",
+    appId: "1:893363056589:web:a070059c7819255d9bde84",
+    measurementId: "G-5SE78JZH03"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+
 // Array berisi daftar nomor KA operasional di Stasiun Ketapang
 const daftarNoKA =[211, 212, 147, 148, 293, 294, 159, 160, 249, 250, 279, 280, 492, 492, 297, 298, 209, 210, 239, 240, 7045, 7046];
 
 document.addEventListener("DOMContentLoaded", function() {
     populateTrackDropdowns();
     populateGanjilDropdowns();
-    // 4. MUAT DATA YANG TERSIMPAN SEBELUMNYA (Anti-Reset)
-    loadSavedData();
-
-    // 5. PASANG EVENT LISTENER UNTUK AUTO-SAVE SETIAP KALI DATA BERUBAH
-    setupAutoSave();
+     // HUBUNGKAN DAN LIVE-SYNC DATA DENGAN FIREBASE CLOUD
+    listenToCloudDatabase();
+    setupCloudAutoSave();
 });
+// --- LOGIKA UTAMA: SINKRONISASI OTOMATIS ANTAR-PERANGKAT (REAL-TIME CLOUD) ---
+
+    // Fungsi Mendengarkan Perubahan Data Cloud (Device Lain Mengisi -> Layar Ini Otomatis Update)
+    function listenToCloudDatabase() {
+        const boardRef = database.ref('pantauan_stopblok_ketapang');
+        
+        boardRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (!data) return;
+
+            // Kembalikan semua nilai Input Text & Textarea dari Cloud
+            const inputs = document.querySelectorAll(".table-textarea, .custom-input, .manual-textarea");
+            inputs.forEach((input, idx) => {
+                const saveId = input.getAttribute("data-save-id") || `input-field-${idx}`;
+                if (!input.getAttribute("data-save-id")) input.setAttribute("data-save-id", saveId);
+                
+                // Pastikan fokus ketikan tidak terganggu saat sinkronisasi data masuk
+                if (data[saveId] !== undefined && document.activeElement !== input) {
+                    input.value = data[saveId];
+                }
+            });
+
+            // Kembalikan semua pilihan Dropdown dari Cloud
+            document.querySelectorAll(".track-dropdown, .ganjil-dropdown").forEach((select, idx) => {
+                const saveId = select.getAttribute("data-save-id") || `${select.classList.contains('track-dropdown')?'track':'ganjil'}-select-${idx}`;
+                if (!select.getAttribute("data-save-id")) select.setAttribute("data-save-id", saveId);
+
+                if (data[saveId] !== undefined) {
+                    select.value = data[saveId];
+                    
+                    // Munculkan textarea manual jika di cloud statusnya terpilih 'custom'
+                    if (select.classList.contains("track-dropdown")) {
+                        const container = select.nextElementSibling;
+                        if (container) {
+                            if (data[saveId] === "custom") {
+                                container.classList.remove("hidden-input");
+                            } else {
+                                container.classList.add("hidden-input");
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    }
+
+    // Fungsi Pengiriman Data ke Cloud (Setiap Ketikan / Perubahan Pilihan Langsung Terkirim Global)
+    function setupCloudAutoSave() {
+        const boardRef = database.ref('pantauan_stopblok_ketapang');
+
+        // Deteksi ketikan pada textarea & manual input
+        const inputs = document.querySelectorAll(".table-textarea, .custom-input, .manual-textarea");
+        inputs.forEach((input, idx) => {
+            const saveId = input.getAttribute("data-save-id") || `input-field-${idx}`;
+            
+            input.addEventListener("input", function() {
+                boardRef.child(saveId).set(input.value);
+            });
+        });
+
+        // Deteksi perubahan pada pilihan dropdown jalur maupun keterangan ganjil
+        document.querySelectorAll(".track-dropdown, .ganjil-dropdown").forEach((select, idx) => {
+            const saveId = select.getAttribute("data-save-id") || `${select.classList.contains('track-dropdown')?'track':'ganjil'}-select-${idx}`;
+            
+            select.addEventListener("change", function() {
+                boardRef.child(saveId).set(select.value);
+            });
+        });
+    }
 
 // 1 & 2. Mengisi Dropdown Kondisi Jalur I - VI (Semua KA + Custom Manual)
 function populateTrackDropdowns() {
@@ -211,96 +299,43 @@ function populateTrackDropdowns() {
         select.appendChild(optCustom);
     });
 }
-    // 3. Fungsi pengendali jika user memilih "Input Manual..."
+
+    // Fungsi pengendali jika user memilih "Input Manual..."
     function handleDropdownChange(selectElement) {
-        const container = selectElement.nextElementSibling;
-        const textareaField = container.querySelector(".manual-textarea");
-        
-        if (selectElement.value === "custom") {
-            container.classList.remove("hidden-input");
-            textareaField.focus();
-        } else {
-            container.classList.add("hidden-input");
-            textareaField.value = "";
-            // Hapus memori lama jika dropdown dikembalikan ke pilihan utama
-            localStorage.removeItem(textareaField.getAttribute("data-save-id")); 
-        }
-        // Simpan status pilihan dropdown saat ini
-        localStorage.setItem(selectElement.getAttribute("data-save-id"), selectElement.value);
-    }
-
-    // 4. Mengisi Dropdown Keterangan Khusus Nomor KA Ganjil Saja
-    function populateGanjilDropdowns() {
-        const dropdowns = document.querySelectorAll(".ganjil-dropdown");
-        dropdowns.forEach(select => {
-            select.innerHTML = "";
+            const container = selectElement.nextElementSibling;
+            const textareaField = container.querySelector(".manual-textarea");
+            const saveId = selectElement.getAttribute("data-save-id");
             
-            const optEmpty = document.createElement("option");
-            optEmpty.value = "";
-            optEmpty.text = "-";
-            select.appendChild(optEmpty);
-            
-            // Filter hanya mengambil No KA yang bernilai Ganjil
-            const ganjilKA = daftarNoKA.filter(no => no % 2 !== 0);
-            ganjilKA.forEach(no => {
-                const opt = document.createElement("option");
-                opt.value = no;
-                opt.text = `Ex KA ${no}`; // Perbaikan: menggunakan backtick (`)
-                select.appendChild(opt);
-            });
-        });
+            if (selectElement.value === "custom") {
+                container.classList.remove("hidden-input");
+                textareaField.focus();
+            } else {
+                container.classList.add("hidden-input");
+                textareaField.value = "";
+                database.ref('pantauan_stopblok_ketapang').child(textareaField.getAttribute("data-save-id")).remove();
+            }
+            // Kirim perubahan status dropdown ke Firebase cloud
+            database.ref('pantauan_stopblok_ketapang').child(saveId).set(selectElement.value);
+    }
 
-    // --- LOGIKA UTAMA: FITUR AUTO SAVE & ANTI RESET LOCALSTORAGE ---
-
-    function setupAutoSave() {
-        // Beri ID unik dan pasang pendengar simpan otomatis pada semua elemen Form input/textarea
-        const inputs = document.querySelectorAll(".table-textarea, .custom-input, .board-card .table-textarea");
+// 4. Mengisi Dropdown Keterangan Khusus Nomor KA Ganjil Saja
+function populateGanjilDropdowns() {
+    const dropdowns = document.querySelectorAll(".ganjil-dropdown");
+    dropdowns.forEach(select => {
+        select.innerHTML = "";
         
-        inputs.forEach((input, idx) => {
-            // Jika belum memiliki ID simpan khusus dari perulangan script, buatkan ID unik berdasarkan indeks
-            if (!input.getAttribute("data-save-id")) {
-                input.setAttribute("data-save-id", `input-field-${idx}`);
-            }
-
-            // Simpan ke storage setiap kali ada ketikan (input) atau perubahan data
-            input.addEventListener("input", function() {
-                localStorage.setItem(input.getAttribute("data-save-id"), input.value);
-            });
+        const optEmpty = document.createElement("option");
+        optEmpty.value = "";
+        optEmpty.text = "-";
+        select.appendChild(optEmpty);
+        
+        // Filter hanya mengambil No KA yang bernilai Ganjil
+        const ganjilKA = daftarNoKA.filter(no => no % 2 !== 0);
+        ganjilKA.forEach(no => {
+            const opt = document.createElement("option");
+            opt.value = no;
+            opt.text = `Ex KA ${no}`; // Perbaikan: menggunakan backtick (`)
+            select.appendChild(opt);
         });
-
-        // Khusus untuk lacak perubahan dropdown secara global jika handleDropdownChange terlewat
-        document.querySelectorAll(".track-dropdown, .ganjil-dropdown").forEach(select => {
-            select.addEventListener("change", function() {
-                localStorage.setItem(select.getAttribute("data-save-id"), select.value);
-            });
-        });
-    }
-
-    function loadSavedData() {
-        // 1. Kembalikan semua isian Textarea dan Input Teks biasa
-        const inputs = document.querySelectorAll(".table-textarea, .custom-input");
-        inputs.forEach((input, idx) => {
-            if (!input.getAttribute("data-save-id")) {
-                input.setAttribute("data-save-id", `input-field-${idx}`);
-            }
-            const savedValue = localStorage.getItem(input.getAttribute("data-save-id"));
-            if (savedValue !== null) {
-                input.value = savedValue;
-            }
-        });
-
-        // 2. Kembalikan semua pilihan Dropdown Kondisi Jalur & Dropdown Ganjil
-        document.querySelectorAll(".track-dropdown, .ganjil-dropdown").forEach(select => {
-            const savedSelectValue = localStorage.getItem(select.getAttribute("data-save-id"));
-            if (savedSelectValue !== null) {
-                select.value = savedSelectValue;
-                
-                // Logika khusus: Jika yang tersimpan adalah pilihan "custom" (Input Manual), munculkan kembali kotak inputnya
-                if (select.classList.contains("track-dropdown") && savedSelectValue === "custom") {
-                    const container = select.nextElementSibling;
-                    if (container) container.classList.remove("hidden-input");
-                }
-            }
-        });
-    }
+    });
 }
