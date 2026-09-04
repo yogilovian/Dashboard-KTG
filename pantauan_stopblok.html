@@ -353,7 +353,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td>CUI 2</td>
+                            <td>CUCI 2</td>
                             <td><textarea class="table-textarea" placeholder="Isi No Sarana"></textarea></td>
                             <td><textarea class="table-textarea" placeholder="Isi No Stopblok"></textarea></td>
                             <td>
@@ -372,10 +372,11 @@
 
     document.addEventListener("DOMContentLoaded", function() {
         // Fungsi Tanggal Header & Papan Tulis
+        initDigitalClock();
         initDates();
+        initSidebarLogic();
         populateTrackDropdowns();
         populateGanjilDropdowns();
-
         // HUBUNGKAN DAN LIVE-SYNC DATA DENGAN FIREBASE CLOUD
         listenToCloudDatabase();
         setupCloudAutoSave();
@@ -504,7 +505,7 @@
             });
         });
     }
-    // --- JAM DIGITAL & REFRESH PERGANTIAN HARI ---
+    // --- 1. JAM DIGITAL & REFRESH PERGANTIAN HARI ---
     function initDigitalClock() {
         const clockElement = document.getElementById('live-clock');
         if (!clockElement) return;
@@ -525,6 +526,31 @@
         }
         updateTime();
         setInterval(updateTime, 1000);
+    }
+
+    // --- 2. LOGIKA BUKA/TUTUP SIDEBAR ---
+    function initSidebarLogic() {
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const closeSidebar = document.getElementById('closeSidebar');
+        const sidebar = document.getElementById('mySidebar');
+        const mainContent = document.querySelector('.main-content');
+
+        if (sidebarToggle && sidebar && mainContent) {
+            sidebarToggle.addEventListener('click', function () {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.toggle('hidden');
+                    mainContent.classList.toggle('full-width');
+                } else { 
+                    sidebar.classList.toggle('active');
+                }
+            });
+        }
+
+        if (closeSidebar && sidebar) {
+            closeSidebar.addEventListener('click', function () {
+                sidebar.classList.remove('active');
+            });
+        }
     }
     </script>
 </body>
