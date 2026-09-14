@@ -1,0 +1,6 @@
+{
+  "name": "Dashboard Stasiun Ketapang",
+  "description": "Dashboard Operasional Stasiun Ketapang Daop 9 Jember PT Kereta Api Indonesia (Persero)",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

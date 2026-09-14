@@ -1,0 +1,312 @@
+import express from "express";
+import path from "path";
+import fs from "fs";
+import { createServer as createViteServer } from "vite";
+
+const PORT = 3000;
+const DATA_DIR = path.join(process.cwd(), "data");
+const TRACKS_FILE = path.join(DATA_DIR, "track_states.json");
+const SHEETS_INFO_FILE = path.join(DATA_DIR, "sheet_info.json");
+const DINAS_FILE = path.join(DATA_DIR, "dinasan.json");
+const CONFIG_FILE = path.join(process.cwd(), "firebase-applet-config.json");
+
+// Pastikan direktori data ada
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+
+// Data awal default emplasemen Stasiun Ketapang (KTG)
+const DEFAULT_TRACK_STATES: Record<string, {
+  status: string;
+  note: string;
+  trainNumber: string;
+  stopblokNumber: string;
+  updatedAt?: string;
+}> = {
+  "jalur-1": {
+    status: "clear",
+    note: "Siap menerima kedatangan/keberangkatan KA",
+    trainNumber: "",
+    stopblokNumber: "",
+    updatedAt: new Date().toISOString()
+  },
+  "jalur-2": {
+    status: "clear",
+    note: "Jalur lurus sepur raya utama",
+    trainNumber: "",
+    stopblokNumber: "",
+    updatedAt: new Date().toISOString()
+  },
+  "jalur-3": {
+    status: "clear",
+    note: "Manuver langsir dan pemeriksaan",
+    trainNumber: "",
+    stopblokNumber: "",
+    updatedAt: new Date().toISOString()
+  },
+  "jalur-4": {
+    status: "stopblok",
+    note: "Terpasang Stopblok Pengaman - Rangkaian KPJ Siaga",
+    trainNumber: "KPJ D9/10426",
+    stopblokNumber: "SB-04",
+    updatedAt: new Date().toISOString()
+  },
+  "jalur-5": {
+    status: "clear",
+    note: "Bebas stabling cadangan",
+    trainNumber: "",
+    stopblokNumber: "",
+    updatedAt: new Date().toISOString()
+  },
+  "jalur-6": {
+    status: "stopblok",
+    note: "Terpasang stopblok pengaman ujung sepur",
+    trainNumber: "",
+    stopblokNumber: "SB-06",
+    updatedAt: new Date().toISOString()
+  },
+  "jalur-bongkar": {
+    status: "clear",
+    note: "Bongkar muat barang/kargo semen",
+    trainNumber: "",
+    stopblokNumber: "",
+    updatedAt: new Date().toISOString()
+  },
+  "jalur-cuci-1": {
+    status: "clear",
+    note: "Instalasi pencucian dan pengisian air",
+    trainNumber: "",
+    stopblokNumber: "",
+    updatedAt: new Date().toISOString()
+  },
+  "jalur-cuci-2": {
+    status: "clear",
+    note: "Perawatan eksterior dan interior",
+    trainNumber: "",
+    stopblokNumber: "",
+    updatedAt: new Date().toISOString()
+  }
+};
+
+function readTrackStates() {
+  try {
+    if (fs.existsSync(TRACKS_FILE)) {
+      const data = fs.readFileSync(TRACKS_FILE, "utf8");
+      return JSON.parse(data);
+    }
+  } catch (err) {
+    console.error("Error membaca file status jalur:", err);
+  }
+  // Tulis nilai awal
+  fs.writeFileSync(TRACKS_FILE, JSON.stringify(DEFAULT_TRACK_STATES, null, 2), "utf8");
+  return { ...DEFAULT_TRACK_STATES };
+}
+
+function writeTrackStates(states: Record<string, any>) {
+  try {
+    fs.writeFileSync(TRACKS_FILE, JSON.stringify(states, null, 2), "utf8");
+    return true;
+  } catch (err) {
+    console.error("Error menulis file status jalur:", err);
+    return false;
+  }
+}
+
+function readSheetsInfo() {
+  try {
+    if (fs.existsSync(SHEETS_INFO_FILE)) {
+      return JSON.parse(fs.readFileSync(SHEETS_INFO_FILE, "utf8"));
+    }
+  } catch (err) {
+    console.error("Error membaca sheet_info.json:", err);
+  }
+  return {
+    spreadsheetId: null,
+    spreadsheetUrl: null,
+    lastSyncTime: null,
+    connectedBy: null
+  };
+}
+
+function writeSheetsInfo(info: any) {
+  try {
+    fs.writeFileSync(SHEETS_INFO_FILE, JSON.stringify(info, null, 2), "utf8");
+    return true;
+  } catch (err) {
+    console.error("Error menulis sheet_info.json:", err);
+    return false;
+  }
+}
+
+async function startServer() {
+  const app = express();
+
+  app.use(express.json());
+
+  // === API ENDPOINTS ===
+
+  // 1. Health check
+  app.get("/api/health", (_req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
+  // 2. OAuthConfig untuk Google Sheets API
+  app.get("/api/oauth-config", (_req, res) => {
+    let clientId = "186406862864-in4aeul1p7hsebl8a8ml8ombr8vpto4b.apps.googleusercontent.com";
+    try {
+      if (fs.existsSync(CONFIG_FILE)) {
+        const conf = JSON.parse(fs.readFileSync(CONFIG_FILE, "utf8"));
+        if (conf.oAuthClientId) {
+          clientId = conf.oAuthClientId;
+        }
+      }
+    } catch (e) {
+      console.warn("Gagal membaca firebase-applet-config.json:", e);
+    }
+
+    res.json({
+      clientId,
+      scopes: [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive.file"
+      ]
+    });
+  });
+
+  // 3. Info Google Sheets yang terhubung
+  app.get("/api/sheets-info", (_req, res) => {
+    res.json(readSheetsInfo());
+  });
+
+  app.post("/api/sheets-info", (req, res) => {
+    const { spreadsheetId, spreadsheetUrl, connectedBy } = req.body;
+    const current = readSheetsInfo();
+    const updated = {
+      ...current,
+      spreadsheetId: spreadsheetId !== undefined ? spreadsheetId : current.spreadsheetId,
+      spreadsheetUrl: spreadsheetUrl !== undefined ? spreadsheetUrl : current.spreadsheetUrl,
+      connectedBy: connectedBy !== undefined ? connectedBy : current.connectedBy,
+      lastSyncTime: new Date().toISOString()
+    };
+    writeSheetsInfo(updated);
+    res.json({ success: true, info: updated });
+  });
+
+  // 4. Data Status Emplasemen (Sinkron Semua Device)
+  app.get("/api/tracks", (_req, res) => {
+    const states = readTrackStates();
+    res.json({
+      success: true,
+      states,
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  app.post("/api/tracks", (req, res) => {
+    const { trackId, status, trainNumber, stopblokNumber, note, states: bulkStates } = req.body;
+    let currentStates = readTrackStates();
+
+    if (bulkStates && typeof bulkStates === "object") {
+      // Pembaruan massal (misalnya sinkronisasi dari Google Sheets)
+      currentStates = { ...currentStates, ...bulkStates };
+    } else if (trackId) {
+      // Pembaruan per jalur
+      const existing = currentStates[trackId] || {};
+      currentStates[trackId] = {
+        ...existing,
+        status: status !== undefined ? status : existing.status,
+        trainNumber: trainNumber !== undefined ? trainNumber : existing.trainNumber,
+        stopblokNumber: stopblokNumber !== undefined ? stopblokNumber : existing.stopblokNumber,
+        note: note !== undefined ? note : existing.note,
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    writeTrackStates(currentStates);
+
+    res.json({
+      success: true,
+      states: currentStates,
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  // 5. Reset Status Jalur
+  app.post("/api/tracks/reset", (req, res) => {
+    const { trackId } = req.body;
+    let currentStates = readTrackStates();
+
+    if (trackId && DEFAULT_TRACK_STATES[trackId]) {
+      currentStates[trackId] = {
+        ...DEFAULT_TRACK_STATES[trackId],
+        updatedAt: new Date().toISOString()
+      };
+    } else if (!trackId) {
+      currentStates = { ...DEFAULT_TRACK_STATES };
+    }
+
+    writeTrackStates(currentStates);
+
+    res.json({
+      success: true,
+      states: currentStates,
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  // 6. Data Dinasan (Sinkron Cloud)
+  app.get("/api/dinas", (_req, res) => {
+    if (fs.existsSync(DINAS_FILE)) {
+      try {
+        const data = fs.readFileSync(DINAS_FILE, "utf8");
+        return res.json(JSON.parse(data));
+      } catch (err) {
+        console.error("Gagal membaca dinasan.json", err);
+      }
+    }
+
+    // Fallback ke data_dinas.csv jika belum ada dinasan.json
+    const csvPath = path.join(process.cwd(), "data_dinas.csv");
+    if (fs.existsSync(csvPath)) {
+      const csvText = fs.readFileSync(csvPath, "utf8");
+      return res.json({ success: true, source: "csv", data: csvText });
+    }
+
+    res.json({ success: false, message: "Belum ada data dinasan" });
+  });
+
+  app.post("/api/dinas", (req, res) => {
+    const { dinasData } = req.body;
+    if (dinasData) {
+      fs.writeFileSync(DINAS_FILE, JSON.stringify({ success: true, data: dinasData, updatedAt: new Date().toISOString() }, null, 2), "utf8");
+      return res.json({ success: true, message: "Data dinasan berhasil disimpan di cloud" });
+    }
+    res.status(400).json({ success: false, message: "Data dinas tidak valid" });
+  });
+
+  // === VITE / STATIC SERVING ===
+  if (process.env.NODE_ENV !== "production") {
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: "spa",
+    });
+    app.use(vite.middlewares);
+  } else {
+    const distPath = path.join(process.cwd(), "dist");
+    app.use(express.static(distPath));
+    app.get("*", (req, res) => {
+      const requested = req.path === "/" ? "index.html" : req.path.replace(/^\//, "");
+      const targetFile = path.join(distPath, requested);
+      if (fs.existsSync(targetFile) && fs.statSync(targetFile).isFile()) {
+        return res.sendFile(targetFile);
+      }
+      res.sendFile(path.join(distPath, "index.html"));
+    });
+  }
+
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server Stasiun Ketapang berjalan di http://0.0.0.0:${PORT}`);
+  });
+}
+
+startServer();

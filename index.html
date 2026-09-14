@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Stasiun Ketapang</title>
+    <meta name="description" content="Dashboard Operasional Stasiun Ketapang Daop 9 Jember PT Kereta Api Indonesia (Persero)" />
+    <meta property="og:title" content="Dashboard Stasiun Ketapang" />
+    <meta property="og:description" content="Dashboard Operasional Stasiun Ketapang Daop 9 Jember PT Kereta Api Indonesia (Persero)" />
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+</head>
+<body>
+    
+    <!-- Sidebar Navigasi -->
+    <nav class="sidebar" id="mySidebar">
+        
+    <!-- TOMBOL CLOSE BARU (KHUSUS HP/TABLET) -->
+    <button class="close-sidebar-btn" id="closeSidebar"><i class="ti ti-x"></i></button>
+        
+        <div class="sidebar-brand">
+            <h2>KAI <span>KETAPANG</span></h2>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="active"><a href="index.html"><i class="ti ti-home"></i> Dashboard Utama</a></li>
+            <li><a href="struktur.html"><i class="ti ti-users"></i> Struktur Organisasi</a></li>
+            <li><a href="emplasemen.html"><i class="ti ti-yarn"></i></i> Emplasemen</a></li>
+            <li><a href="panjang_jalur.html"><i class="ti ti-track"></i> Panjang Jalur</a></li>
+            <li><a href="daftar_jalur.html"><i class="ti ti-train"></i> Daftar Jalur KA</a></li>
+            <li><a href="pantauan_stopblok.html"><i class="ti ti-barrier-block"></i> Pantauan Stopblok</a></li>
+        </ul>
+    </nav>
+
+    <!-- Konten Utama -->
+    <main class="main-content">
+
+    <!-- Tombol untuk Buka/Tutup Sidebar -->
+<div class="top-bar-action">
+    <button class="toggle-btn" id="sidebarToggle">☰</button>
+    
+        <!-- Wadah Jam Digital Baru -->
+    <div class="digital-clock-container">
+        <span class="clock-icon">🕒</span>
+        <span id="live-clock">00:00:00 WIB</span>
+    </div>
+</div>
+        
+        <header class="header">
+            <h1 id="welcome-title">Dashboard Operasional Stasiun Ketapang</h1>
+            <p id="current-date">Memuat Tanggal...</p>
+        </header>
+
+        <!-- BAR NAVIGASI TANGGAL DINASAN -->
+        <section class="date-nav-toolbar" id="dateNavToolbar">
+            <div class="date-nav-header">
+                <div class="date-nav-info">
+                    <span id="dateStatusBadge" class="date-status-badge today">
+                        <i class="ti ti-circle-check-filled"></i> Menampilkan Dinasan Hari Ini (Otomatis)
+                    </span>
+                    <span id="selectedDateDisplay" class="dinas-day-indicator"></span>
+                </div>
+                <div class="date-nav-controls">
+                    <button type="button" class="date-btn" id="btnPrevDay" title="Lihat dinasan kemarin">
+                        <i class="ti ti-chevron-left"></i> Kemarin
+                    </button>
+                    <button type="button" class="date-btn active" id="btnToday" title="Kembali ke dinasan hari ini">
+                        <i class="ti ti-calendar-event"></i> Hari Ini
+                    </button>
+                    <button type="button" class="date-btn" id="btnNextDay" title="Lihat dinasan besok">
+                        Besok <i class="ti ti-chevron-right"></i>
+                    </button>
+                    <div class="date-picker-box">
+                        <label for="dinasDatePicker"><i class="ti ti-calendar"></i> Pilih Tanggal:</label>
+                        <input type="date" id="dinasDatePicker" />
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BARIS 1: DINASAN PPKA -->
+        <h2 style="color: #002F6C; margin-bottom: 15px;">👮‍♂️ 1. PPKA Yang Berdinas <span class="dinas-period-label">Hari Ini</span></h2>
+        <section class="shift-container">
+            <div class="shift-card" style="border-top-color: #002F6C;">
+                <div class="shift-title">🌅 Shift Pagi</div>
+                <div class="staff-list" id="ppka-pagi"></div>
+            </div>
+            <div class="shift-card" style="border-top-color: #002F6C;">
+                <div class="shift-title">☀️ Shift Siang</div>
+                <div class="staff-list" id="ppka-siang"></div>
+            </div>
+            <div class="shift-card" style="border-top-color: #002F6C;">
+                <div class="shift-title">🌙 Shift Malam</div>
+                <div class="staff-list" id="ppka-malam"></div>
+            </div>
+        </section>
+        
+        <!-- BARIS 2: DINASAN PLR -->
+        <h2 style="color: #002F6C; margin-bottom: 15px;">👷 2. Petugas Langsir Yang Berdinas <span class="dinas-period-label">Hari Ini</span></h2>
+        <section class="shift-container">
+            <div class="shift-card">
+                <div class="shift-title">🌅 Shift Pagi</div>
+                <div class="staff-list" id="plr-pagi"></div>
+            </div>
+            <div class="shift-card">
+                <div class="shift-title">☀️ Shift Siang</div>
+                <div class="staff-list" id="plr-siang"></div>
+            </div>
+            <div class="shift-card">
+                <div class="shift-title">🌙 Shift Malam</div>
+                <div class="staff-list" id="plr-malam"></div>
+            </div>
+        </section>
+
+        <!-- BARIS 3: DINASAN PRS -->
+        <h2 style="color: #002F6C; margin-bottom: 15px;">🚉 3. Petugas Rumah Sinyal Yang Berdinas <span class="dinas-period-label">Hari Ini</span></h2>
+        <section class="shift-container">
+            <div class="shift-card" style="border-top-color: #555;">
+                <div class="shift-title">🌅 Shift Pagi</div>
+                <div class="staff-list" id="prs-pagi"></div>
+            </div>
+            <div class="shift-card" style="border-top-color: #555;">
+                <div class="shift-title">☀️ Shift Siang</div>
+                <div class="staff-list" id="prs-siang"></div>
+            </div>
+            <div class="shift-card" style="border-top-color: #555;">
+                <div class="shift-title">🌙 Shift Malam</div>
+                <div class="staff-list" id="prs-malam"></div>
+            </div>
+        </section>
+
+        <!-- Statistik Okupansi Penumpang -->
+        <section class="stats-section">
+            <h2 class="stats-title">📊 Persentase Penumpang Stasiun Ketapang</h2>
+            <div class="occupancy-box">
+                <!-- Ubah variabel --percentage di bawah sesuai tingkat keterisian (Contoh: 82%) -->
+                <div class="progress-circle" style="--percentage: 92%;">
+                    <div class="progress-inner">92%</div>
+                </div>
+                <div class="stats-info">
+                    <p><strong>Total Kapasitas Kursi:</strong> 2.550 / Hari</p>
+                    <p>Last Update: Real-time hari ini</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

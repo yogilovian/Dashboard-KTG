@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Struktur Organisasi - Stasiun Ketapang</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+</head>
+<body>
+
+    <!-- Sidebar Navigasi -->
+    <nav class="sidebar" id="mySidebar">
+
+    <!-- TOMBOL CLOSE BARU (KHUSUS HP/TABLET) -->
+    <button class="close-sidebar-btn" id="closeSidebar">X</button>
+        
+        <div class="sidebar-brand">
+            <h2>KAI<span>KETAPANG</span></h2>
+        </div>
+        
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="ti ti-home"></i> Dashboard Utama</a></li>
+            <li class="active"><a href="struktur.html"><i class="ti ti-users"></i> Struktur Organisasi</a></li>
+            <li><a href="emplasemen.html"><i class="ti ti-yarn"></i></i> Emplasemen</a></li>
+            <li><a href="panjang_jalur.html"><i class="ti ti-track"></i> Panjang Jalur</a></li>
+            <li><a href="daftar_jalur.html"><i class="ti ti-train"></i> Daftar Jalur KA</a></li>
+            <li><a href="pantauan_stopblok.html"><i class="ti ti-barrier-block"></i> Pantauan Stopblok</a></li>
+        </ul>
+    </nav>
+
+    <!-- Konten Utama -->
+    <main class="main-content">
+
+        <!-- Tombol untuk Buka/Tutup Sidebar -->
+    <div class="top-bar-action">
+        <button class="toggle-btn" id="sidebarToggle">☰</button>
+            <!-- Wadah Jam Digital Baru -->
+        <div class="digital-clock-container">
+        <span class="clock-icon">🕒</span>
+        <span id="live-clock">00:00:00 WIB</span>
+        </div>
+    </div>
+        
+        <header class="header">
+            <h1>Struktur Organisasi</h1>
+            <p>Manajemen & Struktural Jabatan Stasiun Ketapang Banyuwangi</p>
+        </header>
+
+        <!-- Tempat Mengedit Struktur Organisasi -->
+        <section class="org-tree">
+            
+            <!-- Tingkat 1: Kepala Stasiun -->
+            <div class="org-node">
+                <h3>Kepala Stasiun (KS)</h3>
+                <p>Efandi Setyo Budi</p> <!-- SILAHKAN EDIT DI SINI -->
+            </div>
+
+            <!-- Tingkat 2: Wakil Kepala Stasiun (Optional) -->
+            <div class="org-node">
+                <h3>Wakil Kepala Stasiun</h3>
+                <p>Deddy Prasetya</p> <!-- SILAHKAN EDIT DI SINI -->
+            </div>
+
+            <!-- Tingkat 3: Kepala Urusan / Supervisor -->
+            <div class="org-level-2">
+                <div class="org-node">
+                    <h3>Supervisor Customer Care</h3>
+                    <p>Riki Riyanda Saidi</p> <!-- SILAHKAN EDIT DI SINI -->
+                    
+                </div>
+                <div class="org-node">
+                    <h3>Supervisor Pelayanan</h3>
+                    <p>Prasetyo Utomo</p> <!-- SILAHKAN EDIT DI SINI -->
+                    
+                </div>
+                <div class="org-node">
+                    <h3>Supervisor Perjalanan KA</h3>
+                    <p>Helmi Mukti Wibowo</p> <!-- SILAHKAN EDIT DI SINI -->
+
+                        <!-- TINGKAT 4: KOLOM TERPISAH MANDIRI DI BAWAH KOORDINASI PERJALANAN KA -->
+            <div class="operational-row">
+                
+                <!-- Kolom Mandiri 1: Pengatur Perjalanan Kereta Api (PPKA) -->
+                <div class="independent-col">
+                    <div class="col-title">🚩 Pengatur Perjalanan Kereta Api</div>
+                    <div class="staff-grid-mini">
+                        <div class="staff-item-box">Mohammad Ibrahim<span>PPKA</span></div>
+                        <div class="staff-item-box">Akhmad Fadli<span>PPKA</span></div>
+                        <div class="staff-item-box">Alif Solehudin<span>PPKA</span></div>
+                        <div class="staff-item-box">Teguh Eko Prasetyo<span>PPKA</span></div>
+                    </div>
+                </div>
+
+                <!-- Kolom Mandiri 2: Petugas Langsir -->
+                <div class="independent-col">
+                    <div class="col-title">🔀 Petugas Langsir</div>
+                    <div class="staff-grid-mini">
+                        <div class="staff-item-box">Danial Syukron<span>PLR</span></div>
+                        <div class="staff-item-box">Qomarik Al Faruq<span>PLR</span></div>
+                        <div class="staff-item-box">Taufik HIdayat<span>PLR</span></div>
+                        <div class="staff-item-box">Yogi Lovian Galis Ismanto<span>PLR</span></div>
+                        <div class="staff-item-box">Agung Wahyu Wibowo<span>PLR</span></div>
+                        <div class="staff-item-box">Listianto Dwi L<span>PLR</span></div>
+                        <div class="staff-item-box">Ahmad Yoga Septian<span>PLR</span></div>
+                        <div class="staff-item-box">Rafi Hartono<span>PLR</span></div>
+                    </div>
+                </div>
+
+                <!-- Kolom Mandiri 3: Petugas Rumah Sinyal (PRS) -->
+                <div class="independent-col">
+                    <div class="col-title">🎛️ Petugas Rumah Sinyal</div>
+                    <div class="staff-grid-mini">
+                        <div class="staff-item-box">Machrus Izunnadi<span>PRS</span></div>
+                        <div class="staff-item-box">Batara Linggar Mukti<span>PRS</span></div>
+                        <div class="staff-item-box">Deny Prastyo<span>PRS</span></div>
+                        <div class="staff-item-box">Roby Prasetyo<span>PRS</span></div>
+                        <div class="staff-item-box">Davin Egik Juniardi<span>PRS</span></div>
+                        <div class="staff-item-box">Arif Saga Febri A.<span></span></div>
+                        <div class="staff-item-box">Masardi Sukma Ragenda<span>PRS</span></div>
+                        <div class="staff-item-box">Kosong<span>PRS</span></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        </section>
+    </main>
+    
+        <script src="script.js"></script>
+    
+</body>
+</html>

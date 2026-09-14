@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <!-- Trik Pengalihan Otomatis Instan ke Halaman Development -->
+    <script>window.location.href = 'development.html';</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pantauan Stopblok & KA - Stasiun Ketapang</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+    <style>
+        /* Gaya Visual Papan Tulis Operasional */
+        .board-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        @media (min-width: 1024px) {
+            .board-container {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+
+        .board-card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-top: 4px solid #002F6C;
+            padding: 15px;
+            overflow-x: auto;
+        }
+
+        .board-header-title {
+            background-color: #D6672A; /* Warna Oranye Papan */
+            color: white;
+            padding: 8px 15px;
+            font-weight: bold;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Desain Tabel Mirip Gambar */
+        .board-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .board-table th, .board-table td {
+            border: 2px solid #555555;
+            padding: 6px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .board-table th {
+            background-color: #F2F4F8;
+            color: #333;
+            font-weight: bold;
+        }
+
+        /* Form elemen kustom di dalam tabel */
+        .table-select, .table-textarea {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px; /* Diperbesar dari 13px */
+            padding: 6px;
+        }
+
+        .table-select {
+            background-color: #ffffff;
+            cursor: pointer;
+            font-weight: normal; /* Dropdown tetap normal agar rapi */
+        }
+
+        .table-textarea, .manual-textarea {
+            font-size: 15px !important;   /* Ukuran huruf diperbesar agar jelas */
+            font-weight: 800 !important;  /* Membuat tulisan menjadi sangat tebal (Bold) */
+            color: #111111;               /* Warna tulisan hitam pekat */
+            resize: vertical;
+            min-height: 65px;
+            display: block;
+        }
+
+        .custom-input-container {
+            margin-top: 5px;
+        }
+
+        .custom-input {
+            width: 100%;
+            padding: 4px;
+            font-size: 12px;
+            border: 1px solid #ED6A16;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .hidden-input {
+            display: none;
+        }
+
+        .bg-gray {
+            background-color: #f9f9f9;
+        }
+        .manual-textarea {
+            resize: vertical;
+            min-height: 60px;
+            font-family: inherit;
+            font-size: 12px;
+            line-height: 1.4;
+            display: block;
+            margin-top: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigasi -->
+    <nav class="sidebar" id="mySidebar">
+        <button class="close-sidebar-btn" id="closeSidebar"><i class="ti ti-x"></i></button>
+        <div class="sidebar-brand">
+            <h2>KAI <span>KETAPANG</span></h2>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="ti ti-home"></i> Dashboard Utama</a></li>
+            <li><a href="struktur.html"><i class="ti ti-users"></i> Struktur Organisasi</a></li>
+            <li><a href="emplasemen.html"><i class="ti ti-yarn"></i> Emplasemen</a></li>
+            <li><a href="panjang_jalur.html"><i class="ti ti-track"></i> Panjang Jalur</a></li>
+            <li><a href="daftar_jalur.html"><i class="ti ti-train"></i> Daftar Jalur KA</a></li>
+            <li class="active"><a href="pantauan_stopblok.html"><i class="ti ti-barrier-block"></i> Pantauan Stopblok</a></li>
+        </ul>
+    </nav>
+
+    <!-- Konten Utama -->
+    <main class="main-content">
+        <div class="top-bar-action">
+            <button class="toggle-btn" id="sidebarToggle">☰</button>
+            <div class="digital-clock-container">
+                <span class="clock-icon">🕒</span>
+                <span id="live-clock">00:00:00 WIB</span>
+            </div>
+        </div>
+
+        <header class="header">
+            <h1>Papan Pantauan Jalur, Stopblok & KA</h1>
+            <p id="current-date">Memuat Tanggal...</p>
+        </header>
+
+        <!-- BARIS ATAS: KONDISI JALUR & INFO KA -->
+        <div class="board-container">
+            
+            <!-- 1. KONDISI JALUR -->
+            <div class="board-card">
+                <div class="board-header-title">
+                    <span>📊 Kondisi Jalur</span>
+                    <span id="board-date">Memuat Tanggal...</span>
+                </div>
+                <table class="board-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 14%;">I</th>
+                            <th style="width: 14%;">II</th>
+                            <th style="width: 14%;">III</th>
+                            <th style="width: 14%;">IV</th>
+                            <th style="width: 14%;">V</th>
+                            <th style="width: 14%;">VI</th>
+                            <th style="width: 14%;">Bongkar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <!-- Kolom Jalur I s/d VI dengan Dropdown & Textarea Manual Panjang -->
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                    <!-- Diisi otomatis via JavaScript -->
+                                </select>
+                                <div class="custom-input-container hidden-input">
+                                    <textarea class="custom-input manual-textarea" placeholder="Isi No Rangkaian Panjang..."></textarea>
+                                </div>
+                            </td>
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                </select>
+                                <div class="custom-input-container hidden-input">
+                                    <textarea class="custom-input manual-textarea" placeholder="Isi No Rangkaian Panjang..."></textarea>
+                                </div>
+                            </td>
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                </select>
+                                <div class="custom-input-container hidden-input">
+                                    <textarea class="custom-input manual-textarea" placeholder="Isi No Rangkaian Panjang..."></textarea>
+                                </div>
+                            </td>
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                </select>
+                                <div class="custom-input-container hidden-input">
+                                    <textarea class="custom-input manual-textarea" placeholder="Isi No Rangkaian Panjang..."></textarea>
+                                </div>
+                            </td>
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                </select>
+                                <div class="custom-input-container hidden-input">
+                                    <textarea class="custom-input manual-textarea" placeholder="Isi No Rangkaian Panjang..."></textarea>
+                                </div>
+                            </td>
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                </select>
+                                <div class="custom-input-container hidden-input">
+                                    <textarea class="custom-input manual-textarea" placeholder="Isi No Rangkaian Panjang..."></textarea>
+                                </div>
+                            </td>
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                </select>
+                                <div class="custom-input-container hidden-input">
+                                    <textarea class="custom-input manual-textarea" placeholder="Isi No Rangkaian Panjang..."></textarea>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 2. INFO KA -->
+            <div class="board-card" style="margin-bottom: 25px;">
+                <div class="board-header-title">
+                    <span>ℹ️ Info KA</span>
+                    <!-- <span class="board-table">Memuat Tanggal...</span> -->
+                </div>
+                <table class="board-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 33%;">BLB</th>
+                            <th style="width: 33%;">JALAN</th>
+                            <th style="width: 34%;">BATAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><textarea class="table-textarea" placeholder="Isi info BLB..."></textarea></td>
+                            <td><textarea class="table-textarea" placeholder="Isi info Jalan..."></textarea></td>
+                            <td><textarea class="table-textarea" placeholder="Isi info Batal..."></textarea></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- BARIS BAWAH: PANTAUAN STOPBLOK UTAMA -->
+        <div class="board-card" style="margin-bottom: 25px;">
+            <div class="board-header-title">
+                <span>🚧 PANTAUAN STOPBLOK</span>
+                <!-- <span class="board-table">Memuat Tanggal...</span> -->
+            </div>
+            <table class="board-table">
+                <thead>
+                    <tr>
+                        <th style="width: 8%;">JALUR</th>
+                        <th style="width: 30%;">SARANA</th>
+                        <th style="width: 29%;">STOPBLOK</th>
+                        <th style="width: 12%;">NO. KA (EX/KA)</th>
+                        <th style="margin-bottom: 25px;">JUMLAH STOPBLOK</th>
+                        <th style="margin-bottom: 25px;">TERPASANG</th>
+                        <th style="margin-bottom: 25px;">TERSEDIA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                        <tr>
+                            <td>I</td>
+                            <td><textarea class="table-textarea" placeholder="Isi No Sarana"></textarea></td>
+                            <td><textarea class="table-textarea" placeholder="Isi No Stopblok"></textarea></td>
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                </select>
+                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                            </td>
+                            <td><textarea class="table-textarea" placeholder="..."></textarea></td>
+                            <td><textarea class="table-textarea" placeholder="..."></textarea></td>
+                            <td><textarea class="table-textarea" placeholder="..."></textarea></td>
+                        </tr>
+                        <tr>
+                            <td>II</td>
+                            <td><textarea class="table-textarea" placeholder="Isi No Sarana"></textarea></td>
+                            <td><textarea class="table-textarea" placeholder="Isi No Stopblok"></textarea></td>
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                </select>
+                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>III</td>
+                            <td><textarea class="table-textarea" placeholder="Isi No Sarana"></textarea></td>
+                            <td><textarea class="table-textarea" placeholder="Isi No Stopblok"></textarea></td>
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                </select>
+                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>IV</td>
+                            <td><textarea class="table-textarea" placeholder="Isi No Sarana"></textarea></td>
+                            <td><textarea class="table-textarea" placeholder="Isi No Stopblok"></textarea></td>
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                </select>
+                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>V</td>
+                            <td><textarea class="table-textarea" placeholder="Isi No Sarana"></textarea></td>
+                            <td><textarea class="table-textarea" placeholder="Isi No Stopblok"></textarea></td>
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                </select>
+                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>VI</td>
+                            <td><textarea class="table-textarea" placeholder="Isi No Sarana"></textarea></td>
+                            <td><textarea class="table-textarea" placeholder="Isi No Stopblok"></textarea></td>
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                </select>
+                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>CUCI 1</td>
+                            <td><textarea class="table-textarea" placeholder="Isi No Sarana"></textarea></td>
+                            <td><textarea class="table-textarea" placeholder="Isi No Stopblok"></textarea></td>
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                </select>
+                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>CUCI 2</td>
+                            <td><textarea class="table-textarea" placeholder="Isi No Sarana"></textarea></td>
+                            <td><textarea class="table-textarea" placeholder="Isi No Stopblok"></textarea></td>
+                            <td>
+                                <select class="table-select track-dropdown" onchange="handleDropdownChange(this)">
+                                </select>
+                                <div class="custom-input-container hidden-input"><input type="text" class="custom-input" placeholder="Isi No Rangkaian..."></div>
+                            </td>
+                        </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set, remove } from "https://gstatic.com";
+
+    // Konfigurasi Kunci Proyek Firebase Stasiun Ketapang Anda
+    const firebaseConfig = {
+        apiKey: "AIzaSyD2iwBlXPV32UpjO-6Svp-33BFpnCmo6cQ",
+        authDomain: "dashboard-ketapang.firebaseapp.com",
+        projectId: "dashboard-ketapang",
+        storageBucket: "dashboard-ketapang.firebasestorage.app",
+        messagingSenderId: "893363056589",
+        appId: "1:893363056589:web:a070059c7819255d9bde84",
+        measurementId: "G-5SE78JZH03"
+    };
+
+    // Inisialisasi Firebase & Akses ke Realtime Database Modul v12
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Array berisi daftar nomor KA operasional di Stasiun Ketapang
+    const daftarNoKA =[211, 212, 147, 148, 293, 294, 159, 160, 249, 250, 279, 280, 492, 492, 297, 298, 209, 210, 239, 240, 7045, 7046];
+
+    document.addEventListener("DOMContentLoaded", function() {
+        initDigitalClock();
+        initDates();
+        populateTrackDropdowns();
+        populateGanjilDropdowns();
+        
+        // Memulai Live-Sync data sinkronisasi global
+        listenToCloudDatabase();
+        setupCloudAutoSave();
+    });
+
+    // --- LOGIKA UTAMA: SINKRONISASI OTOMATIS ANTAR-PERANGKAT (REAL-TIME CLOUD) ---
+
+    function listenToCloudDatabase() {
+        const boardRef = ref(database, 'pantauan_stopblok_ketapang');
+        
+        onValue(boardRef, (snapshot) => {
+            const data = snapshot.val();
+            if (!data) return;
+
+            // Kembalikan semua nilai Input Text & Textarea dari Cloud
+            const inputs = document.querySelectorAll(".table-textarea, .custom-input, .manual-textarea");
+            inputs.forEach((input, idx) => {
+                const saveId = input.getAttribute("data-save-id") || `input-field-${idx}`;
+                if (!input.getAttribute("data-save-id")) input.setAttribute("data-save-id", saveId);
+                
+                if (data[saveId] !== undefined && document.activeElement !== input) {
+                    input.value = data[saveId];
+                }
+            });
+
+            // Kembalikan semua pilihan Dropdown dari Cloud
+            document.querySelectorAll(".track-dropdown, .ganjil-dropdown").forEach((select, idx) => {
+                const saveId = select.getAttribute("data-save-id") || `${select.classList.contains('track-dropdown')?'track':'ganjil'}-select-${idx}`;
+                if (!select.getAttribute("data-save-id")) select.setAttribute("data-save-id", saveId);
+
+                if (data[saveId] !== undefined) {
+                    select.value = data[saveId];
+                    
+                    if (select.classList.contains("track-dropdown")) {
+                        const container = select.nextElementSibling;
+                        if (container) {
+                            if (data[saveId] === "custom") {
+                                container.classList.remove("hidden-input");
+                            } else {
+                                container.classList.add("hidden-input");
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    }
+
+    function setupCloudAutoSave() {
+        const boardRef = ref(database, 'pantauan_stopblok_ketapang');
+
+        // Deteksi ketikan pada textarea & manual input
+        const inputs = document.querySelectorAll(".table-textarea, .custom-input, .manual-textarea");
+        inputs.forEach((input, idx) => {
+            const saveId = input.getAttribute("data-save-id") || `input-field-${idx}`;
+            
+            input.addEventListener("input", function() {
+                set(ref(database, `pantauan_stopblok_ketapang/${saveId}`), input.value);
+            });
+        });
+
+        // Deteksi perubahan pada pilihan dropdown jalur maupun keterangan ganjil
+        document.querySelectorAll(".track-dropdown, .ganjil-dropdown").forEach((select, idx) => {
+            const saveId = select.getAttribute("data-save-id") || `${select.classList.contains('track-dropdown')?'track':'ganjil'}-select-${idx}`;
+            
+            select.addEventListener("change", function() {
+                set(ref(database, `pantauan_stopblok_ketapang/${saveId}`), select.value);
+            });
+        });
+    }
+
+    // Sambungkan fungsi pengendali dropdown manual ke lingkup modul global (window)
+    window.handleDropdownChange = function(selectElement) {
+        const container = selectElement.nextElementSibling;
+        const textareaField = container.querySelector(".manual-textarea");
+        const saveId = selectElement.getAttribute("data-save-id");
+        
+        if (selectElement.value === "custom") {
+            container.classList.remove("hidden-input");
+            textareaField.focus();
+        } else {
+            container.classList.add("hidden-input");
+            textareaField.value = "";
+            remove(ref(database, `pantauan_stopblok_ketapang/${textareaField.getAttribute("data-save-id")}`));
+        }
+        set(ref(database, `pantauan_stopblok_ketapang/${saveId}`), selectElement.value);
+    }
+
+    function populateTrackDropdowns() {
+        document.querySelectorAll(".track-dropdown").forEach((select, idx) => {
+            select.setAttribute("data-save-id", `track-select-${idx}`);
+            select.innerHTML = `<option value="">- Kosong -</option><option value="kpj">KPJ</option>`;
+            daftarNoKA.forEach(no => {
+                const opt = document.createElement("option");
+                opt.value = no;
+                opt.text = (no % 2 === 0) ? `KA ${no}` : `Ex KA ${no}`;
+                select.appendChild(opt);
+            });
+            select.innerHTML += `<option value="custom">📝 Input Manual...</option>`;
+        });
+    }
+
+    function populateGanjilDropdowns() {
+        document.querySelectorAll(".ganjil-dropdown").forEach((select, idx) => {
+            select.setAttribute("data-save-id", `ganjil-select-${idx}`);
+            select.innerHTML = `<option value="">-</option>`;
+            daftarNoKA.filter(no => no % 2 !== 0).forEach(no => {
+                const opt = document.createElement("option");
+                opt.value = no;
+                opt.text = `Ex KA ${no}`;
+                select.appendChild(opt);
+            });
+        });
+    }
+
+    // fitur tanggal otomatis real time
+    function initDates() {
+        const headerDate = document.getElementById("current-date");
+        if (headerDate) headerDate.innerText = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        
+        const boardDate = document.getElementById("board-date");
+        if (boardDate) boardDate.innerText = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+    }
+
+    // fitur jam digital otomatis dan real-time
+    function initDigitalClock() {
+        const clockElement = document.getElementById('live-clock');
+        if (!clockElement) return;
+
+        let currentDayIndex = new Date().getDate();
+
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('id-ID', { hour12: false });
+            
+            clockElement.innerText = `${timeString} WIB`;
+
+            if (now.getDate() !== currentDayIndex) {
+                currentDayIndex = now.getDate();
+                window.location.reload();
+            }
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+    }
+</script>
+</body>
+</html>
