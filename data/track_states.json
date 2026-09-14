@@ -1,0 +1,65 @@
+{
+  "jalur-1": {
+    "status": "clear",
+    "note": "Siap menerima kedatangan/keberangkatan KA",
+    "trainNumber": "",
+    "stopblokNumber": "",
+    "updatedAt": "2026-09-14T10:00:00.000Z"
+  },
+  "jalur-2": {
+    "status": "clear",
+    "note": "Jalur lurus sepur raya utama",
+    "trainNumber": "",
+    "stopblokNumber": "",
+    "updatedAt": "2026-09-14T10:00:00.000Z"
+  },
+  "jalur-3": {
+    "status": "clear",
+    "note": "Manuver langsir dan pemeriksaan",
+    "trainNumber": "",
+    "stopblokNumber": "",
+    "updatedAt": "2026-09-14T10:00:00.000Z"
+  },
+  "jalur-4": {
+    "status": "stopblok",
+    "note": "Terpasang Stopblok Pengaman - Rangkaian KPJ Siaga",
+    "trainNumber": "KPJ D9/10426",
+    "stopblokNumber": "SB-04",
+    "updatedAt": "2026-09-14T10:00:00.000Z"
+  },
+  "jalur-5": {
+    "status": "clear",
+    "note": "Bebas stabling cadangan",
+    "trainNumber": "",
+    "stopblokNumber": "",
+    "updatedAt": "2026-09-14T10:00:00.000Z"
+  },
+  "jalur-6": {
+    "status": "stopblok",
+    "note": "Terpasang stopblok pengaman ujung sepur",
+    "trainNumber": "",
+    "stopblokNumber": "9-12, 13-16",
+    "updatedAt": "2026-09-14T10:00:00.000Z"
+  },
+  "jalur-bongkar": {
+    "status": "clear",
+    "note": "Bongkar muat barang/kargo semen",
+    "trainNumber": "",
+    "stopblokNumber": "",
+    "updatedAt": "2026-09-14T10:00:00.000Z"
+  },
+  "jalur-cuci-1": {
+    "status": "clear",
+    "note": "Instalasi pencucian dan pengisian air",
+    "trainNumber": "",
+    "stopblokNumber": "",
+    "updatedAt": "2026-09-14T10:00:00.000Z"
+  },
+  "jalur-cuci-2": {
+    "status": "clear",
+    "note": "Perawatan eksterior dan interior",
+    "trainNumber": "",
+    "stopblokNumber": "",
+    "updatedAt": "2026-09-14T10:00:00.000Z"
+  }
+}
