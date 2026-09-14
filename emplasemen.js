@@ -433,10 +433,10 @@ function updateCloudStatusUI(isOnline, timestamp) {
 
     if (isOnline) {
         badge.className = "cloud-badge active";
-        badge.innerHTML = `<span class="cloud-dot"></span> Online &bull; Terhubung Server Cloud`;
+        badge.innerHTML = `<span class="cloud-dot"></span> Online &bull; Terhubung Firebase Firestore`;
         if (lastSync) {
             const timeStr = timestamp ? new Date(timestamp).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) + " WIB" : "Baru saja";
-            lastSync.innerHTML = `Status jalur, pemantauan stopblok & KA stabling otomatis tersinkron ke seluruh perangkat tanpa localStorage. Terakhir sinkron: <strong>${timeStr}</strong>`;
+            lastSync.innerHTML = `Status jalur, pemantauan stopblok & KA stabling otomatis tersinkron ke Firebase Firestore & server cloud. Terakhir sinkron: <strong>${timeStr}</strong>`;
         }
     } else {
         badge.className = "cloud-badge offline";

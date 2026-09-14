@@ -10,6 +10,22 @@ const SHEETS_INFO_FILE = path.join(DATA_DIR, "sheet_info.json");
 const DINAS_FILE = path.join(DATA_DIR, "dinasan.json");
 const CONFIG_FILE = path.join(process.cwd(), "firebase-applet-config.json");
 
+// Inisialisasi Firebase Client SDK untuk persistensi Firestore cloud
+import { initializeApp as initClientApp, getApps as getClientApps } from "firebase/app";
+import { getFirestore as getClientFirestore, doc as fsDoc, getDoc as fsGetDoc, setDoc as fsSetDoc } from "firebase/firestore";
+
+let clientDb: any = null;
+try {
+  if (fs.existsSync(CONFIG_FILE)) {
+    const cfg = JSON.parse(fs.readFileSync(CONFIG_FILE, "utf8"));
+    const clientApp = getClientApps().length === 0 ? initClientApp(cfg) : getClientApps()[0];
+    clientDb = getClientFirestore(clientApp, cfg.firestoreDatabaseId || "(default)");
+    console.log(`[Firestore] Client SDK terhubung ke database: ${cfg.firestoreDatabaseId || "(default)"}`);
+  }
+} catch (err) {
+  console.warn("[Firestore] Inisialisasi Firebase Client dilewati:", err);
+}
+
 // Pastikan direktori data ada
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -88,6 +104,40 @@ const DEFAULT_TRACK_STATES: Record<string, {
   }
 };
 
+async function getTrackStatesFromFirestore(): Promise<Record<string, any> | null> {
+  if (!clientDb) return null;
+  try {
+    const docRef = fsDoc(clientDb, "stations", "ketapang");
+    const docSnap = await fsGetDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if (data && data.tracks) {
+        return data.tracks;
+      }
+    }
+  } catch (err) {
+    console.warn("[Firestore] Gagal membaca status jalur dari Firestore:", err);
+  }
+  return null;
+}
+
+async function saveTrackStatesToFirestore(states: Record<string, any>): Promise<boolean> {
+  if (!clientDb) return false;
+  try {
+    const docRef = fsDoc(clientDb, "stations", "ketapang");
+    await fsSetDoc(docRef, {
+      stationId: "ketapang",
+      name: "Stasiun Ketapang (KTG)",
+      tracks: states,
+      lastUpdated: new Date().toISOString()
+    }, { merge: true });
+    return true;
+  } catch (err) {
+    console.warn("[Firestore] Gagal menyimpan status jalur ke Firestore:", err);
+    return false;
+  }
+}
+
 function readTrackStates() {
   try {
     if (fs.existsSync(TRACKS_FILE)) {
@@ -109,6 +159,10 @@ function writeTrackStates(states: Record<string, any>) {
     }
     const jsonContent = JSON.stringify(states, null, 2);
     fs.writeFileSync(TRACKS_FILE, jsonContent, { encoding: "utf8", mode: 0o666 });
+    
+    // Simpan juga secara asinkron ke Firestore jika tersedia
+    saveTrackStatesToFirestore(states).catch((e) => console.warn("[Firestore Async Save Error]:", e));
+
     return true;
   } catch (err) {
     console.error("Error menulis file status jalur:", err);
@@ -116,8 +170,22 @@ function writeTrackStates(states: Record<string, any>) {
   }
 }
 
-// Inisialisasi awal file data pada saat startup
-readTrackStates();
+// Inisialisasi sinkronisasi awal saat server startup: ambil dari Firestore jika ada, lalu sinkronkan file lokal
+(async () => {
+  try {
+    const firestoreStates = await getTrackStatesFromFirestore();
+    if (firestoreStates) {
+      writeTrackStates(firestoreStates);
+      console.log("[Firestore] Berhasil memuat status jalur dari Firestore ke lokal.");
+    } else {
+      const local = readTrackStates();
+      await saveTrackStatesToFirestore(local);
+      console.log("[Firestore] Berhasil inisialisasi dokumen awal stasiun di Firestore.");
+    }
+  } catch (err) {
+    console.warn("[Firestore] Inisialisasi awal sinkronisasi Firestore selesai dengan catatan:", err);
+  }
+})();
 
 function readSheetsInfo() {
   try {

@@ -1,65 +1,65 @@
 {
-  "jalur-1": {
-    "status": "clear",
-    "note": "Siap menerima kedatangan/keberangkatan KA",
-    "trainNumber": "",
-    "stopblokNumber": "",
-    "updatedAt": "2026-09-14T10:00:00.000Z"
+  "jalur-cuci-1": {
+    "stopblokNumber": "1B,2B,3B,4B",
+    "trainNumber": "Ex Ka 279",
+    "updatedAt": "2026-09-14T13:12:32.296Z",
+    "note": "Instalasi pencucian dan pengisian air",
+    "status": "stopblok"
   },
-  "jalur-2": {
+  "jalur-bongkar": {
+    "updatedAt": "2026-09-14T10:00:00.000Z",
+    "note": "Bongkar muat barang/kargo semen",
     "status": "clear",
-    "note": "Jalur lurus sepur raya utama",
-    "trainNumber": "",
     "stopblokNumber": "",
-    "updatedAt": "2026-09-14T10:00:00.000Z"
-  },
-  "jalur-3": {
-    "status": "clear",
-    "note": "Manuver langsir dan pemeriksaan",
-    "trainNumber": "",
-    "stopblokNumber": "",
-    "updatedAt": "2026-09-14T10:00:00.000Z"
-  },
-  "jalur-4": {
-    "status": "stopblok",
-    "note": "Terpasang Stopblok Pengaman - Rangkaian KPJ Siaga",
-    "trainNumber": "KPJ D9/10426",
-    "stopblokNumber": "SB-04",
-    "updatedAt": "2026-09-14T10:00:00.000Z"
-  },
-  "jalur-5": {
-    "status": "clear",
-    "note": "Bebas stabling cadangan",
-    "trainNumber": "",
-    "stopblokNumber": "",
-    "updatedAt": "2026-09-14T10:00:00.000Z"
+    "trainNumber": ""
   },
   "jalur-6": {
-    "status": "stopblok",
     "note": "Terpasang stopblok pengaman ujung sepur",
+    "status": "stopblok",
     "trainNumber": "",
     "stopblokNumber": "9-12, 13-16",
     "updatedAt": "2026-09-14T10:00:00.000Z"
   },
-  "jalur-bongkar": {
+  "jalur-3": {
     "status": "clear",
-    "note": "Bongkar muat barang/kargo semen",
-    "trainNumber": "",
+    "updatedAt": "2026-09-14T10:00:00.000Z",
+    "note": "Manuver langsir dan pemeriksaan",
     "stopblokNumber": "",
+    "trainNumber": ""
+  },
+  "jalur-4": {
+    "status": "stopblok",
+    "stopblokNumber": "SB-04",
+    "updatedAt": "2026-09-14T10:00:00.000Z",
+    "note": "Terpasang Stopblok Pengaman - Rangkaian KPJ Siaga",
+    "trainNumber": "KPJ D9/10426"
+  },
+  "jalur-1": {
+    "status": "clear",
+    "stopblokNumber": "",
+    "note": "Siap menerima kedatangan/keberangkatan KA",
+    "trainNumber": "",
     "updatedAt": "2026-09-14T10:00:00.000Z"
   },
-  "jalur-cuci-1": {
+  "jalur-5": {
+    "updatedAt": "2026-09-14T10:00:00.000Z",
     "status": "clear",
-    "note": "Instalasi pencucian dan pengisian air",
-    "trainNumber": "",
     "stopblokNumber": "",
-    "updatedAt": "2026-09-14T10:00:00.000Z"
+    "note": "Bebas stabling cadangan",
+    "trainNumber": ""
+  },
+  "jalur-2": {
+    "stopblokNumber": "",
+    "status": "clear",
+    "updatedAt": "2026-09-14T10:00:00.000Z",
+    "trainNumber": "",
+    "note": "Jalur lurus sepur raya utama"
   },
   "jalur-cuci-2": {
-    "status": "clear",
-    "note": "Perawatan eksterior dan interior",
-    "trainNumber": "",
-    "stopblokNumber": "",
-    "updatedAt": "2026-09-14T10:00:00.000Z"
+    "status": "stopblok",
+    "updatedAt": "2026-09-14T13:12:58.511Z",
+    "trainNumber": "EX KA 249",
+    "note": "Perawatan eksterior dan interior & Cuci",
+    "stopblokNumber": "5B,6B,7B,8B"
   }
 }

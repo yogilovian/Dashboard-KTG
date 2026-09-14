@@ -1,0 +1,55 @@
+{
+  "entities": {
+    "TrackState": {
+      "title": "Track State",
+      "description": "Status operasional dan indikator stopblok untuk jalur stasiun",
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "Status jalur (clear, occupied, stopblok, maintenance)",
+          "enum": ["clear", "occupied", "stopblok", "maintenance"]
+        },
+        "note": {
+          "type": "string",
+          "description": "Catatan kondisi jalur"
+        },
+        "trainNumber": {
+          "type": "string",
+          "description": "Nomor KA atau rangkaian yang menempati jalur"
+        },
+        "stopblokNumber": {
+          "type": "string",
+          "description": "Nomor identifikasi stopblok yang terpasang"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Waktu pembaruan ISO string"
+        }
+      },
+      "required": ["status"]
+    },
+    "StationTracks": {
+      "title": "Station Tracks Aggregate",
+      "description": "Koleksi seluruh status jalur di Stasiun Ketapang",
+      "type": "object",
+      "properties": {
+        "tracks": {
+          "type": "object",
+          "description": "Pemetaan ID jalur ke objek TrackState"
+        },
+        "lastUpdated": {
+          "type": "string",
+          "description": "Waktu pembaruan terakhir data stasiun"
+        }
+      },
+      "required": ["tracks"]
+    }
+  },
+  "firestore": {
+    "/stations/{stationId}": {
+      "schema": "StationTracks",
+      "description": "Data status operasional stasiun dan jalur emplasemen"
+    }
+  }
+}
