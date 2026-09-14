@@ -62,7 +62,7 @@ const DEFAULT_TRACK_STATES: Record<string, {
     status: "stopblok",
     note: "Terpasang stopblok pengaman ujung sepur",
     trainNumber: "",
-    stopblokNumber: "SB-06",
+    stopblokNumber: "9-12, 13-16",
     updatedAt: new Date().toISOString()
   },
   "jalur-bongkar": {
@@ -98,19 +98,26 @@ function readTrackStates() {
     console.error("Error membaca file status jalur:", err);
   }
   // Tulis nilai awal
-  fs.writeFileSync(TRACKS_FILE, JSON.stringify(DEFAULT_TRACK_STATES, null, 2), "utf8");
+  writeTrackStates(DEFAULT_TRACK_STATES);
   return { ...DEFAULT_TRACK_STATES };
 }
 
 function writeTrackStates(states: Record<string, any>) {
   try {
-    fs.writeFileSync(TRACKS_FILE, JSON.stringify(states, null, 2), "utf8");
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    const jsonContent = JSON.stringify(states, null, 2);
+    fs.writeFileSync(TRACKS_FILE, jsonContent, { encoding: "utf8", mode: 0o666 });
     return true;
   } catch (err) {
     console.error("Error menulis file status jalur:", err);
     return false;
   }
 }
+
+// Inisialisasi awal file data pada saat startup
+readTrackStates();
 
 function readSheetsInfo() {
   try {
@@ -130,7 +137,7 @@ function readSheetsInfo() {
 
 function writeSheetsInfo(info: any) {
   try {
-    fs.writeFileSync(SHEETS_INFO_FILE, JSON.stringify(info, null, 2), "utf8");
+    fs.writeFileSync(SHEETS_INFO_FILE, JSON.stringify(info, null, 2), { encoding: "utf8", mode: 0o666 });
     return true;
   } catch (err) {
     console.error("Error menulis sheet_info.json:", err);
@@ -283,6 +290,23 @@ async function startServer() {
     }
     res.status(400).json({ success: false, message: "Data dinas tidak valid" });
   });
+
+  // 7. Unduh Langsung File track_states.json & Penyajian Berkas Statis /data
+  app.get("/data/track_states.json", (_req, res) => {
+    const states = readTrackStates();
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    res.setHeader("Content-Disposition", 'attachment; filename="track_states.json"');
+    res.send(JSON.stringify(states, null, 2));
+  });
+
+  app.get("/api/tracks/download", (_req, res) => {
+    const states = readTrackStates();
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    res.setHeader("Content-Disposition", 'attachment; filename="track_states.json"');
+    res.send(JSON.stringify(states, null, 2));
+  });
+
+  app.use("/data", express.static(DATA_DIR));
 
   // === VITE / STATIC SERVING ===
   if (process.env.NODE_ENV !== "production") {
