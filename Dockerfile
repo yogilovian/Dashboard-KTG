@@ -28,6 +28,8 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/data ./data
 COPY --from=builder /app/images ./images
 COPY --from=builder /app/data_dinas.csv ./data_dinas.csv
+COPY --from=builder /app/firebase-applet-config.json ./firebase-applet-config.json
+COPY --from=builder /app/firestore.rules ./firestore.rules
 
 # Port Cloud Run disuntikkan lewat environment variable PORT (default 8080/3000)
 ENV PORT=8080
