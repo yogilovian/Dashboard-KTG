@@ -287,6 +287,16 @@ let GAPEKA_TRAINS_DATA = [
         stablingJalur: "Jalur III"
     },
     {
+        no: "493 - 494",
+        name: "Pandanwangi",
+        relasi: "Ketapang - Jember",
+        jamDatang: "16:55",
+        jamBerangkat: "18:45",
+        masukJalur: "Jalur III",
+        berangkatJalur: "Jalur III",
+        stablingJalur: "Jalur III"
+    },
+    {
         no: "297 - 298",
         name: "Probowangi",
         relasi: "Ketapang - Surabaya Gubeng",
@@ -433,14 +443,14 @@ function updateCloudStatusUI(isOnline, timestamp) {
 
     if (isOnline) {
         badge.className = "cloud-badge active";
-        badge.innerHTML = `<span class="cloud-dot"></span> Online &bull; Terhubung Firebase Firestore`;
+        badge.innerHTML = `<span class="cloud-dot"></span> Online &bull; Terhubung ke Server`;
         if (lastSync) {
             const timeStr = timestamp ? new Date(timestamp).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) + " WIB" : "Baru saja";
-            lastSync.innerHTML = `Status jalur, pemantauan stopblok & KA stabling otomatis tersinkron ke Firebase Firestore & server cloud. Terakhir sinkron: <strong>${timeStr}</strong>`;
+            lastSync.innerHTML = `Status jalur, pemantauan stopblok & KA stabling otomatis tersinkron ke Firebase & server cloud. Terakhir sinkron: <strong>${timeStr}</strong>`;
         }
     } else {
         badge.className = "cloud-badge offline";
-        badge.innerHTML = `<span class="cloud-dot"></span> Menghubungkan ke Server Cloud...`;
+        badge.innerHTML = `<span class="cloud-dot"></span> Menghubungkan ke Server...`;
     }
 }
 
