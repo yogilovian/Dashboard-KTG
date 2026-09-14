@@ -32,7 +32,7 @@ const KTG_TRACKS_DATA = [
             gdPkpkw: "1 LOK + 17 GD (PKPKW)"
         },
         description: "Jalur utama langsung bersebelahan dengan Gedung Stasiun & Peron 1. Digunakan untuk pelayanan naik/turun penumpang KA Utama.",
-        hotspotCoords: { top: "37%", left: "46%" }
+        hotspotCoords: { top: "36%", left: "46%" }
     },
     {
         id: "jalur-2",
@@ -53,12 +53,12 @@ const KTG_TRACKS_DATA = [
             gdPkpkw: "1 LOK + 19 GD (PKPKW)"
         },
         description: "Sepur lurus utama emplasemen Stasiun Ketapang melayani Peron Pulau 2. Prioritas penerimaan KA Jarak Jauh.",
-        hotspotCoords: { top: "39%", left: "50%" }
+        hotspotCoords: { top: "41%", left: "55%" }
     },
     {
         id: "jalur-3",
         name: "Jalur III",
-        alias: "Jalur Utama & Langsir",
+        alias: "Jalur Pemeriksaan & Langsir",
         totalLength: 373,
         effectiveLength: 358,
         grade: "0,3 ‰",
@@ -74,7 +74,7 @@ const KTG_TRACKS_DATA = [
             gdPkpkw: "1 LOK + 20 GD (PKPKW)"
         },
         description: "Jalur belok untuk kegiatan pemeriksaan sarana harian, langsir lokomotif, serta persilangan KA.",
-        hotspotCoords: { top: "45%", left: "48%" }
+        hotspotCoords: { top: "44%", left: "48%" }
     },
     {
         id: "jalur-4",
@@ -95,12 +95,12 @@ const KTG_TRACKS_DATA = [
             gdPkpkw: "1 LOK + 19 GD (PKPKW)"
         },
         description: "Jalur stabling khusus untuk KPJ (Kereta Penolong / Crane Siaga) dan penempatan rangkaian siap operasi.",
-        hotspotCoords: { top: "50%", left: "52%" }
+        hotspotCoords: { top: "48%", left: "52%" }
     },
     {
         id: "jalur-5",
         name: "Jalur V",
-        alias: "Jalur Utama & Langsir",
+        alias: "Jalur Simpan Cadangan",
         totalLength: 348,
         effectiveLength: 333,
         grade: "0,5 ‰",
@@ -121,7 +121,7 @@ const KTG_TRACKS_DATA = [
     {
         id: "jalur-6",
         name: "Jalur VI",
-        alias: "Jalur Utama & Simpan",
+        alias: "Jalur Simpan Panjang",
         totalLength: 393,
         effectiveLength: 378,
         grade: "0,4 ‰",
@@ -158,7 +158,7 @@ const KTG_TRACKS_DATA = [
             gdPkpkw: "1 LOK + 5 GD (PKPKW)"
         },
         description: "Sepur simpang area bongkar muat semen/logistik barang Stasiun Ketapang.",
-        hotspotCoords: { top: "22%", left: "26%" }
+        hotspotCoords: { top: "32%", left: "61%" }
     },
     {
         id: "jalur-cuci-1",
@@ -179,7 +179,7 @@ const KTG_TRACKS_DATA = [
             gdPkpkw: "1 LOK + 13 GD (PKPKW)"
         },
         description: "Jalur khusus instalasi pencucian, pembersihan, dan pengisian air rangkaian kereta api.",
-        hotspotCoords: { top: "78%", left: "74%" }
+        hotspotCoords: { top: "30%", left: "19%" }
     },
     {
         id: "jalur-cuci-2",
@@ -200,7 +200,7 @@ const KTG_TRACKS_DATA = [
             gdPkpkw: "1 LOK + 13 GD (PKPKW)"
         },
         description: "Jalur pencucian dan perawatan eksterior/interior rangkaian KA Jarak Jauh.",
-        hotspotCoords: { top: "85%", left: "78%" }
+        hotspotCoords: { top: "35%", left: "21%" }
     }
 ];
 
@@ -282,16 +282,6 @@ let GAPEKA_TRAINS_DATA = [
         relasi: "Ketapang - Jember",
         jamDatang: "07:45",
         jamBerangkat: "10:00",
-        masukJalur: "Jalur III",
-        berangkatJalur: "Jalur III",
-        stablingJalur: "Jalur III"
-    },
-    {
-        no: "493 - 494",
-        name: "Pandanwangi",
-        relasi: "Ketapang - Jember",
-        jamDatang: "16:55",
-        jamBerangkat: "18:45",
         masukJalur: "Jalur III",
         berangkatJalur: "Jalur III",
         stablingJalur: "Jalur III"
@@ -1226,4 +1216,3 @@ const GoogleSheetsService = {
         }
     }
 };
-
