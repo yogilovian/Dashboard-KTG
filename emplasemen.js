@@ -561,7 +561,7 @@ function updateCloudStatusUI(mode, timestamp) {
         badge.style.borderColor = "#BBF7D0";
         badge.innerHTML = `<span class="cloud-dot" style="background: #10B981;"></span> Mode Mandiri &bull; Google Sheets Aktif`;
         if (lastSync) {
-            lastSync.innerHTML = `Terhubung langsung ke Google Sheets (Mode GitHub Pages). Terakhir sinkron: <strong>${timeStr}</strong>`;
+            lastSync.innerHTML = `Terhubung langsung ke Google Sheets. Terakhir sinkron: <strong>${timeStr}</strong>`;
         }
     } else if (mode === "local") {
         badge.className = "cloud-badge";
