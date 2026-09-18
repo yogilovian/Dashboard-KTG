@@ -1324,12 +1324,96 @@ const GoogleSheetsService = {
         }
     },
 
+    async ensureSheetsStructure() {
+        if (!this.accessToken || !this.spreadsheetId) return null;
+
+        const metaUrl = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}?fields=sheets.properties`;
+        let res;
+        try {
+            res = await fetch(metaUrl, {
+                headers: { "Authorization": `Bearer ${this.accessToken}` }
+            });
+        } catch (netErr) {
+            throw new Error(`Gagal terhubung ke Google Sheets API (Failed to fetch). Periksa koneksi internet Anda dan pastikan origin "${window.location.origin}" terdaftar di Authorized JavaScript origins Google Cloud Console.`);
+        }
+
+        if (!res.ok) {
+            const errData = await res.json().catch(() => null);
+            const detailMsg = errData?.error?.message || `HTTP ${res.status}`;
+            if (res.status === 401) {
+                this.accessToken = null;
+                this.updateButtonsUI();
+                throw new Error("Sesi token login Google telah kedaluwarsa. Silakan klik tombol 'Hubungkan Google Sheets' untuk masuk kembali.");
+            }
+            if (res.status === 404) {
+                throw new Error(`Google Spreadsheet dengan ID "${this.spreadsheetId}" tidak ditemukan (404). Silakan periksa kembali Spreadsheet ID di menu Pengaturan.`);
+            }
+            if (res.status === 403) {
+                throw new Error(`Akses Google Sheets ditolak (403): ${detailMsg}. Pastikan Google Sheets API telah DIAKTIFKAN di Google Cloud Console dan akun Google Anda memiliki akses edit pada spreadsheet.`);
+            }
+            throw new Error(detailMsg);
+        }
+
+        const data = await res.json();
+        const existingTitles = (data.sheets || []).map(s => s.properties?.title || "");
+
+        // Jika sheet Status_Emplasemen atau Data_Dinasan belum ada, tambahkan otomatis
+        const requests = [];
+        if (!existingTitles.includes("Status_Emplasemen")) {
+            requests.push({
+                addSheet: {
+                    properties: {
+                        title: "Status_Emplasemen",
+                        gridProperties: { frozenRowCount: 1 }
+                    }
+                }
+            });
+        }
+        if (!existingTitles.includes("Data_Dinasan")) {
+            requests.push({
+                addSheet: {
+                    properties: {
+                        title: "Data_Dinasan",
+                        gridProperties: { frozenRowCount: 1 }
+                    }
+                }
+            });
+        }
+
+        if (requests.length > 0) {
+            try {
+                const batchUrl = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}:batchUpdate`;
+                const batchRes = await fetch(batchUrl, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${this.accessToken}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ requests })
+                });
+                if (batchRes.ok) {
+                    existingTitles.push("Status_Emplasemen", "Data_Dinasan");
+                }
+            } catch (batchErr) {
+                console.warn("Gagal menambahkan tab otomatis:", batchErr);
+            }
+        }
+
+        return existingTitles;
+    },
+
     async createOrFindSpreadsheet() {
         const savedSheetId = AppConfig.getSpreadsheetId();
         if (savedSheetId) {
             this.spreadsheetId = savedSheetId;
             this.spreadsheetUrl = `https://docs.google.com/spreadsheets/d/${savedSheetId}/edit`;
-            await this.syncCurrentStatesToSheet(true);
+            try {
+                await this.ensureSheetsStructure();
+                await this.syncCurrentStatesToSheet(true);
+            } catch (err) {
+                console.error("Gagal inisialisasi spreadsheet tersimpan:", err);
+                alert("Gagal menghubungkan ke Spreadsheet tersimpan:\n\n" + err.message);
+            }
             return;
         }
 
@@ -1363,8 +1447,17 @@ const GoogleSheetsService = {
             });
 
             if (!res.ok) {
-                const errData = await res.json();
-                throw new Error(errData.error?.message || "HTTP " + res.status);
+                const errData = await res.json().catch(() => null);
+                const detailMsg = errData?.error?.message || `HTTP ${res.status}`;
+                if (res.status === 401) {
+                    this.accessToken = null;
+                    this.updateButtonsUI();
+                    throw new Error("Sesi login Google telah kedaluwarsa. Silakan login kembali.");
+                }
+                if (res.status === 403) {
+                    throw new Error(`Akses ditolak (403): ${detailMsg}. Pastikan Google Sheets API dan Google Drive API telah diaktifkan di Google Cloud Console.`);
+                }
+                throw new Error(detailMsg);
             }
 
             const sheetData = await res.json();
@@ -1393,7 +1486,7 @@ const GoogleSheetsService = {
             this.updateButtonsUI();
         } catch (err) {
             console.error("Gagal membuat Google Spreadsheet:", err);
-            alert("Gagal membuat Google Spreadsheet: " + err.message);
+            alert("Gagal membuat Google Spreadsheet:\n\n" + err.message);
         }
     },
 
@@ -1402,6 +1495,10 @@ const GoogleSheetsService = {
 
         try {
             if (notify) showToastNotification("Mengirim data ke Google Sheets...", "info");
+
+            // Pastikan struktur tab Status_Emplasemen & Data_Dinasan tersedia
+            await this.ensureSheetsStructure();
+
             const states = getSavedTrackStates();
             const rows = [
                 ["ID Jalur", "Nama Jalur", "Status Operasional", "Nomor Rangkaian / KA", "Nomor Stopblok", "Catatan Operasional", "Waktu Sinkronisasi (WIB)"]
@@ -1424,22 +1521,33 @@ const GoogleSheetsService = {
             const range = "Status_Emplasemen!A1:G10";
             const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
 
-            const res = await fetch(url, {
-                method: "PUT",
-                headers: {
-                    "Authorization": `Bearer ${this.accessToken}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    range: range,
-                    majorDimension: "ROWS",
-                    values: rows
-                })
-            });
+            let res;
+            try {
+                res = await fetch(url, {
+                    method: "PUT",
+                    headers: {
+                        "Authorization": `Bearer ${this.accessToken}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        range: range,
+                        majorDimension: "ROWS",
+                        values: rows
+                    })
+                });
+            } catch (netErr) {
+                throw new Error("Gagal terhubung ke Google Sheets API (Failed to fetch). Pastikan origin web Anda sudah terdaftar di Authorized JavaScript origins Google Cloud Console.");
+            }
 
             if (!res.ok) {
-                const errData = await res.json();
-                throw new Error(errData.error?.message || "HTTP " + res.status);
+                const errData = await res.json().catch(() => null);
+                const detailMsg = errData?.error?.message || `HTTP ${res.status}`;
+                if (res.status === 401) {
+                    this.accessToken = null;
+                    this.updateButtonsUI();
+                    throw new Error("Sesi token login Google telah kedaluwarsa. Silakan klik 'Hubungkan Google Sheets' untuk masuk kembali.");
+                }
+                throw new Error(detailMsg);
             }
 
             // Juga cadangkan data dinasan jika ada
@@ -1463,7 +1571,7 @@ const GoogleSheetsService = {
             updateCloudStatusUI("sheets", new Date().toISOString());
         } catch (err) {
             console.error("Gagal sinkron ke Google Sheets:", err);
-            if (notify) alert("Gagal mengirim ke Google Sheets: " + err.message);
+            if (notify) alert("Gagal mengirim ke Google Sheets:\n\n" + err.message);
         }
     },
 
@@ -1527,14 +1635,39 @@ const GoogleSheetsService = {
 
         try {
             if (notify) showToastNotification("Mengambil status terbaru dari Google Sheets...", "info");
+
+            // Pastikan tab Status_Emplasemen sudah tersedia di Spreadsheet
+            await this.ensureSheetsStructure();
+
             const range = "Status_Emplasemen!A2:G15";
             const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${encodeURIComponent(range)}`;
 
-            const res = await fetch(url, {
-                headers: { "Authorization": `Bearer ${this.accessToken}` }
-            });
+            let res;
+            try {
+                res = await fetch(url, {
+                    headers: { "Authorization": `Bearer ${this.accessToken}` }
+                });
+            } catch (netErr) {
+                throw new Error("Gagal terhubung ke Google Sheets API (Failed to fetch). Pastikan koneksi internet aktif dan origin web terdaftar di Google Cloud Console.");
+            }
 
-            if (!res.ok) throw new Error("Gagal membaca lembar kerja Google Sheets");
+            if (!res.ok) {
+                const errData = await res.json().catch(() => null);
+                const detailMsg = errData?.error?.message || `HTTP ${res.status}`;
+                if (res.status === 401) {
+                    this.accessToken = null;
+                    this.updateButtonsUI();
+                    throw new Error("Sesi token login Google telah kedaluwarsa. Silakan klik 'Hubungkan Google Sheets' untuk masuk kembali.");
+                }
+                if (res.status === 404) {
+                    throw new Error(`Google Spreadsheet dengan ID "${this.spreadsheetId}" tidak ditemukan (404). Silakan periksa ID spreadsheet.`);
+                }
+                if (res.status === 403) {
+                    throw new Error(`Akses Google Sheets ditolak (403): ${detailMsg}. Pastikan Google Sheets API aktif dan akun Anda berhak mengakses spreadsheet ini.`);
+                }
+                throw new Error(detailMsg);
+            }
+
             const data = await res.json();
 
             if (data.values && data.values.length > 0) {
@@ -1574,11 +1707,13 @@ const GoogleSheetsService = {
                 updateCloudStatusUI("sheets", new Date().toISOString());
                 if (notify) showToastNotification("Data dari Google Sheets berhasil disinkronkan ke seluruh denah!", "success");
             } else {
-                if (notify) showToastNotification("Tidak ada baris data di Google Sheets.", "info");
+                // Jika sheet masih baru / kosong, otomatis isi dengan data terkini
+                if (notify) showToastNotification("Tab 'Status_Emplasemen' masih kosong. Menginisialisasi data denah ke Google Sheets...", "info");
+                await this.syncCurrentStatesToSheet(false);
             }
         } catch (err) {
             console.error("Gagal menarik data dari Google Sheets:", err);
-            if (notify) alert("Gagal menarik data dari Google Sheets: " + err.message);
+            if (notify) alert("Gagal menarik data dari Google Sheets:\n\n" + err.message);
         }
     },
 
