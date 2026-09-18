@@ -8,29 +8,101 @@ document.addEventListener("DOMContentLoaded", function () {
     // initTrackingClock();
 });
 
-// --- 2. LOGIKA BUKA/TUTUP SIDEBAR ---
+// --- 2. LOGIKA BUKA/TUTUP SIDEBAR (RESPONSIF HP, TABLET & DESKTOP) ---
 function initSidebarLogic() {
     const sidebarToggle = document.getElementById('sidebarToggle');
     const closeSidebar = document.getElementById('closeSidebar');
     const sidebar = document.getElementById('mySidebar');
     const mainContent = document.querySelector('.main-content');
 
-    if (sidebarToggle && sidebar && mainContent) {
-        sidebarToggle.addEventListener('click', function () {
-            if (window.innerWidth > 768) {
+    if (!sidebar) return;
+
+    // Tambahkan ikon tombol jika tombol toggle belum memiliki ikon
+    if (sidebarToggle && !sidebarToggle.querySelector('i')) {
+        sidebarToggle.innerHTML = `<i class="ti ti-menu-2"></i> <span>Menu</span>`;
+    }
+
+    // Buat elemen overlay latar belakang dinamis jika belum ada di DOM
+    let overlay = document.querySelector('.sidebar-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'sidebar-overlay';
+        overlay.id = 'sidebarOverlay';
+        document.body.appendChild(overlay);
+    }
+
+    function openMobileSidebar() {
+        sidebar.classList.add('active');
+        if (overlay) overlay.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Cegah background scrolling saat menu terbuka
+    }
+
+    function closeMobileSidebar() {
+        sidebar.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (window.innerWidth > 992) {
+                // Mode Desktop: Collapse / Expand sidebar
                 sidebar.classList.toggle('hidden');
-                mainContent.classList.toggle('full-width');
-            } else { 
-                sidebar.classList.toggle('active');
+                if (mainContent) mainContent.classList.toggle('full-width');
+            } else {
+                // Mode Mobile / Tablet: Drawer slide-in
+                if (sidebar.classList.contains('active')) {
+                    closeMobileSidebar();
+                } else {
+                    openMobileSidebar();
+                }
             }
         });
     }
 
-    if (closeSidebar && sidebar) {
-        closeSidebar.addEventListener('click', function () {
-            sidebar.classList.remove('active');
+    if (closeSidebar) {
+        closeSidebar.addEventListener('click', function (e) {
+            e.stopPropagation();
+            closeMobileSidebar();
         });
     }
+
+    if (overlay) {
+        overlay.addEventListener('click', function () {
+            closeMobileSidebar();
+        });
+    }
+
+    // Tutup saat tombol ESC ditekan
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+            closeMobileSidebar();
+        }
+    });
+
+    // Otomatis reset overflow jika ukuran layar di-resize ke desktop
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 992) {
+            closeMobileSidebar();
+        }
+    });
+
+    // Dukungan gestur swipe ke kiri pada sidebar di layar sentuh untuk menutup
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    sidebar.addEventListener('touchstart', function (e) {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    sidebar.addEventListener('touchend', function (e) {
+        touchEndX = e.changedTouches[0].screenX;
+        // Jika swipe ke kiri sejauh lebih dari 50px
+        if (touchStartX - touchEndX > 50 && window.innerWidth <= 992) {
+            closeMobileSidebar();
+        }
+    }, { passive: true });
 }
 
 // --- 3. JAM DIGITAL & REFRESH PERGANTIAN HARI ---

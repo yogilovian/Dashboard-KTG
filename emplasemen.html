@@ -17,19 +17,32 @@
     <!-- Sidebar Navigasi -->
     <nav class="sidebar" id="mySidebar">
         <!-- Tombol Tutup Khusus Mobile -->
-        <button class="close-sidebar-btn" id="closeSidebar"><i class="ti ti-x"></i></button>
+        <button class="close-sidebar-btn" id="closeSidebar" aria-label="Tutup Menu Navigasi"><i class="ti ti-x"></i></button>
         
         <div class="sidebar-brand">
-            <h2>KAI <span>KETAPANG</span></h2>
+            <div class="sidebar-brand-info">
+                <h2>KAI <span>KETAPANG</span></h2>
+                <p>Daop 9 Jember &bull; KTG</p>
+            </div>
         </div>
+
+        <div class="sidebar-section-title">Menu Utama</div>
+
         <ul class="sidebar-menu">
-            <li><a href="index.html"><i class="ti ti-home"></i> Dashboard Utama</a></li>
-            <li><a href="struktur.html"><i class="ti ti-users"></i> Struktur Organisasi</a></li>
+            <li><a href="index.html"><i class="ti ti-layout-dashboard"></i> Dashboard Utama</a></li>
             <li class="active"><a href="emplasemen.html"><i class="ti ti-yarn"></i> Emplasemen</a></li>
-            <li><a href="panjang_jalur.html"><i class="ti ti-track"></i> Panjang Jalur</a></li>
             <li><a href="daftar_jalur.html"><i class="ti ti-train"></i> Daftar Jalur KA</a></li>
             <li><a href="pantauan_stopblok.html"><i class="ti ti-barrier-block"></i> Pantauan Stopblok</a></li>
+            <li><a href="panjang_jalur.html"><i class="ti ti-track"></i> Panjang Jalur</a></li>
+            <li><a href="struktur.html"><i class="ti ti-users"></i> Struktur Organisasi</a></li>
         </ul>
+
+        <div class="sidebar-footer-card">
+            <div class="station-code">
+                <span>STASIUN</span> KETAPANG (KTG)
+            </div>
+            <div>Wilayah Daop 9 Jember &bull; Aktif 24 Jam</div>
+        </div>
     </nav>
 
     <!-- Konten Utama -->
@@ -104,7 +117,7 @@
                     </div>
                 </div>
 
-                <!-- Kontrol Integrasi Google Sheets -->
+                <!-- Kontrol Integrasi Google Sheets & Server Backend -->
                 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;" id="googleSheetsActions">
                     <button type="button" id="btnConnectGoogleSheets" class="btn-sheets-action" style="background: #0F9D58; color: #FFFFFF;" title="Hubungkan Google Sheets untuk mencadangkan dan menyinkronkan data operasional">
                         <i class="ti ti-file-spreadsheet"></i> Hubungkan Google Sheets
@@ -118,6 +131,12 @@
                     <a id="linkOpenGoogleSheets" href="#" target="_blank" class="btn-sheets-action" style="display: none; background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0;" title="Buka spreadsheet di tab baru">
                         <i class="ti ti-external-link"></i> Buka Spreadsheet
                     </a>
+                    <button type="button" id="btnDisconnectGoogleSheets" class="btn-sheets-action" style="display: none; background: #FEF2F2; color: #DC2626; border: 1px solid #FCA5A5;" title="Putuskan koneksi Google Sheets & cabut token akses">
+                        <i class="ti ti-logout"></i> Putuskan
+                    </button>
+                    <button type="button" id="btnOpenOAuthSettings" class="btn-sheets-action" style="background: #FFFFFF; color: #002F6C; border: 1px solid #CBD5E1;" title="Pengaturan OAuth 2.0 Google, Authorized Origin & Server Backend">
+                        <i class="ti ti-settings"></i> Pengaturan OAuth & Server
+                    </button>
                 </div>
             </section>
 
@@ -311,6 +330,151 @@
                 </div>
             </div>
         </div>
+
+        <!-- MODAL KONFIGURASI OAUTH 2.0 GOOGLE & SERVER BACKEND -->
+        <div class="track-modal-overlay" id="oauthModalOverlay" style="display: none;">
+            <div class="track-modal-content" style="max-width: 680px;">
+                <div class="track-modal-header" style="background: linear-gradient(135deg, #002F6C, #0F4C81); color: #FFFFFF;">
+                    <div class="track-modal-title" style="color: #FFFFFF; display: flex; align-items: center; gap: 8px;">
+                        <i class="ti ti-brand-google" style="font-size: 20px; color: #4ade80;"></i>
+                        Konfigurasi OAuth 2.0 Google & Server
+                    </div>
+                    <button type="button" class="track-modal-close" id="oauthModalCloseBtn" style="color: #FFFFFF;">&times;</button>
+                </div>
+
+                <div class="track-modal-body" style="max-height: 75vh; overflow-y: auto; padding: 20px;">
+                    <!-- 1. Origin Domain Status -->
+                    <div class="oauth-section-box" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+                            <label style="font-size: 12.5px; font-weight: 700; color: #1E293B; display: flex; align-items: center; gap: 6px;">
+                                <i class="ti ti-world" style="color: #002F6C;"></i> Asal JavaScript Web Ini (Authorized Origin):
+                            </label>
+                            <span class="badge" style="background: #EFF6FF; color: #1D4ED8; font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 600;">
+                                Terdeteksi Otomatis
+                            </span>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                            <input type="text" id="detectedOriginInput" readonly style="flex: 1; min-width: 240px; height: 38px; padding: 6px 12px; background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px; font-family: monospace; font-size: 13px; font-weight: 600; color: #0F172A;" value="Memuat origin..." />
+                            <button type="button" id="btnCopyDetectedOrigin" class="btn-sheets-action" style="background: #002F6C; color: #FFFFFF; height: 38px; white-space: nowrap;">
+                                <i class="ti ti-copy"></i> Salin Origin
+                            </button>
+                        </div>
+                        <p style="font-size: 11.5px; color: #64748B; margin: 8px 0 0 0; line-height: 1.45;">
+                            ⚠️ <strong>Penting untuk GitHub Pages:</strong> Agar terhindar dari <em>Error 400: origin_mismatch</em> saat link GitHub dibuka, pastikan URL di atas telah ditambahkan ke menu <strong>Authorized JavaScript origins</strong> pada Google Cloud Console Client ID Anda.
+                        </p>
+                    </div>
+
+                    <!-- 2. Google OAuth 2.0 Client ID -->
+                    <div style="margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <label for="inputCustomClientId" style="font-size: 12.5px; font-weight: 700; color: #1E293B;">
+                                <i class="ti ti-key" style="color: #0F9D58;"></i> Google OAuth 2.0 Client ID (Web Application):
+                            </label>
+                            <button type="button" id="btnResetToDefaultClientId" style="background: none; border: none; font-size: 11.5px; color: #2563EB; cursor: pointer; text-decoration: underline; padding: 0;">
+                                Pulihkan Default
+                            </button>
+                        </div>
+                        <input type="text" id="inputCustomClientId" class="modal-form-input" placeholder="Contoh: 123456789-abcdef.apps.googleusercontent.com" style="width: 100%; height: 40px; padding: 8px 12px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 13px; font-family: monospace;" />
+                        <div style="font-size: 11.5px; color: #64748B; margin-top: 4px;">
+                            Jika Anda menggunakan Google Cloud Project sendiri untuk repositori GitHub Anda, masukkan Client ID di sini.
+                        </div>
+                    </div>
+
+                    <!-- 3. Google Spreadsheet ID -->
+                    <div style="margin-bottom: 16px;">
+                        <label for="inputCustomSpreadsheetId" style="font-size: 12.5px; font-weight: 700; color: #1E293B; display: block; margin-bottom: 4px;">
+                            <i class="ti ti-table" style="color: #0F9D58;"></i> ID Google Spreadsheet Operasional (Opsional):
+                        </label>
+                        <input type="text" id="inputCustomSpreadsheetId" class="modal-form-input" placeholder="Contoh: 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms" style="width: 100%; height: 40px; padding: 8px 12px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 13px; font-family: monospace;" />
+                        <div style="font-size: 11.5px; color: #64748B; margin-top: 4px;">
+                            Biarkan kosong jika ingin sistem otomatis membuat spreadsheet baru, atau tempel ID spreadsheet yang sudah ada agar semua HP/tablet terhubung ke file yang sama.
+                        </div>
+                    </div>
+
+                    <!-- 4. URL Server Backend API -->
+                    <div style="margin-bottom: 16px;">
+                        <label for="inputCustomBackendUrl" style="font-size: 12.5px; font-weight: 700; color: #1E293B; display: block; margin-bottom: 4px;">
+                            <i class="ti ti-server" style="color: #002F6C;"></i> URL Server Backend API (Opsional untuk GitHub Pages):
+                        </label>
+                        <input type="text" id="inputCustomBackendUrl" class="modal-form-input" placeholder="Kosongkan untuk otomatis / Mode Mandiri, atau isi https://my-server.run.app" style="width: 100%; height: 40px; padding: 8px 12px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 13px;" />
+                        <div style="font-size: 11.5px; color: #64748B; margin-top: 4px;">
+                            Di GitHub Pages tanpa backend terpisah, biarkan kosong. Aplikasi akan berjalan dalam <strong>Mode Mandiri (Direct Sheets)</strong> langsung sinkron ke Google Sheets!
+                        </div>
+                    </div>
+
+                    <!-- 5. Panduan Kepatuhan Kebijakan OAuth 2.0 Google -->
+                    <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 14px; margin-bottom: 14px;">
+                        <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #166534; display: flex; align-items: center; gap: 6px;">
+                            <i class="ti ti-shield-check"></i> Kebijakan Privasi & Kepatuhan OAuth 2.0
+                        </h4>
+                        <ul style="margin: 0; padding-left: 18px; font-size: 11.8px; color: #15803D; line-height: 1.55;">
+                            <li><strong>Prinsip Hak Akses Minimal (Least Privilege):</strong> Hanya meminta izin baca/tulis Google Sheets (<code>/auth/spreadsheets</code>) dan file yang dibuat aplikasi (<code>/auth/drive.file</code>). Tidak membaca drive atau email pribadi.</li>
+                            <li><strong>Keamanan Token:</strong> Sesuai kebijakan Google API User Data Policy, token otentikasi disimpan eksklusif di memori RAM sesi aktif dan tidak pernah disimpan permanen di localStorage atau disalahgunakan.</li>
+                            <li><strong>Pencabutan Izin:</strong> Petugas dapat mencabut izin kapan saja melalui tombol <em>Putuskan</em> di dashboard ini atau via <a href="https://myaccount.google.com/permissions" target="_blank" style="color: #002F6C; text-decoration: underline;">Akun Google Anda</a>.</li>
+                        </ul>
+                    </div>
+
+                    <!-- 6. Langkah Cepat Google Cloud Console -->
+                    <details style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #334155;">
+                        <summary style="font-weight: 700; cursor: pointer; color: #002F6C;">
+                            📖 Cara Membuat Client ID di Google Cloud Console (3 Menit)
+                        </summary>
+                        <ol style="margin: 10px 0 0 0; padding-left: 18px; line-height: 1.6;">
+                            <li>Buka <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color: #2563EB; font-weight: 600;">Google Cloud Console &rarr; Kredensial</a>.</li>
+                            <li>Klik <strong>+ Create Credentials &rarr; OAuth client ID</strong>.</li>
+                            <li>Pilih Application type: <strong>Web application</strong>.</li>
+                            <li>Pada bagian <strong>Authorized JavaScript origins</strong>, klik <em>+ ADD URI</em> dan tempel URL asal yang sudah disalin di atas (contoh: <code>https://username.github.io</code>).</li>
+                            <li>Klik <strong>Create</strong>, lalu salin Client ID yang diberikan dan tempelkan ke kolom Client ID di atas.</li>
+                        </ol>
+                    </details>
+                </div>
+
+                <div class="track-modal-footer" style="padding: 14px 20px; background: #F8FAFC; border-top: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <button type="button" class="btn-secondary" id="oauthResetAllBtn" style="color: #DC2626;">
+                        <i class="ti ti-trash"></i> Hapus Konfigurasi Khusus
+                    </button>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" class="btn-secondary" id="oauthCancelBtn">Tutup</button>
+                        <button type="button" class="btn-primary" id="oauthSaveApplyBtn" style="background: #002F6C;">
+                            <i class="ti ti-check"></i> Simpan & Terapkan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER RESPONSIF -->
+        <footer class="site-footer">
+            <div class="footer-inner">
+                <div class="footer-top-row">
+                    <div class="footer-brand">
+                        <div class="footer-logo-icon">
+                            <i class="ti ti-train"></i>
+                        </div>
+                        <div class="footer-brand-text">
+                            <h4>KAI <span>KETAPANG</span></h4>
+                            <p>Stasiun Ketapang (KTG) &bull; Daop 9 Jember</p>
+                        </div>
+                    </div>
+                    <nav class="footer-quick-links">
+                        <a href="index.html" class="footer-link-pill"><i class="ti ti-home"></i> Utama</a>
+                        <a href="emplasemen.html" class="footer-link-pill"><i class="ti ti-yarn"></i> Emplasemen</a>
+                        <a href="daftar_jalur.html" class="footer-link-pill"><i class="ti ti-train"></i> Daftar Jalur</a>
+                        <a href="pantauan_stopblok.html" class="footer-link-pill"><i class="ti ti-barrier-block"></i> Stopblok</a>
+                        <a href="panjang_jalur.html" class="footer-link-pill"><i class="ti ti-track"></i> Panjang</a>
+                        <a href="struktur.html" class="footer-link-pill"><i class="ti ti-users"></i> Struktur</a>
+                    </nav>
+                </div>
+                <div class="footer-bottom-row">
+                    <div class="footer-copyright">
+                        &copy; 2026 TIM IT Ketapang (KTG) &bull; Dashboard Operasional Stasiun Ketapang
+                    </div>
+                    <div class="footer-status-pill">
+                        <span class="footer-pulse-dot"></span> Sistem Operasional Aktif
+                    </div>
+                </div>
+            </div>
+        </footer>
 
     </main>
 

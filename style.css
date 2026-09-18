@@ -25,77 +25,199 @@ body {
 
 /* Sidebar Navigation */
 .sidebar {
-    width: 260px;
+    width: 270px;
     height: 100vh;
-    background-color: var(--kai-blue);
+    background: linear-gradient(180deg, #00224F 0%, var(--kai-blue) 60%, #0A3A75 100%);
     position: fixed;
     top: 0;
     left: 0;
-    padding: 20px;
+    padding: 24px 18px;
     display: flex;
     flex-direction: column;
     color: var(--white);
-    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease;
-    z-index: 999;
+    box-shadow: 4px 0 24px rgba(0, 47, 108, 0.22);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1050;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(237, 106, 22, 0.4) transparent;
+}
+
+/* Overlay Gelap Elegan saat Sidebar Terbuka di HP/Tablet */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1040;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .sidebar-brand {
-    text-align: center;
-    padding: 20px 0;
-    border-bottom: 2px solid var(--kai-orange);
-    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 8px 20px 8px;
+    border-bottom: 2px solid rgba(237, 106, 22, 0.8);
+    margin-bottom: 22px;
+    position: relative;
 }
 
-.sidebar-brand h2 {
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: 1px;
-}
-
-.sidebar-brand span {
+/* .sidebar-brand-icon {
+    width: 42px;
+    height: 42px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
     color: var(--kai-orange);
+    flex-shrink: 0;
+} */
+
+.sidebar-brand-info h2 {
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    line-height: 1.2;
+    margin: 0;
+    color: var(--white);
+}
+
+.sidebar-brand-info h2 span {
+    color: var(--kai-orange);
+}
+
+.sidebar-brand-info p {
+    font-size: 11px;
+    color: #94A3B8;
+    margin: 2px 0 0 0;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+.sidebar-section-title {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #93C5FD;
+    padding: 0 12px 8px 12px;
+    opacity: 0.85;
 }
 
 .sidebar-menu {
     list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-grow: 1;
 }
 
 .sidebar-menu li {
-    margin-bottom: 15px;
+    margin: 0;
 }
 
 .sidebar-menu a {
-    display: block;
-    color: #CED4DA;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #E2E8F0;
     text-decoration: none;
-    padding: 12px 20px;
-    border-radius: 8px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    font-size: 13.5px;
     font-weight: 500;
-    transition: all 0.3s ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
 }
 
-.sidebar-menu li.active a, .sidebar-menu a:hover {
-    background-color: var(--kai-orange);
+.sidebar-menu a i {
+    font-size: 19px;
+    color: #93C5FD;
+    transition: all 0.25s ease;
+    flex-shrink: 0;
+}
+
+.sidebar-menu a:hover {
+    background: rgba(255, 255, 255, 0.1);
     color: var(--white);
-    transform: translateX(5px);
+    transform: translateX(4px);
 }
 
-/* Kelas khusus saat sidebar disembunyikan */
+.sidebar-menu a:hover i {
+    color: var(--kai-orange);
+}
+
+.sidebar-menu li.active a {
+    background: linear-gradient(135deg, var(--kai-orange) 0%, #D85A09 100%);
+    color: var(--white);
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(237, 106, 22, 0.35);
+}
+
+.sidebar-menu li.active a i {
+    color: var(--white);
+}
+
+/* Badge mini status di footer sidebar */
+.sidebar-footer-card {
+    margin-top: auto;
+    padding: 14px;
+    background: rgba(0, 20, 50, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    font-size: 11.5px;
+    color: #CBD5E1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sidebar-footer-card .station-code {
+    font-weight: 700;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar-footer-card .station-code span {
+    background: var(--kai-orange);
+    color: #fff;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 10px;
+}
+
+/* Kelas khusus saat sidebar disembunyikan di Desktop */
 .sidebar.hidden {
-    left: -260px; /* Geser keluar layar ke arah kiri */
+    transform: translateX(-270px);
 }
 
 /* Main Content Area */
 .main-content {
-    margin-left: 260px;
-    width: calc(100% - 260px);
-    transition: margin-left 0.3s ease, width 0.3s ease;
+    margin-left: 270px;
+    width: calc(100% - 270px);
+    transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1), width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     padding: 30px 40px;
     min-height: 100vh;
 }
 
-/* Kelas khusus untuk konten utama saat sidebar sembunyi */
+/* Kelas khusus untuk konten utama saat sidebar sembunyi di Desktop */
 .main-content.full-width {
     margin-left: 0;
     width: 100%;
@@ -489,25 +611,40 @@ body {
             margin-top: 2px;
         }
 
-        /* Tombol Toggle Menu Baru (Bebas Melayang Tanpa Menabrak Teks) */
+        /* Tombol Toggle Menu Baru (Modern, Beranimasi & Sentuh-Ramah) */
         .toggle-btn {
-            background-color: var(--kai-blue);
+            background: linear-gradient(135deg, var(--kai-blue) 0%, #0F4C81 100%);
             color: var(--white);
             border: 2px solid var(--kai-orange);
             padding: 8px 16px;
             font-size: 14px;
-            font-weight: bold;
-            border-radius: 6px;
+            font-weight: 700;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0, 47, 108, 0.15);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
         .toggle-btn i {
-            margin-right: 5px;
-            vertical-align: middle;
-            font-size: 16px;
+            font-size: 18px;
+            color: var(--kai-orange);
+            transition: transform 0.25s ease;
         }
         .toggle-btn:hover {
-            background-color: var(--kai-orange);
+            background: var(--kai-orange);
+            color: var(--white);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(237, 106, 22, 0.3);
+        }
+        .toggle-btn:hover i {
+            color: var(--white);
+        }
+        .toggle-btn:active {
+            transform: scale(0.96);
         }
 
 /* Secara bawaan di laptop/PC, tombol close ini disembunyikan */
@@ -515,54 +652,74 @@ body {
     display: none;
 }
 
-/* Responsif untuk Layar HP/Tablet */
-@media (max-width: 768px) {  
+/* Responsif untuk Layar HP/Tablet (< 992px & < 768px) */
+@media (max-width: 992px) {
     .close-sidebar-btn {
-        display: block; /* Tampilkan tombol khusus di HP */
+        display: flex; /* Tampilkan tombol khusus di HP/Tablet */
+        align-items: center;
+        justify-content: center;
         position: absolute;
-        top: 15px;
-        right: 20px;
-        background: transparent;
-        color: var(--white);
-        border: none;
-        font-size: 32px;
-        font-weight: bold;
+        top: 18px;
+        right: 14px;
+        width: 36px;
+        height: 36px;
+        background: rgba(255, 255, 255, 0.12);
+        color: #F8FAFC;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        font-size: 20px;
         cursor: pointer;
-        line-height: 1;
-        transition: color 0.2s ease;
-        z-index: 1002;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1060;
     }
-    .close-sidebar-btn:hover {
-        color: var(--kai-orange); /* Berubah warna oranye saat ditekan */
+    .close-sidebar-btn:hover, .close-sidebar-btn:active {
+        background: var(--kai-orange);
+        color: var(--white);
+        transform: rotate(90deg);
     }
     .sidebar {
-        transform: translateX(-260px);
+        width: 290px;
+        max-width: 85vw;
+        transform: translateX(-100%);
+        left: 0;
+        box-shadow: 8px 0 30px rgba(0, 0, 0, 0.35);
     }
     .sidebar.active {
         transform: translateX(0);
     }
     .main-content {
-        margin-left: 0;
-        width: 100%;
-        padding: 20px;
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 20px 18px;
     }
     .top-bar-action {
-        position: fixed;
+        position: sticky;
         top: 0;
         left: 0;
+        width: 100%;
         justify-content: space-between;
-        background-color: var(--white);
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        padding: 10px 20px;
-        height: 65px;
-        z-index: 998;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+        border-bottom: 1px solid #E2E8F0;
+        padding: 10px 16px;
+        height: 60px;
+        z-index: 1020;
+        border-radius: 0 0 12px 12px;
+        margin-top: -20px;
+        margin-left: -18px;
+        margin-right: -18px;
+        margin-bottom: 22px;
+        width: calc(100% + 36px);
     }
     .digital-clock-container {
         font-size: 13px;
         padding: 6px 12px;
+        border-radius: 8px;
     }
     .header {
-        padding-top: 60px; /* Jarak aman di HP agar tidak tertutup top-bar melayang */
+        padding-top: 10px;
     }
     .header h1 {
         font-size: 22px;
@@ -1540,4 +1697,186 @@ body {
         transform: translateY(0) scale(1);
     }
 }
+
+/* ===================================================
+   KOMPONEN FOOTER RESPONSIF & RAMAH DEVICE (HP, TABLET, PC)
+   =================================================== */
+.site-footer {
+    margin-top: 45px;
+    background: #FFFFFF;
+    border-radius: 12px;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+    overflow: hidden;
+    position: relative;
+}
+
+.site-footer::before {
+    content: "";
+    display: block;
+    height: 4px;
+    width: 100%;
+    background: linear-gradient(90deg, var(--kai-blue) 0%, var(--kai-orange) 50%, var(--kai-light-blue) 100%);
+}
+
+.footer-inner {
+    padding: 24px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.footer-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.footer-logo-icon {
+    width: 40px;
+    height: 40px;
+    background: #EEF2FF;
+    color: var(--kai-blue);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.footer-brand-text h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--kai-blue);
+    line-height: 1.2;
+    margin: 0;
+}
+
+.footer-brand-text h4 span {
+    color: var(--kai-orange);
+}
+
+.footer-brand-text p {
+    font-size: 12px;
+    color: #64748B;
+    margin: 2px 0 0 0;
+    font-weight: 500;
+}
+
+.footer-quick-links {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.footer-link-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #F8FAFC;
+    color: #334155;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.footer-link-pill:hover {
+    background: var(--kai-blue);
+    color: #FFFFFF;
+    border-color: var(--kai-blue);
+    transform: translateY(-1px);
+}
+
+.footer-bottom-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 12px;
+    color: #64748B;
+}
+
+.footer-copyright {
+    line-height: 1.5;
+}
+
+.footer-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #ECFDF5;
+    color: #065F46;
+    border: 1px solid #A7F3D0;
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+.footer-pulse-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10B981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+    animation: pulseDot 2s infinite;
+}
+
+@keyframes pulseDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+/* Penyesuaian khusus layar HP & Tablet agar footer tidak rusak / terpotong */
+@media (max-width: 768px) {
+    .site-footer {
+        margin-top: 30px;
+        border-radius: 10px;
+    }
+    .footer-inner {
+        padding: 16px 18px;
+        gap: 14px;
+    }
+    .footer-top-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding-bottom: 14px;
+    }
+    .footer-quick-links {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 6px;
+    }
+    .footer-link-pill {
+        font-size: 11.5px;
+        padding: 5px 10px;
+        flex-grow: 1;
+        justify-content: center;
+    }
+    .footer-bottom-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
+
 

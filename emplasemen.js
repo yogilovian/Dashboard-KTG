@@ -338,13 +338,64 @@ let GAPEKA_TRAINS_DATA = [
     }
 ];
 
-// State Cache Sinkronisasi Cloud (Menggantikan LocalStorage agar tersinkron di semua device)
+// === MANAJEMEN KONFIGURASI APLIKASI (DUAL-MODE: SERVER & GITHUB PAGES MANDIRI) ===
+const AppConfig = {
+    getApiBaseUrl() {
+        const custom = (localStorage.getItem("ktg_custom_backend_url") || "").trim();
+        return custom ? custom.replace(/\/+$/, "") : "";
+    },
+    getGoogleClientId(defaultId) {
+        const custom = (localStorage.getItem("ktg_custom_client_id") || "").trim();
+        return custom || defaultId;
+    },
+    getSpreadsheetId() {
+        return (localStorage.getItem("ktg_custom_spreadsheet_id") || "").trim();
+    },
+    setCustomConfig({ clientId, spreadsheetId, backendUrl }) {
+        if (clientId && clientId.trim()) {
+            localStorage.setItem("ktg_custom_client_id", clientId.trim());
+        } else {
+            localStorage.removeItem("ktg_custom_client_id");
+        }
+
+        if (spreadsheetId && spreadsheetId.trim()) {
+            localStorage.setItem("ktg_custom_spreadsheet_id", spreadsheetId.trim());
+        } else {
+            localStorage.removeItem("ktg_custom_spreadsheet_id");
+        }
+
+        if (backendUrl && backendUrl.trim()) {
+            localStorage.setItem("ktg_custom_backend_url", backendUrl.trim().replace(/\/+$/, ""));
+        } else {
+            localStorage.removeItem("ktg_custom_backend_url");
+        }
+    },
+    clearCustomConfig() {
+        localStorage.removeItem("ktg_custom_client_id");
+        localStorage.removeItem("ktg_custom_spreadsheet_id");
+        localStorage.removeItem("ktg_custom_backend_url");
+    }
+};
+
+// State Cache Sinkronisasi Cloud (Mendukung Server Cloud, Google Sheets Langsung & LocalStorage)
 let currentTrackStatesCache = {};
 
 function getSavedTrackStates() {
     if (Object.keys(currentTrackStatesCache).length > 0) {
         return currentTrackStatesCache;
     }
+    // Coba ambil cadangan dari localStorage
+    try {
+        const localBackup = localStorage.getItem("ktg_track_states_backup");
+        if (localBackup) {
+            const parsed = JSON.parse(localBackup);
+            if (parsed && typeof parsed === "object" && Object.keys(parsed).length > 0) {
+                currentTrackStatesCache = parsed;
+                return currentTrackStatesCache;
+            }
+        }
+    } catch (e) {}
+
     const initial = {};
     KTG_TRACKS_DATA.forEach(t => {
         initial[t.id] = {
@@ -354,35 +405,59 @@ function getSavedTrackStates() {
             stopblokNumber: t.defaultStopblokNumber || ""
         };
     });
+    currentTrackStatesCache = initial;
     return initial;
 }
 
-// Mengambil status terkini dari Cloud API (/api/tracks)
+// Mengambil status terkini dari Server Backend atau Google Sheets (GitHub Pages Fallback)
 async function fetchTrackStatesFromCloud(isInitial = false) {
+    const apiBase = AppConfig.getApiBaseUrl();
+    const apiUrl = `${apiBase}/api/tracks`;
+
     try {
-        const res = await fetch("/api/tracks");
+        const res = await fetch(apiUrl);
         if (!res.ok) throw new Error("HTTP " + res.status);
         const data = await res.json();
         if (data.success && data.states) {
             currentTrackStatesCache = data.states;
+            localStorage.setItem("ktg_track_states_backup", JSON.stringify(data.states));
             updateSummaryStats();
             initHotspotPins();
-            updateCloudStatusUI(true, data.timestamp);
+            updateCloudStatusUI("server", data.timestamp);
+            return;
         }
     } catch (e) {
-        console.warn("Gagal sinkron status jalur dari server cloud:", e);
-        updateCloudStatusUI(false);
+        // Jika server backend tidak merespons (misal saat live di GitHub Pages murni)
+        console.warn("Server backend tidak aktif atau offline, beralih ke Mode Mandiri:", e);
+
+        // Jika Google Sheets terhubung, coba sinkronkan dari Google Sheets
+        if (GoogleSheetsService.isConnected()) {
+            updateCloudStatusUI("sheets");
+            GoogleSheetsService.pullFromSheet(false);
+        } else {
+            // Gunakan cadangan lokal di peramban
+            const local = getSavedTrackStates();
+            currentTrackStatesCache = local;
+            updateSummaryStats();
+            initHotspotPins();
+            updateCloudStatusUI("local");
+        }
     }
 }
 
-// Menyimpan pembaruan status ke Cloud API (/api/tracks)
+// Menyimpan pembaruan status ke Server Backend, Google Sheets, & LocalStorage
 async function saveTrackStateToCloud(trackId, stateObj) {
     currentTrackStatesCache[trackId] = stateObj;
+    localStorage.setItem("ktg_track_states_backup", JSON.stringify(currentTrackStatesCache));
     updateSummaryStats();
     initHotspotPins();
 
+    const apiBase = AppConfig.getApiBaseUrl();
+    const apiUrl = `${apiBase}/api/tracks`;
+
+    let serverSaved = false;
     try {
-        const res = await fetch("/api/tracks", {
+        const res = await fetch(apiUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -393,64 +468,113 @@ async function saveTrackStateToCloud(trackId, stateObj) {
                 note: stateObj.note
             })
         });
-        const data = await res.json();
-        if (data.success) {
-            currentTrackStatesCache = data.states;
-            updateCloudStatusUI(true, data.timestamp);
-            showToastNotification("Status jalur berhasil disimpan ke Cloud!", "success");
-
-            // Otomatis sinkronkan ke Google Sheets jika akun terhubung
-            if (GoogleSheetsService.isConnected()) {
-                GoogleSheetsService.syncCurrentStatesToSheet(false);
+        if (res.ok) {
+            const data = await res.json();
+            if (data.success) {
+                currentTrackStatesCache = data.states;
+                localStorage.setItem("ktg_track_states_backup", JSON.stringify(data.states));
+                updateCloudStatusUI("server", data.timestamp);
+                showToastNotification("Status jalur berhasil disimpan ke Server!", "success");
+                serverSaved = true;
             }
         }
     } catch (err) {
-        console.error("Gagal menyimpan ke cloud:", err);
-        showToastNotification("Gagal menyimpan ke cloud. Periksa koneksi.", "error");
-        updateCloudStatusUI(false);
+        // Backend offline / GitHub Pages tanpa server
+    }
+
+    // Jika Google Sheets terhubung, kirim pembaruan ke Google Sheets secara real-time
+    if (GoogleSheetsService.isConnected()) {
+        GoogleSheetsService.syncCurrentStatesToSheet(false);
+        if (!serverSaved) {
+            updateCloudStatusUI("sheets", new Date().toISOString());
+            showToastNotification("Status jalur berhasil disinkronkan langsung ke Google Sheets!", "success");
+        }
+    } else if (!serverSaved) {
+        updateCloudStatusUI("local", new Date().toISOString());
+        showToastNotification("Status tersimpan di browser lokal. Hubungkan Google Sheets untuk sinkronisasi cloud.", "info");
     }
 }
 
-// Reset status jalur ke default di Cloud
+// Reset status jalur ke default
 async function resetTrackStateOnCloud(trackId) {
+    const defaultData = KTG_TRACKS_DATA.find(t => t.id === trackId);
+    if (defaultData) {
+        currentTrackStatesCache[trackId] = {
+            status: defaultData.defaultStatus,
+            note: defaultData.defaultNote,
+            trainNumber: defaultData.defaultTrainNumber || "",
+            stopblokNumber: defaultData.defaultStopblokNumber || ""
+        };
+        localStorage.setItem("ktg_track_states_backup", JSON.stringify(currentTrackStatesCache));
+        updateSummaryStats();
+        initHotspotPins();
+    }
+
+    const apiBase = AppConfig.getApiBaseUrl();
     try {
-        const res = await fetch("/api/tracks/reset", {
+        const res = await fetch(`${apiBase}/api/tracks/reset`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ trackId })
         });
-        const data = await res.json();
-        if (data.success) {
-            currentTrackStatesCache = data.states;
-            updateSummaryStats();
-            initHotspotPins();
-            showToastNotification("Status jalur dikembalikan ke kondisi awal", "info");
-
-            if (GoogleSheetsService.isConnected()) {
-                GoogleSheetsService.syncCurrentStatesToSheet(false);
+        if (res.ok) {
+            const data = await res.json();
+            if (data.success) {
+                currentTrackStatesCache = data.states;
+                localStorage.setItem("ktg_track_states_backup", JSON.stringify(data.states));
+                updateCloudStatusUI("server", data.timestamp);
             }
         }
-    } catch (err) {
-        console.error("Gagal reset status di cloud:", err);
+    } catch (err) {}
+
+    showToastNotification("Status jalur dikembalikan ke kondisi awal", "info");
+
+    if (GoogleSheetsService.isConnected()) {
+        GoogleSheetsService.syncCurrentStatesToSheet(false);
+        updateCloudStatusUI("sheets", new Date().toISOString());
+    } else {
+        updateCloudStatusUI("local", new Date().toISOString());
     }
 }
 
-// UI Badge Status Cloud
-function updateCloudStatusUI(isOnline, timestamp) {
+// UI Badge Status Cloud (Mendukung Server, Google Sheets Mandiri, dan Offline Lokal)
+function updateCloudStatusUI(mode, timestamp) {
     const badge = document.getElementById("cloudStatusBadge");
     const lastSync = document.getElementById("cloudLastSyncText");
     if (!badge) return;
 
-    if (isOnline) {
+    const timeStr = timestamp ? new Date(timestamp).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) + " WIB" : "Baru saja";
+
+    if (mode === "server") {
         badge.className = "cloud-badge active";
-        badge.innerHTML = `<span class="cloud-dot"></span> Online &bull; Terhubung ke Server`;
+        badge.style.background = "#EFF6FF";
+        badge.style.color = "#1E40AF";
+        badge.style.borderColor = "#BFDBFE";
+        badge.innerHTML = `<span class="cloud-dot" style="background: #2563EB;"></span> Online &bull; Terhubung ke Server`;
         if (lastSync) {
-            const timeStr = timestamp ? new Date(timestamp).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) + " WIB" : "Baru saja";
-            lastSync.innerHTML = `Status jalur, pemantauan stopblok & KA stabling otomatis tersinkron ke Firebase & server cloud. Terakhir sinkron: <strong>${timeStr}</strong>`;
+            lastSync.innerHTML = `Status jalur, pemantauan stopblok & KA stabling otomatis tersinkron ke server cloud. Terakhir sinkron: <strong>${timeStr}</strong>`;
+        }
+    } else if (mode === "sheets") {
+        badge.className = "cloud-badge active";
+        badge.style.background = "#F0FDF4";
+        badge.style.color = "#15803D";
+        badge.style.borderColor = "#BBF7D0";
+        badge.innerHTML = `<span class="cloud-dot" style="background: #10B981;"></span> Mode Mandiri &bull; Google Sheets Aktif`;
+        if (lastSync) {
+            lastSync.innerHTML = `Terhubung langsung ke Google Sheets (Mode GitHub Pages). Terakhir sinkron: <strong>${timeStr}</strong>`;
+        }
+    } else if (mode === "local") {
+        badge.className = "cloud-badge";
+        badge.style.background = "#FFFBEB";
+        badge.style.color = "#92400E";
+        badge.style.borderColor = "#FDE68A";
+        badge.innerHTML = `<span class="cloud-dot" style="background: #F59E0B;"></span> Mode Lokal (Tersimpan di Browser)`;
+        if (lastSync) {
+            lastSync.innerHTML = `Data jalur aktif tersimpan di peramban. Klik <em>Hubungkan Google Sheets</em> untuk sinkronisasi otomatis multi-perangkat.`;
         }
     } else {
         badge.className = "cloud-badge offline";
-        badge.innerHTML = `<span class="cloud-dot"></span> Menghubungkan ke Server...`;
+        badge.innerHTML = `<span class="cloud-dot"></span> Menghubungkan...`;
     }
 }
 
@@ -872,35 +996,45 @@ function initBlueprintZoom() {
     }
 }
 
-// === LAYANAN GOOGLE SHEETS API & GOOGLE DRIVE INTEGRATION ===
+// === LAYANAN GOOGLE SHEETS API & GOOGLE DRIVE INTEGRATION (KEPATUHAN OAUTH 2.0 RESMI) ===
 const GoogleSheetsService = {
     tokenClient: null,
-    accessToken: null,
+    accessToken: null, // STRICTLY IN-MEMORY ONLY (Google API Services User Data Policy)
     spreadsheetId: null,
     spreadsheetUrl: null,
-    clientId: "186406862864-in4aeul1p7hsebl8a8ml8ombr8vpto4b.apps.googleusercontent.com",
+    defaultClientId: "186406862864-in4aeul1p7hsebl8a8ml8ombr8vpto4b.apps.googleusercontent.com",
     scopes: "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file",
 
+    getClientId() {
+        return AppConfig.getGoogleClientId(this.defaultClientId);
+    },
+
     async init() {
-        // Ambil info Google Sheet dari backend
+        // 1. Muat ID spreadsheet dari localStorage jika tersimpan
+        const savedSheetId = AppConfig.getSpreadsheetId();
+        if (savedSheetId) {
+            this.spreadsheetId = savedSheetId;
+            this.spreadsheetUrl = `https://docs.google.com/spreadsheets/d/${savedSheetId}/edit`;
+        }
+
+        // 2. Coba sinkronkan dengan backend jika server aktif
+        const apiBase = AppConfig.getApiBaseUrl();
         try {
-            const res = await fetch("/api/sheets-info");
+            const res = await fetch(`${apiBase}/api/sheets-info`);
             if (res.ok) {
                 const info = await res.json();
-                if (info.spreadsheetId) {
+                if (info.spreadsheetId && !this.spreadsheetId) {
                     this.spreadsheetId = info.spreadsheetId;
                     this.spreadsheetUrl = info.spreadsheetUrl || `https://docs.google.com/spreadsheets/d/${info.spreadsheetId}/edit`;
                 }
             }
-        } catch (e) {
-            console.warn("Gagal mengambil info sheet:", e);
-        }
+        } catch (e) {}
 
         try {
-            const resConf = await fetch("/api/oauth-config");
+            const resConf = await fetch(`${apiBase}/api/oauth-config`);
             if (resConf.ok) {
                 const conf = await resConf.json();
-                if (conf.clientId) this.clientId = conf.clientId;
+                if (conf.clientId) this.defaultClientId = conf.clientId;
             }
         } catch (e) {}
 
@@ -912,6 +1046,17 @@ const GoogleSheetsService = {
         const btnConnect = document.getElementById("btnConnectGoogleSheets");
         const btnSync = document.getElementById("btnSyncToSheets");
         const btnPull = document.getElementById("btnPullFromSheets");
+        const btnDisconnect = document.getElementById("btnDisconnectGoogleSheets");
+        const btnOpenSettings = document.getElementById("btnOpenOAuthSettings");
+
+        // Kontrol Modal Pengaturan
+        const oauthModal = document.getElementById("oauthModalOverlay");
+        const btnCloseModal = document.getElementById("oauthModalCloseBtn");
+        const btnCancelModal = document.getElementById("oauthCancelBtn");
+        const btnSaveApply = document.getElementById("oauthSaveApplyBtn");
+        const btnResetAll = document.getElementById("oauthResetAllBtn");
+        const btnCopyOrigin = document.getElementById("btnCopyDetectedOrigin");
+        const btnResetClientId = document.getElementById("btnResetToDefaultClientId");
 
         if (btnConnect) {
             btnConnect.addEventListener("click", () => {
@@ -936,45 +1081,260 @@ const GoogleSheetsService = {
                 }
             });
         }
+        if (btnDisconnect) {
+            btnDisconnect.addEventListener("click", () => {
+                this.disconnect();
+            });
+        }
+        if (btnOpenSettings) {
+            btnOpenSettings.addEventListener("click", () => {
+                this.openOAuthSettingsModal();
+            });
+        }
+        if (btnCloseModal) {
+            btnCloseModal.addEventListener("click", () => {
+                this.closeOAuthSettingsModal();
+            });
+        }
+        if (btnCancelModal) {
+            btnCancelModal.addEventListener("click", () => {
+                this.closeOAuthSettingsModal();
+            });
+        }
+        if (oauthModal) {
+            oauthModal.addEventListener("click", (e) => {
+                if (e.target === oauthModal) {
+                    this.closeOAuthSettingsModal();
+                }
+            });
+        }
+
+        // Salin Asal JavaScript (Origin) ke Clipboard
+        if (btnCopyOrigin) {
+            btnCopyOrigin.addEventListener("click", () => {
+                const originText = window.location.origin;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(originText).then(() => {
+                        const originalHTML = btnCopyOrigin.innerHTML;
+                        btnCopyOrigin.innerHTML = '<i class="ti ti-check"></i> Tersalin!';
+                        btnCopyOrigin.style.background = "#10B981";
+                        showToastNotification(`Origin "${originText}" berhasil disalin ke clipboard!`, "success");
+                        setTimeout(() => {
+                            btnCopyOrigin.innerHTML = originalHTML;
+                            btnCopyOrigin.style.background = "#002F6C";
+                        }, 2500);
+                    }).catch(() => {
+                        this.fallbackCopyText(originText);
+                    });
+                } else {
+                    this.fallbackCopyText(originText);
+                }
+            });
+        }
+
+        // Reset ke Default Client ID
+        if (btnResetClientId) {
+            btnResetClientId.addEventListener("click", () => {
+                const inputClientId = document.getElementById("inputCustomClientId");
+                if (inputClientId) inputClientId.value = this.defaultClientId;
+                showToastNotification("Client ID disetel ke bawaan sistem.", "info");
+            });
+        }
+
+        // Hapus Konfigurasi Khusus
+        if (btnResetAll) {
+            btnResetAll.addEventListener("click", () => {
+                if (confirm("Apakah Anda yakin ingin menghapus semua konfigurasi custom (Client ID, Spreadsheet ID, URL Server)?")) {
+                    AppConfig.clearCustomConfig();
+                    const inputClientId = document.getElementById("inputCustomClientId");
+                    const inputSheetId = document.getElementById("inputCustomSpreadsheetId");
+                    const inputBackend = document.getElementById("inputCustomBackendUrl");
+                    if (inputClientId) inputClientId.value = "";
+                    if (inputSheetId) inputSheetId.value = "";
+                    if (inputBackend) inputBackend.value = "";
+                    showToastNotification("Konfigurasi custom berhasil dihapus. Menggunakan pengaturan bawaan.", "info");
+                }
+            });
+        }
+
+        // Simpan dan Terapkan Konfigurasi
+        if (btnSaveApply) {
+            btnSaveApply.addEventListener("click", () => {
+                const inputClientId = document.getElementById("inputCustomClientId");
+                const inputSheetId = document.getElementById("inputCustomSpreadsheetId");
+                const inputBackend = document.getElementById("inputCustomBackendUrl");
+
+                let rawSheetId = inputSheetId ? inputSheetId.value.trim() : "";
+                // Jika pengguna menempel seluruh tautan URL spreadsheet docs.google.com/spreadsheets/d/.../edit
+                const sheetIdMatch = rawSheetId.match(/\/d\/([a-zA-Z0-9-_]+)/);
+                if (sheetIdMatch && sheetIdMatch[1]) {
+                    rawSheetId = sheetIdMatch[1];
+                }
+
+                AppConfig.setCustomConfig({
+                    clientId: inputClientId ? inputClientId.value.trim() : "",
+                    spreadsheetId: rawSheetId,
+                    backendUrl: inputBackend ? inputBackend.value.trim() : ""
+                });
+
+                if (rawSheetId) {
+                    this.spreadsheetId = rawSheetId;
+                    this.spreadsheetUrl = `https://docs.google.com/spreadsheets/d/${rawSheetId}/edit`;
+                }
+
+                this.closeOAuthSettingsModal();
+                this.updateButtonsUI();
+                showToastNotification("Konfigurasi OAuth & Server berhasil disimpan dan diterapkan!", "success");
+
+                // Uji ulang koneksi ke backend atau sheets
+                fetchTrackStatesFromCloud(false);
+            });
+        }
+    },
+
+    fallbackCopyText(text) {
+        const temp = document.createElement("input");
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        document.body.removeChild(temp);
+        showToastNotification(`Origin "${text}" disalin!`, "success");
+    },
+
+    openOAuthSettingsModal() {
+        const modal = document.getElementById("oauthModalOverlay");
+        const originInput = document.getElementById("detectedOriginInput");
+        const inputClientId = document.getElementById("inputCustomClientId");
+        const inputSheetId = document.getElementById("inputCustomSpreadsheetId");
+        const inputBackend = document.getElementById("inputCustomBackendUrl");
+
+        if (originInput) originInput.value = window.location.origin;
+        if (inputClientId) inputClientId.value = localStorage.getItem("ktg_custom_client_id") || "";
+        if (inputSheetId) inputSheetId.value = this.spreadsheetId || localStorage.getItem("ktg_custom_spreadsheet_id") || "";
+        if (inputBackend) inputBackend.value = localStorage.getItem("ktg_custom_backend_url") || "";
+
+        if (modal) {
+            modal.style.display = "flex";
+            modal.classList.add("active");
+        }
+    },
+
+    closeOAuthSettingsModal() {
+        const modal = document.getElementById("oauthModalOverlay");
+        if (modal) {
+            modal.style.display = "none";
+            modal.classList.remove("active");
+        }
+    },
+
+    showOriginMismatchHelp(errorMsg) {
+        this.openOAuthSettingsModal();
+        const origin = window.location.origin;
+        alert(
+            `[Kepatuhan OAuth 2.0 Google: Error Origin Mismatch]\n\n` +
+            `Domain web ini (${origin}) belum didaftarkan di 'Authorized JavaScript origins' pada Google Cloud Console.\n\n` +
+            `Langkah Solusi:\n` +
+            `1. Origin Anda (${origin}) otomatis disalin ke clipboard.\n` +
+            `2. Buka Google Cloud Console -> Kredensial -> OAuth 2.0 Client ID Anda.\n` +
+            `3. Tambahkan "${origin}" pada bagian "Authorized JavaScript origins".\n` +
+            `4. Masukkan Client ID Anda pada kolom di jendela Pengaturan ini lalu klik Simpan.`
+        );
     },
 
     isConnected() {
         return !!this.accessToken && !!this.spreadsheetId;
     },
 
+    disconnect() {
+        if (this.accessToken && window.google?.accounts?.oauth2?.revoke) {
+            try {
+                window.google.accounts.oauth2.revoke(this.accessToken, () => {
+                    console.log("Token OAuth 2.0 berhasil dicabut.");
+                });
+            } catch (e) {
+                console.warn("Gagal revoke token:", e);
+            }
+        }
+
+        this.accessToken = null;
+        this.updateButtonsUI();
+        showToastNotification("Koneksi Google Sheets diputuskan & token akses dicabut.", "info");
+
+        if (AppConfig.getApiBaseUrl()) {
+            updateCloudStatusUI("server");
+        } else {
+            updateCloudStatusUI("local");
+        }
+    },
+
     requestLoginAndSync() {
         if (!window.google || !window.google.accounts || !window.google.accounts.oauth2) {
-            alert("Google Identity Services sedang dimuat. Mohon tunggu beberapa detik lalu klik kembali.");
+            alert("Pustaka Google Identity Services sedang dimuat dari Google CDN. Mohon tunggu beberapa saat lalu coba kembali.");
             return;
         }
 
-        this.tokenClient = window.google.accounts.oauth2.initTokenClient({
-            client_id: this.clientId,
-            scope: this.scopes,
-            callback: async (resp) => {
-                if (resp.error) {
-                    console.error("Kesalahan Autentikasi Google:", resp);
-                    alert("Gagal autentikasi Google: " + resp.error);
-                    return;
-                }
-                this.accessToken = resp.access_token;
-                showToastNotification("Autentikasi Google berhasil!", "success");
+        const activeClientId = this.getClientId();
 
-                if (!this.spreadsheetId) {
-                    await this.createOrFindSpreadsheet();
-                } else {
-                    await this.syncCurrentStatesToSheet(true);
+        try {
+            this.tokenClient = window.google.accounts.oauth2.initTokenClient({
+                client_id: activeClientId,
+                scope: this.scopes,
+                callback: async (resp) => {
+                    if (resp.error) {
+                        console.error("Kesalahan Autentikasi Google OAuth 2.0:", resp);
+                        const err = String(resp.error || "").toLowerCase();
+                        const errSub = String(resp.error_subtype || "").toLowerCase();
+
+                        if (err.includes("origin_mismatch") || errSub.includes("origin_mismatch")) {
+                            this.showOriginMismatchHelp(resp.error);
+                        } else if (err === "popup_closed_by_user") {
+                            showToastNotification("Proses login Google dibatalkan oleh pengguna.", "info");
+                        } else if (err === "access_denied") {
+                            showToastNotification("Izin Google Sheets tidak diberikan.", "error");
+                        } else {
+                            alert("Gagal autentikasi Google OAuth 2.0: " + resp.error + (resp.error_description ? ` (${resp.error_description})` : ""));
+                        }
+                        return;
+                    }
+
+                    // Kepatuhan Kebijakan: Token hanya disimpan di memori RAM (in-memory)
+                    this.accessToken = resp.access_token;
+                    showToastNotification("Autentikasi Google OAuth 2.0 Berhasil!", "success");
+
+                    if (!this.spreadsheetId) {
+                        await this.createOrFindSpreadsheet();
+                    } else {
+                        await this.syncCurrentStatesToSheet(true);
+                    }
+                    this.updateButtonsUI();
+                    updateCloudStatusUI("sheets", new Date().toISOString());
                 }
-                this.updateButtonsUI();
+            });
+
+            this.tokenClient.requestAccessToken({ prompt: "" });
+        } catch (initErr) {
+            console.error("Gagal menginisialisasi Google Token Client:", initErr);
+            const errStr = String(initErr.message || initErr).toLowerCase();
+            if (errStr.includes("origin") || errStr.includes("idpiframe")) {
+                this.showOriginMismatchHelp(errStr);
+            } else {
+                alert("Gagal menginisialisasi Google OAuth: " + initErr.message);
             }
-        });
-
-        this.tokenClient.requestAccessToken({ prompt: "" });
+        }
     },
 
     async createOrFindSpreadsheet() {
+        const savedSheetId = AppConfig.getSpreadsheetId();
+        if (savedSheetId) {
+            this.spreadsheetId = savedSheetId;
+            this.spreadsheetUrl = `https://docs.google.com/spreadsheets/d/${savedSheetId}/edit`;
+            await this.syncCurrentStatesToSheet(true);
+            return;
+        }
+
         try {
-            showToastNotification("Membuat Google Spreadsheet Operasional...", "info");
+            showToastNotification("Membuat Google Spreadsheet Operasional Baru...", "info");
             const res = await fetch("https://sheets.googleapis.com/v4/spreadsheets", {
                 method: "POST",
                 headers: {
@@ -1011,15 +1371,21 @@ const GoogleSheetsService = {
             this.spreadsheetId = sheetData.spreadsheetId;
             this.spreadsheetUrl = sheetData.spreadsheetUrl || `https://docs.google.com/spreadsheets/d/${this.spreadsheetId}/edit`;
 
-            // Simpan info ke server agar semua device tahu ID spreadsheet yang sama
-            await fetch("/api/sheets-info", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    spreadsheetId: this.spreadsheetId,
-                    spreadsheetUrl: this.spreadsheetUrl
-                })
-            });
+            // Simpan ID spreadsheet di localStorage agar GitHub Pages mengingatnya
+            localStorage.setItem("ktg_custom_spreadsheet_id", this.spreadsheetId);
+
+            // Simpan info ke server backend jika backend aktif
+            const apiBase = AppConfig.getApiBaseUrl();
+            try {
+                await fetch(`${apiBase}/api/sheets-info`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        spreadsheetId: this.spreadsheetId,
+                        spreadsheetUrl: this.spreadsheetUrl
+                    })
+                });
+            } catch (e) {}
 
             // Tulis baris data jalur saat ini
             await this.syncCurrentStatesToSheet(false);
@@ -1076,21 +1442,25 @@ const GoogleSheetsService = {
                 throw new Error(errData.error?.message || "HTTP " + res.status);
             }
 
-            // Juga cadangkan data dinasan ke sheet Data_Dinasan jika ada
+            // Juga cadangkan data dinasan jika ada
             this.syncDinasanToSheet();
 
-            // Update timestamp di server
-            await fetch("/api/sheets-info", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    spreadsheetId: this.spreadsheetId,
-                    spreadsheetUrl: this.spreadsheetUrl
-                })
-            });
+            // Update timestamp di server jika tersedia
+            const apiBase = AppConfig.getApiBaseUrl();
+            try {
+                await fetch(`${apiBase}/api/sheets-info`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        spreadsheetId: this.spreadsheetId,
+                        spreadsheetUrl: this.spreadsheetUrl
+                    })
+                });
+            } catch (e) {}
 
             if (notify) showToastNotification("Data berhasil diperbarui di Google Sheets!", "success");
             this.updateButtonsUI();
+            updateCloudStatusUI("sheets", new Date().toISOString());
         } catch (err) {
             console.error("Gagal sinkron ke Google Sheets:", err);
             if (notify) alert("Gagal mengirim ke Google Sheets: " + err.message);
@@ -1100,15 +1470,25 @@ const GoogleSheetsService = {
     async syncDinasanToSheet() {
         if (!this.accessToken || !this.spreadsheetId) return;
         try {
-            const resDinas = await fetch("/api/dinas");
-            if (!resDinas.ok) return;
-            const dinasData = await resDinas.json();
-            if (!dinasData.data || !Array.isArray(dinasData.data)) return;
+            const apiBase = AppConfig.getApiBaseUrl();
+            let dinasItems = [];
+
+            try {
+                const resDinas = await fetch(`${apiBase}/api/dinas`);
+                if (resDinas.ok) {
+                    const dinasData = await resDinas.json();
+                    if (dinasData.data && Array.isArray(dinasData.data)) {
+                        dinasItems = dinasData.data;
+                    }
+                }
+            } catch (e) {}
+
+            if (dinasItems.length === 0) return;
 
             const rows = [
                 ["Tanggal", "Nama Pegawai", "Unit / Kelompok", "Shift", "File Foto", "Waktu Dicatat"]
             ];
-            dinasData.data.forEach(d => {
+            dinasItems.forEach(d => {
                 rows.push([
                     d.tanggal || "-",
                     d.nama || "-",
@@ -1139,14 +1519,14 @@ const GoogleSheetsService = {
         }
     },
 
-    async pullFromSheet() {
+    async pullFromSheet(notify = true) {
         if (!this.accessToken || !this.spreadsheetId) {
-            this.requestLoginAndSync();
+            if (notify) this.requestLoginAndSync();
             return;
         }
 
         try {
-            showToastNotification("Mengambil status terbaru dari Google Sheets...", "info");
+            if (notify) showToastNotification("Mengambil status terbaru dari Google Sheets...", "info");
             const range = "Status_Emplasemen!A2:G15";
             const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${encodeURIComponent(range)}`;
 
@@ -1176,25 +1556,29 @@ const GoogleSheetsService = {
                     };
                 });
 
-                // Simpan bulk ke server cloud
-                const saveRes = await fetch("/api/tracks", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ states: updatedBulk })
-                });
-                const saveData = await saveRes.json();
-                if (saveData.success) {
-                    currentTrackStatesCache = saveData.states;
-                    updateSummaryStats();
-                    initHotspotPins();
-                    showToastNotification("Data dari Google Sheets berhasil disinkronkan ke seluruh sistem!", "success");
-                }
+                currentTrackStatesCache = updatedBulk;
+                localStorage.setItem("ktg_track_states_backup", JSON.stringify(updatedBulk));
+                updateSummaryStats();
+                initHotspotPins();
+
+                // Juga coba simpan ke server backend jika aktif
+                const apiBase = AppConfig.getApiBaseUrl();
+                try {
+                    await fetch(`${apiBase}/api/tracks`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ states: updatedBulk })
+                    });
+                } catch (e) {}
+
+                updateCloudStatusUI("sheets", new Date().toISOString());
+                if (notify) showToastNotification("Data dari Google Sheets berhasil disinkronkan ke seluruh denah!", "success");
             } else {
-                showToastNotification("Tidak ada baris data di Google Sheets.", "info");
+                if (notify) showToastNotification("Tidak ada baris data di Google Sheets.", "info");
             }
         } catch (err) {
             console.error("Gagal menarik data dari Google Sheets:", err);
-            alert("Gagal menarik data dari Google Sheets: " + err.message);
+            if (notify) alert("Gagal menarik data dari Google Sheets: " + err.message);
         }
     },
 
@@ -1203,25 +1587,43 @@ const GoogleSheetsService = {
         const btnSync = document.getElementById("btnSyncToSheets");
         const btnPull = document.getElementById("btnPullFromSheets");
         const linkOpen = document.getElementById("linkOpenGoogleSheets");
+        const btnDisconnect = document.getElementById("btnDisconnectGoogleSheets");
 
-        if (this.spreadsheetId) {
+        if (this.accessToken) {
+            // Sudah login Google
             if (btnConnect) {
                 btnConnect.style.background = "#10B981";
                 btnConnect.innerHTML = '<i class="ti ti-check"></i> Google Sheets Terhubung';
             }
             if (btnSync) btnSync.style.display = "inline-flex";
             if (btnPull) btnPull.style.display = "inline-flex";
+            if (btnDisconnect) btnDisconnect.style.display = "inline-flex";
+            if (linkOpen && this.spreadsheetId) {
+                linkOpen.style.display = "inline-flex";
+                linkOpen.href = this.spreadsheetUrl || `https://docs.google.com/spreadsheets/d/${this.spreadsheetId}/edit`;
+            }
+        } else if (this.spreadsheetId) {
+            // Punya ID sheet tapi belum otentikasi sesi ini
+            if (btnConnect) {
+                btnConnect.style.background = "#0F9D58";
+                btnConnect.innerHTML = '<i class="ti ti-login"></i> Masuk Akun Google';
+            }
+            if (btnSync) btnSync.style.display = "none";
+            if (btnPull) btnPull.style.display = "none";
+            if (btnDisconnect) btnDisconnect.style.display = "none";
             if (linkOpen) {
                 linkOpen.style.display = "inline-flex";
                 linkOpen.href = this.spreadsheetUrl || `https://docs.google.com/spreadsheets/d/${this.spreadsheetId}/edit`;
             }
         } else {
+            // Belum ada koneksi
             if (btnConnect) {
                 btnConnect.style.background = "#0F9D58";
                 btnConnect.innerHTML = '<i class="ti ti-file-spreadsheet"></i> Hubungkan Google Sheets';
             }
             if (btnSync) btnSync.style.display = "none";
             if (btnPull) btnPull.style.display = "none";
+            if (btnDisconnect) btnDisconnect.style.display = "none";
             if (linkOpen) linkOpen.style.display = "none";
         }
     }
