@@ -94,7 +94,7 @@ const KTG_TRACKS_DATA = [
             gdPpcw: "1 LOK + 21 GD (PPCW)",
             gdPkpkw: "1 LOK + 19 GD (PKPKW)"
         },
-        description: "Jalur stabling khusus untuk KPJ (Kereta Penolong / Crane Siaga) dan penempatan rangkaian siap operasi.",
+        description: "Jalur stabling KPJ dan Ex 147 (Kereta Penolong / Crane Siaga) dan penempatan rangkaian siap operasi.",
         hotspotCoords: { top: "48%", left: "52%" }
     },
     {
@@ -234,7 +234,7 @@ let GAPEKA_TRAINS_DATA = [
         jamBerangkat: "15:45",
         masukJalur: "Jalur II",
         berangkatJalur: "Jalur I",
-        stablingJalur: "Cuci 2"
+        stablingJalur: "Jalur IV - Cuci 2"
     },
     {
         no: "293 - 294",
