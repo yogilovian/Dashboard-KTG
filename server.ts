@@ -1,13 +1,17 @@
 import express from "express";
 import path from "path";
 import fs from "fs";
-import { createServer as createViteServer } from "vite";
 
-const PORT = 3000;
+// Di lingkungan dev AI Studio, dev server harus mendengarkan di port 3000 (diteruskan oleh reverse-proxy Nginx).
+// Di Cloud Run produksi mandiri, Cloud Run menyuntikkan port melalui process.env.PORT (biasanya 8080).
+const isAiStudioDev = process.env.NODE_ENV !== "production" || !!process.env.DEFAULT_APP_PORT || !!process.env.CONTROL_PLANE_PORT;
+const PORT = isAiStudioDev ? 3000 : (process.env.PORT ? parseInt(process.env.PORT, 10) : 8080);
 const DATA_DIR = path.join(process.cwd(), "data");
 const TRACKS_FILE = path.join(DATA_DIR, "track_states.json");
 const SHEETS_INFO_FILE = path.join(DATA_DIR, "sheet_info.json");
+const STOPBLOK_SHEETS_INFO_FILE = path.join(DATA_DIR, "stopblok_sheet_info.json");
 const DINAS_FILE = path.join(DATA_DIR, "dinasan.json");
+const STOPBLOK_FILE = path.join(DATA_DIR, "stopblok_data.json");
 const CONFIG_FILE = path.join(process.cwd(), "firebase-applet-config.json");
 
 // Inisialisasi Firebase Client SDK untuk persistensi Firestore cloud
@@ -187,6 +191,47 @@ function writeTrackStates(states: Record<string, any>) {
   }
 })();
 
+function readStopblokData() {
+  try {
+    if (fs.existsSync(STOPBLOK_FILE)) {
+      const data = fs.readFileSync(STOPBLOK_FILE, "utf8");
+      return JSON.parse(data);
+    }
+  } catch (err) {
+    console.error("Error membaca file stopblok_data.json:", err);
+  }
+  return {
+    boardData: {},
+    kondisiJalur: {},
+    infoKA: { blb: "", jalan: "", batal: "" },
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function writeStopblokData(data: Record<string, any>) {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    const payload = {
+      ...data,
+      updatedAt: new Date().toISOString()
+    };
+    fs.writeFileSync(STOPBLOK_FILE, JSON.stringify(payload, null, 2), { encoding: "utf8", mode: 0o666 });
+
+    // Simpan juga ke Firestore stations/ketapang doc jika tersedia
+    if (clientDb) {
+      const docRef = fsDoc(clientDb, "stations", "ketapang");
+      fsSetDoc(docRef, { stopblok: payload, lastUpdated: new Date().toISOString() }, { merge: true })
+        .catch(err => console.warn("[Firestore] Gagal update stopblok:", err));
+    }
+    return true;
+  } catch (err) {
+    console.error("Error menulis file stopblok_data.json:", err);
+    return false;
+  }
+}
+
 function readSheetsInfo() {
   try {
     if (fs.existsSync(SHEETS_INFO_FILE)) {
@@ -209,6 +254,32 @@ function writeSheetsInfo(info: any) {
     return true;
   } catch (err) {
     console.error("Error menulis sheet_info.json:", err);
+    return false;
+  }
+}
+
+function readStopblokSheetsInfo() {
+  try {
+    if (fs.existsSync(STOPBLOK_SHEETS_INFO_FILE)) {
+      return JSON.parse(fs.readFileSync(STOPBLOK_SHEETS_INFO_FILE, "utf8"));
+    }
+  } catch (err) {
+    console.error("Error membaca stopblok_sheet_info.json:", err);
+  }
+  return {
+    spreadsheetId: null,
+    spreadsheetUrl: null,
+    lastSyncTime: null,
+    connectedBy: null
+  };
+}
+
+function writeStopblokSheetsInfo(info: any) {
+  try {
+    fs.writeFileSync(STOPBLOK_SHEETS_INFO_FILE, JSON.stringify(info, null, 2), { encoding: "utf8", mode: 0o666 });
+    return true;
+  } catch (err) {
+    console.error("Error menulis stopblok_sheet_info.json:", err);
     return false;
   }
 }
@@ -370,7 +441,69 @@ async function startServer() {
     res.status(400).json({ success: false, message: "Data dinas tidak valid" });
   });
 
-  // 7. Unduh Langsung File track_states.json & Penyajian Berkas Statis /data
+  // 7. Data Pantauan Stopblok (Cloud Sync & Spreadsheet Support)
+  app.get("/api/stopblok", (_req, res) => {
+    const data = readStopblokData();
+    res.json({
+      success: true,
+      data,
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  app.post("/api/stopblok", (req, res) => {
+    const { boardData, kondisiJalur, infoKA, bulkData } = req.body;
+    let current = readStopblokData();
+
+    if (bulkData && typeof bulkData === "object") {
+      current = { ...current, ...bulkData };
+    } else {
+      if (boardData && typeof boardData === "object") {
+        current.boardData = { ...current.boardData, ...boardData };
+      }
+      if (kondisiJalur && typeof kondisiJalur === "object") {
+        current.kondisiJalur = { ...current.kondisiJalur, ...kondisiJalur };
+      }
+      if (infoKA && typeof infoKA === "object") {
+        current.infoKA = { ...current.infoKA, ...infoKA };
+      }
+    }
+
+    writeStopblokData(current);
+    res.json({
+      success: true,
+      data: current,
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  app.get("/api/stopblok/download", (_req, res) => {
+    const data = readStopblokData();
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    res.setHeader("Content-Disposition", 'attachment; filename="stopblok_data.json"');
+    res.send(JSON.stringify(data, null, 2));
+  });
+
+  // 7b. Info Google Sheets Pantauan Stopblok Terpisah (Independen dari Emplasemen)
+  app.get("/api/stopblok/sheets-info", (_req, res) => {
+    res.json(readStopblokSheetsInfo());
+  });
+
+  app.post("/api/stopblok/sheets-info", (req, res) => {
+    const { spreadsheetId, spreadsheetUrl, connectedBy } = req.body;
+    const current = readStopblokSheetsInfo();
+    const updated = {
+      ...current,
+      spreadsheetId: spreadsheetId !== undefined ? spreadsheetId : current.spreadsheetId,
+      spreadsheetUrl: spreadsheetUrl !== undefined ? spreadsheetUrl : current.spreadsheetUrl,
+      connectedBy: connectedBy !== undefined ? connectedBy : current.connectedBy,
+      lastSyncTime: new Date().toISOString()
+    };
+    writeStopblokSheetsInfo(updated);
+    res.json({ success: true, info: updated });
+  });
+
+  // 8. Unduh Langsung File track_states.json & Penyajian Berkas Statis /data
   app.get("/data/track_states.json", (_req, res) => {
     const states = readTrackStates();
     res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -389,6 +522,7 @@ async function startServer() {
 
   // === VITE / STATIC SERVING ===
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
@@ -398,7 +532,8 @@ async function startServer() {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
-      const requested = req.path === "/" ? "index.html" : req.path.replace(/^\//, "");
+      const sanitized = path.normalize(req.path).replace(/^(\.\.[\/\\])+/, "");
+      const requested = sanitized === "/" || sanitized === "" ? "index.html" : sanitized.replace(/^\//, "");
       const targetFile = path.join(distPath, requested);
       if (fs.existsSync(targetFile) && fs.statSync(targetFile).isFile()) {
         return res.sendFile(targetFile);
@@ -407,8 +542,23 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server Stasiun Ketapang berjalan di http://0.0.0.0:${PORT}`);
+  const server = app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server Stasiun Ketapang berjalan di http://0.0.0.0:${PORT} [mode: ${process.env.NODE_ENV || "development"}]`);
+  });
+
+  process.on("SIGTERM", () => {
+    console.log("[Server] Menerima sinyal SIGTERM, menutup koneksi...");
+    server.close(() => {
+      console.log("[Server] Server berhasil ditutup.");
+      process.exit(0);
+    });
+  });
+
+  process.on("SIGINT", () => {
+    console.log("[Server] Menerima sinyal SIGINT, menutup koneksi...");
+    server.close(() => {
+      process.exit(0);
+    });
   });
 }
 

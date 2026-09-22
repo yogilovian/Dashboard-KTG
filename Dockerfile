@@ -4,12 +4,12 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+RUN npm ci || npm install
 
 COPY . .
 
 # Build Vite frontend dan bundle server.ts ke dist/server.cjs
-RUN npm run build
+RUN npm run build && cp -f script.js emplasemen.js stopblok.js style.css dist/ 2>/dev/null || true
 
 # Production stage
 FROM node:20-alpine AS runner
@@ -20,7 +20,7 @@ ENV NODE_ENV=production
 
 COPY package*.json ./
 # Hanya install production dependencies jika diperlukan
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev || npm install --omit=dev
 
 # Salin hasil build dist
 COPY --from=builder /app/dist ./dist
@@ -28,10 +28,10 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/data ./data
 COPY --from=builder /app/images ./images
 COPY --from=builder /app/data_dinas.csv ./data_dinas.csv
-COPY --from=builder /app/firebase-applet-config.json ./firebase-applet-config.json
-COPY --from=builder /app/firestore.rules ./firestore.rules
+COPY --from=builder /app/firebase-applet-config.json* ./
+COPY --from=builder /app/firestore.rules* ./
 
-# Port Cloud Run disuntikkan lewat environment variable PORT (default 8080/3000)
+# Port Cloud Run disuntikkan lewat environment variable PORT (default 8080)
 ENV PORT=8080
 EXPOSE 8080
 
