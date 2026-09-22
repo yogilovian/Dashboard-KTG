@@ -309,7 +309,7 @@ async function startServer() {
 
   // 2. OAuthConfig untuk Google Sheets API
   app.get("/api/oauth-config", (_req, res) => {
-    let clientId = "186406862864-in4aeul1p7hsebl8a8ml8ombr8vpto4b.apps.googleusercontent.com";
+    let clientId = "893363056589-kph2ujnsfdl55uamlj1uuta8fvsd59b1.apps.googleusercontent.comm";
     try {
       if (fs.existsSync(CONFIG_FILE)) {
         const conf = JSON.parse(fs.readFileSync(CONFIG_FILE, "utf8"));
