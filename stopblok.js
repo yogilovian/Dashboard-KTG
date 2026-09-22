@@ -33,7 +33,7 @@ const StopblokSheetsService = {
     accessToken: null, // STRICTLY IN-MEMORY ONLY
     spreadsheetId: null,
     spreadsheetUrl: null,
-    defaultClientId: "186406862864-in4aeul1p7hsebl8a8ml8ombr8vpto4b.apps.googleusercontent.com",
+    defaultClientId: "893363056589-kph2ujnsfdl55uamlj1uuta8fvsd59b1.apps.googleusercontent.com",
     scopes: "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file",
 
     getClientId() {
