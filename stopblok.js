@@ -11,7 +11,7 @@ const StopblokConfig = {
         return "";
     },
     getGoogleClientId() {
-        return "186406862864-in4aeul1p7hsebl8a8ml8ombr8vpto4b.apps.googleusercontent.com";
+        return "893363056589-kph2ujnsfdl55uamlj1uuta8fvsd59b1.apps.googleusercontent.com;
     },
     getSpreadsheetId() {
         return (localStorage.getItem("ktg_stopblok_spreadsheet_id") || "").trim();
