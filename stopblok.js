@@ -11,7 +11,7 @@ const StopblokConfig = {
         return "";
     },
     getGoogleClientId() {
-        return "893363056589-kph2ujnsfdl55uamlj1uuta8fvsd59b1.apps.googleusercontent.com;
+        return "893363056589-kph2ujnsfdl55uamlj1uuta8fvsd59b1.apps.googleusercontent.com";
     },
     getSpreadsheetId() {
         return (localStorage.getItem("ktg_stopblok_spreadsheet_id") || "").trim();
@@ -137,12 +137,24 @@ const StopblokSheetsService = {
                     if (resp.error) {
                         console.error("[Stopblok] Kesalahan Autentikasi Google OAuth:", resp);
                         const err = String(resp.error || "").toLowerCase();
-                        if (err === "popup_closed_by_user") {
+                        const errSub = String(resp.error_subtype || "").toLowerCase();
+                        if (err.includes("origin_mismatch") || errSub.includes("origin_mismatch")) {
+                            alert(
+                                `[Google OAuth: Origin Belum Terdaftar]\n\n` +
+                                `Domain: ${window.location.origin}\n\n` +
+                                `Penyebab: Google memblokir akses karena domain ${window.location.origin} belum didaftarkan di 'Authorized JavaScript origins' pada Google Cloud Console.\n\n` +
+                                `Cara Mengatasi:\n` +
+                                `1. Buka Google Cloud Console (console.cloud.google.com) -> APIs & Services -> Credentials\n` +
+                                `2. Pilih OAuth 2.0 Client ID (${activeClientId})\n` +
+                                `3. Pada bagian 'Authorized JavaScript origins', tambahkan:\n   ${window.location.origin}\n` +
+                                `4. Klik SAVE/SIMPAN dan tunggu beberapa menit.`
+                            );
+                        } else if (err === "popup_closed_by_user") {
                             this.showToast("Proses login Google dibatalkan.", "info");
                         } else if (err === "access_denied") {
                             this.showToast("Izin akses Google Sheets tidak diberikan.", "error");
                         } else {
-                            alert("Gagal autentikasi Google: " + resp.error);
+                            alert("Gagal autentikasi Google: " + resp.error + (resp.error_description ? ` (${resp.error_description})` : ""));
                         }
                         return;
                     }
@@ -163,7 +175,14 @@ const StopblokSheetsService = {
             this.tokenClient.requestAccessToken({ prompt: "" });
         } catch (initErr) {
             console.error("[Stopblok] Gagal menginisialisasi Google Token Client:", initErr);
-            alert("Gagal menginisialisasi Google OAuth: " + (initErr.message || initErr));
+            const errStr = String(initErr?.message || initErr).toLowerCase();
+            if (errStr.includes("origin") || errStr.includes("idpiframe")) {
+                alert(
+                    `[Google OAuth: Error Origin]\n\nDomain ${window.location.origin} belum diizinkan di Google Cloud Console Client ID.\nSilakan tambahkan ${window.location.origin} ke Authorized JavaScript origins di Google Cloud Console.`
+                );
+            } else {
+                alert("Gagal menginisialisasi Google OAuth: " + (initErr?.message || initErr));
+            }
         }
     },
 
