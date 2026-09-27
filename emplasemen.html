@@ -108,9 +108,10 @@
                             <span id="cloudStatusBadge" class="cloud-badge active">
                                 <span class="cloud-dot"></span> Online &bull; Terhubung ke Server Cloud
                             </span>
+                            <span id="emplasemenSheetIdDisplay" style="display: none; align-items: center; font-size: 11.5px; color: #002F6C; background: #EEF2FF; padding: 3px 8px; border-radius: 4px; font-weight: 600; border: 1px solid #C7D2FE;"></span>
                         </div>
                         <div style="font-size: 12px; color: #64748B; margin-top: 3px;" id="cloudLastSyncText">
-                            Papan emplasemen memiliki spreadsheet tersendiri dan otomatis tersimpan real-time ke cloud.
+                            Papan emplasemen memiliki spreadsheet tersendiri dan otomatis tersimpan real-time ke cloud antar semua perangkat.
                         </div>
                     </div>
                 </div>
@@ -129,6 +130,9 @@
                     <a id="linkOpenGoogleSheets" href="#" target="_blank" class="btn-sheets-action" style="display: none; background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0;" title="Buka Spreadsheet Emplasemen di Tab Baru">
                         <i class="ti ti-external-link"></i> Buka Spreadsheet
                     </a>
+                    <button type="button" id="btnSetEmplasemenSheetId" class="btn-sheets-action" style="background: #F8FAFC; color: #334155; border: 1px solid #CBD5E1;" title="Atur atau masukkan ID Spreadsheet yang sudah ada untuk dipakai bersama di semua device">
+                        <i class="ti ti-link"></i> Tautkan ID Sheet
+                    </button>
                     <button type="button" id="btnDisconnectGoogleSheets" class="btn-sheets-action" style="display: none; background: #FEF2F2; color: #DC2626; border: 1px solid #FCA5A5;" title="Putuskan koneksi Google Sheets">
                         <i class="ti ti-logout"></i> Putuskan
                     </button>
@@ -361,6 +365,65 @@
 
     </main>
 
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+    // Konfigurasi Kunci Proyek Firebase Stasiun Ketapang
+    const firebaseConfig = {
+        apiKey: "AIzaSyD2iwBlXPV32UpjO-6Svp-33BFpnCmo6cQ",
+        authDomain: "dashboard-ketapang.firebaseapp.com",
+        projectId: "dashboard-ketapang",
+        storageBucket: "dashboard-ketapang.firebasestorage.app",
+        messagingSenderId: "893363056589",
+        appId: "1:893363056589:web:a070059c7819255d9bde84",
+        measurementId: "G-5SE78JZH03"
+    };
+
+    // Inisialisasi Firebase & Realtime Database
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Sinkronisasi Real-Time ID Spreadsheet Emplasemen Antar Semua Perangkat (PC, HP, Tablet)
+    const emplasemenSheetsRef = ref(database, 'emplasemen_ketapang_config/sheets');
+    onValue(emplasemenSheetsRef, (snapshot) => {
+        const conf = snapshot.val();
+        if (conf && conf.spreadsheetId && window.GoogleSheetsService) {
+            window.GoogleSheetsService.setSpreadsheetIdFromCloud(conf.spreadsheetId, conf.spreadsheetUrl);
+        }
+    });
+
+    window.saveEmplasemenSheetToFirebase = function(spreadsheetId, spreadsheetUrl) {
+        if (!spreadsheetId) return;
+        try {
+            set(emplasemenSheetsRef, {
+                spreadsheetId: spreadsheetId,
+                spreadsheetUrl: spreadsheetUrl || `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit`,
+                updatedAt: new Date().toISOString()
+            });
+        } catch (e) {
+            console.warn("[Firebase] Gagal menyimpan konfigurasi sheet emplasemen:", e);
+        }
+    };
+
+    // Sinkronisasi Real-Time Kondisi Jalur Emplasemen Antar Semua Perangkat
+    const tracksRef = ref(database, 'emplasemen_ketapang/tracks');
+    onValue(tracksRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data && typeof data === 'object' && window.applyTrackStatesFromCloud) {
+            window.applyTrackStatesFromCloud(data);
+        }
+    });
+
+    window.saveTrackStatesToFirebase = function(states) {
+        if (!states || typeof states !== 'object') return;
+        try {
+            set(tracksRef, states);
+        } catch (e) {
+            console.warn("[Firebase] Gagal simpan track states:", e);
+        }
+    };
+    </script>
     <script src="script.js"></script>
     <script src="emplasemen.js"></script>
 </body>

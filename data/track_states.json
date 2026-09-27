@@ -1,65 +1,65 @@
 {
+  "jalur-3": {
+    "trainNumber": "",
+    "stopblokNumber": "",
+    "note": "Manuver langsir dan pemeriksaan",
+    "updatedAt": "2026-09-14T10:00:00.000Z",
+    "status": "clear"
+  },
   "jalur-cuci-1": {
     "stopblokNumber": "1B,2B,3B,4B",
-    "trainNumber": "Ex Ka 279",
-    "updatedAt": "2026-09-14T13:12:32.296Z",
+    "updatedAt": "2026-09-18T14:54:46.382Z",
+    "status": "stopblok",
     "note": "Instalasi pencucian dan pengisian air",
-    "status": "stopblok"
-  },
-  "jalur-bongkar": {
-    "updatedAt": "2026-09-14T10:00:00.000Z",
-    "note": "Bongkar muat barang/kargo semen",
-    "status": "clear",
-    "stopblokNumber": "",
-    "trainNumber": ""
-  },
-  "jalur-6": {
-    "note": "Terpasang stopblok pengaman ujung sepur",
-    "status": "stopblok",
-    "trainNumber": "",
-    "stopblokNumber": "9-12, 13-16",
-    "updatedAt": "2026-09-14T10:00:00.000Z"
-  },
-  "jalur-3": {
-    "status": "clear",
-    "updatedAt": "2026-09-14T10:00:00.000Z",
-    "note": "Manuver langsir dan pemeriksaan",
-    "stopblokNumber": "",
-    "trainNumber": ""
-  },
-  "jalur-4": {
-    "status": "stopblok",
-    "stopblokNumber": "SB-04",
-    "updatedAt": "2026-09-14T10:00:00.000Z",
-    "note": "Terpasang Stopblok Pengaman - Rangkaian KPJ Siaga",
-    "trainNumber": "KPJ D9/10426"
-  },
-  "jalur-1": {
-    "status": "clear",
-    "stopblokNumber": "",
-    "note": "Siap menerima kedatangan/keberangkatan KA",
-    "trainNumber": "",
-    "updatedAt": "2026-09-14T10:00:00.000Z"
-  },
-  "jalur-5": {
-    "updatedAt": "2026-09-14T10:00:00.000Z",
-    "status": "clear",
-    "stopblokNumber": "",
-    "note": "Bebas stabling cadangan",
-    "trainNumber": ""
-  },
-  "jalur-2": {
-    "stopblokNumber": "",
-    "status": "clear",
-    "updatedAt": "2026-09-14T10:00:00.000Z",
-    "trainNumber": "",
-    "note": "Jalur lurus sepur raya utama"
+    "trainNumber": "EX KA 211F"
   },
   "jalur-cuci-2": {
-    "status": "stopblok",
-    "updatedAt": "2026-09-14T13:12:58.511Z",
-    "trainNumber": "EX KA 249",
+    "trainNumber": "EX KA 159",
     "note": "Perawatan eksterior dan interior & Cuci",
-    "stopblokNumber": "5B,6B,7B,8B"
+    "status": "stopblok",
+    "stopblokNumber": "5B,6B,7B,8B",
+    "updatedAt": "2026-09-18T14:54:52.986Z"
+  },
+  "jalur-1": {
+    "updatedAt": "2026-09-14T10:00:00.000Z",
+    "stopblokNumber": "",
+    "trainNumber": "",
+    "status": "clear",
+    "note": "Siap menerima kedatangan/keberangkatan KA"
+  },
+  "jalur-bongkar": {
+    "trainNumber": "",
+    "updatedAt": "2026-09-14T10:00:00.000Z",
+    "stopblokNumber": "",
+    "status": "clear",
+    "note": "Bongkar muat barang/kargo semen"
+  },
+  "jalur-6": {
+    "note": "Terpasang stopblok untuk rangkaian simpan",
+    "updatedAt": "2026-09-18T14:56:57.348Z",
+    "stopblokNumber": "9-12, 13-16",
+    "trainNumber": "K3 00501 - B 06802",
+    "status": "stopblok"
+  },
+  "jalur-4": {
+    "updatedAt": "2026-09-18T14:55:36.671Z",
+    "stopblokNumber": "5,6,7,8",
+    "trainNumber": "EX KA 147",
+    "note": "STABLING RANGKAIAN BALMEX",
+    "status": "stopblok"
+  },
+  "jalur-2": {
+    "status": "clear",
+    "stopblokNumber": "",
+    "updatedAt": "2026-09-14T10:00:00.000Z",
+    "note": "Jalur lurus sepur raya utama",
+    "trainNumber": ""
+  },
+  "jalur-5": {
+    "trainNumber": "",
+    "updatedAt": "2026-09-14T10:00:00.000Z",
+    "stopblokNumber": "",
+    "status": "clear",
+    "note": "Bebas stabling cadangan"
   }
 }

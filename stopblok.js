@@ -68,11 +68,79 @@ const StopblokSheetsService = {
         this.fetchDataFromBackend();
     },
 
+    setSpreadsheetIdFromCloud(id, url) {
+        if (!id || !id.trim()) return;
+        const cleanId = id.trim();
+        this.spreadsheetId = cleanId;
+        this.spreadsheetUrl = url || `https://docs.google.com/spreadsheets/d/${cleanId}/edit`;
+        StopblokConfig.setSpreadsheetId(cleanId);
+        this.updateButtonsUI();
+        console.log("[Stopblok] ID Spreadsheet disinkronkan dari cloud real-time:", cleanId);
+    },
+
+    async setSpreadsheetIdFromUser(rawInput) {
+        if (!rawInput || !rawInput.trim()) return false;
+        let sheetId = rawInput.trim();
+        const match = sheetId.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+        if (match && match[1]) {
+            sheetId = match[1];
+        }
+        
+        this.spreadsheetId = sheetId;
+        this.spreadsheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit`;
+        StopblokConfig.setSpreadsheetId(sheetId);
+
+        // Siarkan ke Firebase agar seluruh perangkat (HP, PC, Tablet) langsung tersinkron
+        if (window.saveStopblokSheetToFirebase) {
+            window.saveStopblokSheetToFirebase(sheetId, this.spreadsheetUrl);
+        }
+
+        // Simpan ke backend jika ada
+        try {
+            await fetch("/api/stopblok/sheets-info", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    spreadsheetId: this.spreadsheetId,
+                    spreadsheetUrl: this.spreadsheetUrl,
+                    connectedBy: "Petugas Pantauan Stopblok KTG"
+                })
+            });
+        } catch (e) {}
+
+        this.updateButtonsUI();
+        this.showToast("ID Spreadsheet berhasil ditautkan dan disinkronkan ke seluruh perangkat!", "success");
+
+        if (this.accessToken) {
+            try {
+                await this.ensureSheetsStructure();
+                await this.syncCurrentDataToSheet(true);
+            } catch (e) {
+                console.warn("[Stopblok] Gagal inisialisasi sheet baru:", e);
+            }
+        }
+        return true;
+    },
+
+    promptSetSpreadsheetId() {
+        const currentVal = this.spreadsheetUrl || (this.spreadsheetId ? `https://docs.google.com/spreadsheets/d/${this.spreadsheetId}/edit` : "");
+        const input = prompt(
+            "Masukkan Link URL atau ID Google Spreadsheet Pantauan Stopblok:\n\n" +
+            "Contoh Link: https://docs.google.com/spreadsheets/d/1abcXYZ.../edit\n\n" +
+            "(ID ini otomatis disimpan ke cloud dan berlaku sama di SEMUA perangkat lain, seperti HP atau komputer petugas lainnya)",
+            currentVal
+        );
+        if (input !== null && input.trim()) {
+            this.setSpreadsheetIdFromUser(input.trim());
+        }
+    },
+
     bindEvents() {
         const btnConnect = document.getElementById("btnConnectGoogleSheets");
         const btnSync = document.getElementById("btnSyncToSheets");
         const btnPull = document.getElementById("btnPullFromSheets");
         const btnDisconnect = document.getElementById("btnDisconnectGoogleSheets");
+        const btnSetSheet = document.getElementById("btnSetSpreadsheetId");
 
         if (btnConnect) {
             btnConnect.addEventListener("click", () => {
@@ -100,6 +168,11 @@ const StopblokSheetsService = {
         if (btnDisconnect) {
             btnDisconnect.addEventListener("click", () => {
                 this.disconnect();
+            });
+        }
+        if (btnSetSheet) {
+            btnSetSheet.addEventListener("click", () => {
+                this.promptSetSpreadsheetId();
             });
         }
     },
@@ -277,7 +350,7 @@ const StopblokSheetsService = {
     },
 
     async createOrFindSpreadsheet() {
-        const savedSheetId = StopblokConfig.getSpreadsheetId();
+        const savedSheetId = this.spreadsheetId || StopblokConfig.getSpreadsheetId();
         if (savedSheetId) {
             this.spreadsheetId = savedSheetId;
             this.spreadsheetUrl = `https://docs.google.com/spreadsheets/d/${savedSheetId}/edit`;
@@ -291,6 +364,39 @@ const StopblokSheetsService = {
             return;
         }
 
+        // 2. Coba cari di Google Drive apakah sudah pernah dibuat sebelumnya dari device lain
+        try {
+            const searchTitle = encodeURIComponent("name = 'Pantauan Stopblok & Operasional KA - Stasiun Ketapang (KTG)' and mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false");
+            const driveUrl = `https://www.googleapis.com/drive/v3/files?q=${searchTitle}&orderBy=modifiedTime desc&fields=files(id,name,webViewLink)`;
+            const driveRes = await fetch(driveUrl, {
+                headers: { "Authorization": `Bearer ${this.accessToken}` }
+            }).catch(() => null);
+
+            if (driveRes && driveRes.ok) {
+                const driveData = await driveRes.json().catch(() => null);
+                if (driveData && driveData.files && driveData.files.length > 0) {
+                    const existing = driveData.files[0];
+                    console.log("[Stopblok] Menemukan Spreadsheet yang sudah ada di Google Drive:", existing);
+                    this.spreadsheetId = existing.id;
+                    this.spreadsheetUrl = existing.webViewLink || `https://docs.google.com/spreadsheets/d/${existing.id}/edit`;
+                    StopblokConfig.setSpreadsheetId(this.spreadsheetId);
+
+                    if (window.saveStopblokSheetToFirebase) {
+                        window.saveStopblokSheetToFirebase(this.spreadsheetId, this.spreadsheetUrl);
+                    }
+
+                    this.updateButtonsUI();
+                    await this.ensureSheetsStructure();
+                    await this.syncCurrentDataToSheet(true);
+                    this.showToast("Berhasil tersambung ke Spreadsheet yang sama dari Google Drive!", "success");
+                    return;
+                }
+            }
+        } catch (searchErr) {
+            console.warn("[Stopblok] Pencarian Google Drive dilewati:", searchErr);
+        }
+
+        // 3. Jika belum pernah ada sama sekali, buat baru
         try {
             this.showToast("Membuat Spreadsheet Khusus Pantauan Stopblok...", "info");
             const res = await fetch("https://sheets.googleapis.com/v4/spreadsheets", {
@@ -344,6 +450,11 @@ const StopblokSheetsService = {
             // Simpan ke storage tersendiri khusus Stopblok
             StopblokConfig.setSpreadsheetId(this.spreadsheetId);
 
+            // Siarkan ke Firebase agar semua perangkat lain (HP, PC, laptop) langsung memakai spreadsheet ini
+            if (window.saveStopblokSheetToFirebase) {
+                window.saveStopblokSheetToFirebase(this.spreadsheetId, this.spreadsheetUrl);
+            }
+
             // Simpan ke server backend di endpoint khusus Stopblok
             try {
                 await fetch("/api/stopblok/sheets-info", {
@@ -358,7 +469,7 @@ const StopblokSheetsService = {
             } catch (e) {}
 
             await this.syncCurrentDataToSheet(false);
-            this.showToast("Google Spreadsheet Stopblok berhasil dibuat!", "success");
+            this.showToast("Google Spreadsheet Stopblok berhasil dibuat & ditautkan ke semua device!", "success");
             this.updateButtonsUI();
         } catch (err) {
             console.error("[Stopblok] Gagal membuat Google Spreadsheet:", err);
@@ -726,6 +837,17 @@ const StopblokSheetsService = {
                 btnOpenLink.style.display = "inline-flex";
             } else {
                 btnOpenLink.style.display = "none";
+            }
+        }
+
+        const sheetDisplay = document.getElementById("stopblokSheetIdDisplay");
+        if (sheetDisplay) {
+            if (hasSheet) {
+                sheetDisplay.style.display = "inline-flex";
+                sheetDisplay.innerHTML = `<i class="ti ti-table" style="margin-right: 4px;"></i> Sheet: <strong>${this.spreadsheetId.substring(0, 8)}...</strong>`;
+                sheetDisplay.title = `ID Spreadsheet Lengkap:\n${this.spreadsheetId}\n\n(Tersinkron di semua device)`;
+            } else {
+                sheetDisplay.style.display = "none";
             }
         }
     },

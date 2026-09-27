@@ -452,6 +452,11 @@ async function saveTrackStateToCloud(trackId, stateObj) {
     updateSummaryStats();
     initHotspotPins();
 
+    // Siarkan langsung ke Firebase Realtime Database agar seluruh device (HP/PC lain) sinkron seketika
+    if (window.saveTrackStatesToFirebase) {
+        window.saveTrackStatesToFirebase(currentTrackStatesCache);
+    }
+
     const apiBase = AppConfig.getApiBaseUrl();
     const apiUrl = `${apiBase}/api/tracks`;
 
@@ -508,6 +513,10 @@ async function resetTrackStateOnCloud(trackId) {
         localStorage.setItem("ktg_track_states_backup", JSON.stringify(currentTrackStatesCache));
         updateSummaryStats();
         initHotspotPins();
+
+        if (window.saveTrackStatesToFirebase) {
+            window.saveTrackStatesToFirebase(currentTrackStatesCache);
+        }
     }
 
     const apiBase = AppConfig.getApiBaseUrl();
@@ -536,6 +545,16 @@ async function resetTrackStateOnCloud(trackId) {
         updateCloudStatusUI("local", new Date().toISOString());
     }
 }
+
+// Sinkronisasi data real-time antar semua device via Firebase
+window.applyTrackStatesFromCloud = function(cloudStates) {
+    if (!cloudStates || typeof cloudStates !== 'object') return;
+    currentTrackStatesCache = { ...currentTrackStatesCache, ...cloudStates };
+    localStorage.setItem("ktg_track_states_backup", JSON.stringify(currentTrackStatesCache));
+    updateSummaryStats();
+    initHotspotPins();
+    updateCloudStatusUI("server", new Date().toISOString());
+};
 
 // UI Badge Status Cloud (Mendukung Server, Google Sheets Mandiri, dan Offline Lokal)
 function updateCloudStatusUI(mode, timestamp) {
@@ -1002,11 +1021,79 @@ const GoogleSheetsService = {
     accessToken: null, // STRICTLY IN-MEMORY ONLY (Google API Services User Data Policy)
     spreadsheetId: null,
     spreadsheetUrl: null,
-    defaultClientId: "186406862864-in4aeul1p7hsebl8a8ml8ombr8vpto4b.apps.googleusercontent.com",
+    defaultClientId: "893363056589-kph2ujnsfdl55uamlj1uuta8fvsd59b1.apps.googleusercontent.com",
     scopes: "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file",
 
     getClientId() {
         return AppConfig.getGoogleClientId(this.defaultClientId);
+    },
+
+    setSpreadsheetIdFromCloud(id, url) {
+        if (!id || !id.trim()) return;
+        const cleanId = id.trim();
+        this.spreadsheetId = cleanId;
+        this.spreadsheetUrl = url || `https://docs.google.com/spreadsheets/d/${cleanId}/edit`;
+        AppConfig.setCustomConfig({ spreadsheetId: cleanId });
+        this.updateButtonsUI();
+        console.log("[Emplasemen] ID Spreadsheet disinkronkan dari cloud real-time:", cleanId);
+    },
+
+    async setSpreadsheetIdFromUser(rawInput) {
+        if (!rawInput || !rawInput.trim()) return false;
+        let sheetId = rawInput.trim();
+        const match = sheetId.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+        if (match && match[1]) {
+            sheetId = match[1];
+        }
+        
+        this.spreadsheetId = sheetId;
+        this.spreadsheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit`;
+        AppConfig.setCustomConfig({ spreadsheetId: sheetId });
+
+        // Siarkan ke Firebase agar seluruh perangkat (HP, PC, Tablet) langsung tersinkron
+        if (window.saveEmplasemenSheetToFirebase) {
+            window.saveEmplasemenSheetToFirebase(sheetId, this.spreadsheetUrl);
+        }
+
+        // Simpan ke backend jika ada
+        const apiBase = AppConfig.getApiBaseUrl();
+        try {
+            await fetch(`${apiBase}/api/sheets-info`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    spreadsheetId: this.spreadsheetId,
+                    spreadsheetUrl: this.spreadsheetUrl,
+                    connectedBy: "Petugas Emplasemen KTG"
+                })
+            });
+        } catch (e) {}
+
+        this.updateButtonsUI();
+        showToastNotification("ID Spreadsheet berhasil ditautkan dan disinkronkan ke seluruh perangkat!", "success");
+
+        if (this.accessToken) {
+            try {
+                await this.ensureSheetsStructure();
+                await this.syncCurrentStatesToSheet(true);
+            } catch (e) {
+                console.warn("[Emplasemen] Gagal inisialisasi sheet:", e);
+            }
+        }
+        return true;
+    },
+
+    promptSetSpreadsheetId() {
+        const currentVal = this.spreadsheetUrl || (this.spreadsheetId ? `https://docs.google.com/spreadsheets/d/${this.spreadsheetId}/edit` : "");
+        const input = prompt(
+            "Masukkan Link URL atau ID Google Spreadsheet Emplasemen:\n\n" +
+            "Contoh Link: https://docs.google.com/spreadsheets/d/1abcXYZ.../edit\n\n" +
+            "(ID ini otomatis disimpan ke cloud dan berlaku sama di SEMUA perangkat lain, seperti HP atau komputer petugas lainnya)",
+            currentVal
+        );
+        if (input !== null && input.trim()) {
+            this.setSpreadsheetIdFromUser(input.trim());
+        }
     },
 
     async init() {
@@ -1048,6 +1135,7 @@ const GoogleSheetsService = {
         const btnPull = document.getElementById("btnPullFromSheets");
         const btnDisconnect = document.getElementById("btnDisconnectGoogleSheets");
         const btnOpenSettings = document.getElementById("btnOpenOAuthSettings");
+        const btnSetSheet = document.getElementById("btnSetEmplasemenSheetId");
 
         // Kontrol Modal Pengaturan
         const oauthModal = document.getElementById("oauthModalOverlay");
@@ -1084,6 +1172,11 @@ const GoogleSheetsService = {
         if (btnDisconnect) {
             btnDisconnect.addEventListener("click", () => {
                 this.disconnect();
+            });
+        }
+        if (btnSetSheet) {
+            btnSetSheet.addEventListener("click", () => {
+                this.promptSetSpreadsheetId();
             });
         }
         if (btnOpenSettings) {
@@ -1403,7 +1496,7 @@ const GoogleSheetsService = {
     },
 
     async createOrFindSpreadsheet() {
-        const savedSheetId = AppConfig.getSpreadsheetId();
+        const savedSheetId = this.spreadsheetId || AppConfig.getSpreadsheetId();
         if (savedSheetId) {
             this.spreadsheetId = savedSheetId;
             this.spreadsheetUrl = `https://docs.google.com/spreadsheets/d/${savedSheetId}/edit`;
@@ -1415,6 +1508,38 @@ const GoogleSheetsService = {
                 alert("Gagal menghubungkan ke Spreadsheet tersimpan:\n\n" + err.message);
             }
             return;
+        }
+
+        // 2. Coba cari di Google Drive apakah sudah pernah dibuat sebelumnya dari device lain
+        try {
+            const searchTitle = encodeURIComponent("name = 'Emplasemen & Operasional Stasiun Ketapang (KTG)' and mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false");
+            const driveUrl = `https://www.googleapis.com/drive/v3/files?q=${searchTitle}&orderBy=modifiedTime desc&fields=files(id,name,webViewLink)`;
+            const driveRes = await fetch(driveUrl, {
+                headers: { "Authorization": `Bearer ${this.accessToken}` }
+            }).catch(() => null);
+
+            if (driveRes && driveRes.ok) {
+                const driveData = await driveRes.json().catch(() => null);
+                if (driveData && driveData.files && driveData.files.length > 0) {
+                    const existing = driveData.files[0];
+                    console.log("[Emplasemen] Menemukan Spreadsheet yang sudah ada di Google Drive:", existing);
+                    this.spreadsheetId = existing.id;
+                    this.spreadsheetUrl = existing.webViewLink || `https://docs.google.com/spreadsheets/d/${existing.id}/edit`;
+                    AppConfig.setCustomConfig({ spreadsheetId: this.spreadsheetId });
+
+                    if (window.saveEmplasemenSheetToFirebase) {
+                        window.saveEmplasemenSheetToFirebase(this.spreadsheetId, this.spreadsheetUrl);
+                    }
+
+                    this.updateButtonsUI();
+                    await this.ensureSheetsStructure();
+                    await this.syncCurrentStatesToSheet(true);
+                    showToastNotification("Tersambung ke Google Spreadsheet Emplasemen yang sudah ada!", "success");
+                    return;
+                }
+            }
+        } catch (searchErr) {
+            console.warn("[Emplasemen] Pencarian Google Drive dilewati:", searchErr);
         }
 
         try {
@@ -1467,6 +1592,11 @@ const GoogleSheetsService = {
             // Simpan ID spreadsheet di localStorage agar GitHub Pages mengingatnya
             localStorage.setItem("ktg_custom_spreadsheet_id", this.spreadsheetId);
 
+            // Siarkan ke Firebase agar semua perangkat langsung tersinkron
+            if (window.saveEmplasemenSheetToFirebase) {
+                window.saveEmplasemenSheetToFirebase(this.spreadsheetId, this.spreadsheetUrl);
+            }
+
             // Simpan info ke server backend jika backend aktif
             const apiBase = AppConfig.getApiBaseUrl();
             try {
@@ -1482,7 +1612,7 @@ const GoogleSheetsService = {
 
             // Tulis baris data jalur saat ini
             await this.syncCurrentStatesToSheet(false);
-            showToastNotification("Google Sheets operasional berhasil dibuat & disinkronkan!", "success");
+            showToastNotification("Google Sheets operasional berhasil dibuat & disinkronkan ke seluruh perangkat!", "success");
             this.updateButtonsUI();
         } catch (err) {
             console.error("Gagal membuat Google Spreadsheet:", err);
@@ -1760,6 +1890,17 @@ const GoogleSheetsService = {
             if (btnPull) btnPull.style.display = "none";
             if (btnDisconnect) btnDisconnect.style.display = "none";
             if (linkOpen) linkOpen.style.display = "none";
+        }
+
+        const sheetDisplay = document.getElementById("emplasemenSheetIdDisplay");
+        if (sheetDisplay) {
+            if (this.spreadsheetId) {
+                sheetDisplay.style.display = "inline-flex";
+                sheetDisplay.innerHTML = `<i class="ti ti-table" style="margin-right: 4px;"></i> Sheet: <strong>${this.spreadsheetId.substring(0, 8)}...</strong>`;
+                sheetDisplay.title = `ID Spreadsheet Lengkap:\n${this.spreadsheetId}\n\n(Tersinkron di semua device)`;
+            } else {
+                sheetDisplay.style.display = "none";
+            }
         }
     }
 };
