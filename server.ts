@@ -12,6 +12,8 @@ const SHEETS_INFO_FILE = path.join(DATA_DIR, "sheet_info.json");
 const STOPBLOK_SHEETS_INFO_FILE = path.join(DATA_DIR, "stopblok_sheet_info.json");
 const DINAS_FILE = path.join(DATA_DIR, "dinasan.json");
 const STOPBLOK_FILE = path.join(DATA_DIR, "stopblok_data.json");
+const STRUKTUR_SHEETS_INFO_FILE = path.join(DATA_DIR, "struktur_sheet_info.json");
+const STRUKTUR_BIODATA_FILE = path.join(DATA_DIR, "struktur_biodata.json");
 const CONFIG_FILE = path.join(process.cwd(), "firebase-applet-config.json");
 
 // Inisialisasi Firebase Client SDK untuk persistensi Firestore cloud
@@ -284,6 +286,53 @@ function writeStopblokSheetsInfo(info: any) {
   }
 }
 
+function readStrukturSheetsInfo() {
+  try {
+    if (fs.existsSync(STRUKTUR_SHEETS_INFO_FILE)) {
+      return JSON.parse(fs.readFileSync(STRUKTUR_SHEETS_INFO_FILE, "utf8"));
+    }
+  } catch (err) {
+    console.error("Error membaca struktur_sheet_info.json:", err);
+  }
+  return {
+    spreadsheetId: null,
+    spreadsheetUrl: null,
+    lastSyncTime: null,
+    connectedBy: null
+  };
+}
+
+function writeStrukturSheetsInfo(info: any) {
+  try {
+    fs.writeFileSync(STRUKTUR_SHEETS_INFO_FILE, JSON.stringify(info, null, 2), { encoding: "utf8", mode: 0o666 });
+    return true;
+  } catch (err) {
+    console.error("Error menulis struktur_sheet_info.json:", err);
+    return false;
+  }
+}
+
+function readStrukturBiodata() {
+  try {
+    if (fs.existsSync(STRUKTUR_BIODATA_FILE)) {
+      return JSON.parse(fs.readFileSync(STRUKTUR_BIODATA_FILE, "utf8"));
+    }
+  } catch (err) {
+    console.error("Error membaca struktur_biodata.json:", err);
+  }
+  return {};
+}
+
+function writeStrukturBiodata(data: any) {
+  try {
+    fs.writeFileSync(STRUKTUR_BIODATA_FILE, JSON.stringify(data, null, 2), { encoding: "utf8", mode: 0o666 });
+    return true;
+  } catch (err) {
+    console.error("Error menulis struktur_biodata.json:", err);
+    return false;
+  }
+}
+
 async function startServer() {
   const app = express();
 
@@ -501,6 +550,43 @@ async function startServer() {
     };
     writeStopblokSheetsInfo(updated);
     res.json({ success: true, info: updated });
+  });
+
+  // 7c. Info Google Sheets Struktur Organisasi & Biodata Terpisah (Independen)
+  app.get("/api/struktur/sheets-info", (_req, res) => {
+    res.json(readStrukturSheetsInfo());
+  });
+
+  app.post("/api/struktur/sheets-info", (req, res) => {
+    const { spreadsheetId, spreadsheetUrl, connectedBy } = req.body;
+    const current = readStrukturSheetsInfo();
+    const updated = {
+      ...current,
+      spreadsheetId: spreadsheetId !== undefined ? spreadsheetId : current.spreadsheetId,
+      spreadsheetUrl: spreadsheetUrl !== undefined ? spreadsheetUrl : current.spreadsheetUrl,
+      connectedBy: connectedBy !== undefined ? connectedBy : current.connectedBy,
+      lastSyncTime: new Date().toISOString()
+    };
+    writeStrukturSheetsInfo(updated);
+    res.json({ success: true, info: updated });
+  });
+
+  // 7d. Data Biodata Pegawai Struktur Organisasi
+  app.get("/api/struktur/biodata", (_req, res) => {
+    const data = readStrukturBiodata();
+    res.json({ success: true, data, timestamp: new Date().toISOString() });
+  });
+
+  app.post("/api/struktur/biodata", (req, res) => {
+    const { personId, biodata, bulkBiodata } = req.body;
+    let current = readStrukturBiodata();
+    if (bulkBiodata && typeof bulkBiodata === "object") {
+      current = { ...current, ...bulkBiodata };
+    } else if (personId && biodata) {
+      current[personId] = { ...(current[personId] || {}), ...biodata, updatedAt: new Date().toISOString() };
+    }
+    writeStrukturBiodata(current);
+    res.json({ success: true, data: current, timestamp: new Date().toISOString() });
   });
 
   // 8. Unduh Langsung File track_states.json & Penyajian Berkas Statis /data

@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Struktur Organisasi - Stasiun Ketapang</title>
+    <title>Struktur Organisasi & Biodata Petugas - Stasiun Ketapang</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+    <!-- Google Identity Services (GIS) untuk Otentikasi OAuth 2.0 Google Sheets -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -42,77 +44,163 @@
     <main class="main-content">
 
         <!-- Tombol untuk Buka/Tutup Sidebar -->
-    <div class="top-bar-action">
-        <button class="toggle-btn" id="sidebarToggle">☰</button>
-            <!-- Wadah Jam Digital Baru -->
-        <div class="digital-clock-container">
-        <span class="clock-icon">🕒</span>
-        <span id="live-clock">00:00:00 WIB</span>
+        <div class="top-bar-action">
+            <button class="toggle-btn" id="sidebarToggle">☰</button>
+            <!-- Wadah Jam Digital -->
+            <div class="digital-clock-container">
+                <span class="clock-icon">🕒</span>
+                <span id="live-clock">00:00:00 WIB</span>
+            </div>
         </div>
-    </div>
         
         <header class="header">
-            <h1>Struktur Organisasi</h1>
-            <p>Manajemen & Struktural Jabatan Stasiun Ketapang Banyuwangi</p>
+            <h1>Struktur Organisasi & Biodata Petugas</h1>
+            <p>Manajemen & Struktural Jabatan Stasiun Ketapang Banyuwangi (Daop 9 Jember)</p>
         </header>
 
-        <!-- Tempat Mengedit Struktur Organisasi -->
+        <!-- KARTU SINKRONISASI CLOUD & GOOGLE SHEETS KHUSUS STRUKTUR ORGANISASI (TERPISAH & MANDIRI) -->
+        <section class="cloud-sync-card" id="cloudSyncCard" style="margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: #EEF2FF; color: #002F6C; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; border: 1px solid #C7D2FE;">
+                    <i class="ti ti-table-shortcut"></i>
+                </div>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <strong style="color: #0F172A; font-size: 15px;">Google Sheets Struktur Organisasi</strong>
+                        <span id="cloudStatusBadge" class="cloud-badge active">
+                            <span class="cloud-dot"></span> Online &bull; Terhubung ke Server Cloud
+                        </span>
+                        <span id="strukturSheetIdDisplay" style="display: none; align-items: center; font-size: 11.5px; color: #002F6C; background: #EEF2FF; padding: 3px 8px; border-radius: 4px; font-weight: 600; border: 1px solid #C7D2FE;"></span>
+                    </div>
+                    <div style="font-size: 12px; color: #64748B; margin-top: 3px;" id="cloudLastSyncText">
+                        Struktur organisasi memiliki spreadsheet tersendiri dan otomatis tersimpan real-time ke cloud antar semua perangkat.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kontrol Aksi Google Sheets Sederhana & Mandiri Tanpa Modal Pengaturan -->
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;" id="googleSheetsActions">
+                <button type="button" id="btnConnectGoogleSheets" class="btn-sheets-action" style="background: #0F9D58; color: #FFFFFF;" title="Hubungkan ke Google Sheets khusus Struktur Organisasi">
+                    <i class="ti ti-brand-google"></i> Hubungkan Google Sheets
+                </button>
+                <button type="button" id="btnSyncToSheets" class="btn-sheets-action" style="display: none; background: #002F6C; color: #FFFFFF;" title="Simpan data biodata saat ini ke Google Sheets">
+                    <i class="ti ti-upload"></i> Simpan ke Sheets
+                </button>
+                <button type="button" id="btnPullFromSheets" class="btn-sheets-action" style="display: none; background: #F1F5F9; color: #0F172A; border: 1px solid #CBD5E1;" title="Ambil pembaruan dari Google Sheets">
+                    <i class="ti ti-download"></i> Tarik dari Sheets
+                </button>
+                <a id="linkOpenGoogleSheets" href="#" target="_blank" class="btn-sheets-action" style="display: none; background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0;" title="Buka Spreadsheet Struktur Organisasi di Tab Baru">
+                    <i class="ti ti-external-link"></i> Buka Spreadsheet
+                </a>
+                <button type="button" id="btnSetSpreadsheetId" class="btn-sheets-action" style="background: #F8FAFC; color: #334155; border: 1px solid #CBD5E1;" title="Atur atau masukkan ID Spreadsheet yang sudah ada untuk dipakai bersama di semua device">
+                    <i class="ti ti-link"></i> Tautkan ID Sheet
+                </button>
+                <button type="button" id="btnDisconnectGoogleSheets" class="btn-sheets-action" style="display: none; background: #FEF2F2; color: #DC2626; border: 1px solid #FCA5A5;" title="Putuskan koneksi Google Sheets">
+                    <i class="ti ti-logout"></i> Putuskan
+                </button>
+            </div>
+        </section>
+
+        <!-- Petunjuk Interaktif
+        <div style="display: flex; justify-content: center; margin-bottom: 18px;">
+            <div class="org-interactive-hint">
+                <i class="ti ti-pointer"></i> Klik langsung pada setiap kotak nama petugas untuk membuka & mengedit biodata
+            </div>
+        </div> -->
+
+        <!-- Struktur Organisasi & Kotak Biodata Interaktif (Setiap Kotak adalah Tombol) -->
         <section class="org-tree">
             
             <!-- Tingkat 1: Kepala Stasiun -->
-            <div class="org-node">
+            <div class="org-node org-node-btn" data-person-id="ks-efandi" role="button" tabindex="0" title="Klik untuk membuka biodata Efandi Setyo Budi">
                 <h3>Kepala Stasiun (KS)</h3>
-                <p>Efandi Setyo Budi</p> <!-- SILAHKAN EDIT DI SINI -->
+                <p data-name-for="ks-efandi">Efandi Setyo Budi</p>
             </div>
 
-            <!-- Tingkat 2: Wakil Kepala Stasiun (Optional) -->
-            <div class="org-node">
+            <!-- Tingkat 2: Wakil Kepala Stasiun -->
+            <div class="org-node org-node-btn" data-person-id="wks-deddy" role="button" tabindex="0" title="Klik untuk membuka biodata Deddy Prasetya">
                 <h3>Wakil Kepala Stasiun</h3>
-                <p>Deddy Prasetya</p> <!-- SILAHKAN EDIT DI SINI -->
+                <p data-name-for="wks-deddy">Deddy Prasetya</p>
             </div>
 
             <!-- Tingkat 3: Kepala Urusan / Supervisor -->
             <div class="org-level-2">
-                <div class="org-node">
+                <div class="org-node org-node-btn" data-person-id="spv-riki" role="button" tabindex="0" title="Klik untuk membuka biodata Riki Riyanda Saidi">
                     <h3>Supervisor Customer Care</h3>
-                    <p>Riki Riyanda Saidi</p> <!-- SILAHKAN EDIT DI SINI -->
-                    
+                    <p data-name-for="spv-riki">Riki Riyanda Saidi</p>
                 </div>
-                <div class="org-node">
+                <div class="org-node org-node-btn" data-person-id="spv-prasetyo" role="button" tabindex="0" title="Klik untuk membuka biodata Prasetyo Utomo">
                     <h3>Supervisor Pelayanan</h3>
-                    <p>Prasetyo Utomo</p> <!-- SILAHKAN EDIT DI SINI -->
-                    
+                    <p data-name-for="spv-prasetyo">Prasetyo Utomo</p>
                 </div>
-                <div class="org-node">
+                <div class="org-node org-node-btn" data-person-id="spv-helmi" role="button" tabindex="0" title="Klik untuk membuka biodata Helmi Mukti Wibowo">
                     <h3>Supervisor Perjalanan KA</h3>
-                    <p>Helmi Mukti Wibowo</p> <!-- SILAHKAN EDIT DI SINI -->
+                    <p data-name-for="spv-helmi">Helmi Mukti Wibowo</p>
+                </div>
+            </div>
 
-                        <!-- TINGKAT 4: KOLOM TERPISAH MANDIRI DI BAWAH KOORDINASI PERJALANAN KA -->
+            <!-- TINGKAT 4: KOLOM OPERASIONAL MANDIRI -->
             <div class="operational-row">
                 
                 <!-- Kolom Mandiri 1: Pengatur Perjalanan Kereta Api (PPKA) -->
                 <div class="independent-col">
                     <div class="col-title">🚩 Pengatur Perjalanan Kereta Api</div>
                     <div class="staff-grid-mini">
-                        <div class="staff-item-box">Mohammad Ibrahim<span>PPKA</span></div>
-                        <div class="staff-item-box">Akhmad Fadli<span>PPKA</span></div>
-                        <div class="staff-item-box">Alif Solehudin<span>PPKA</span></div>
-                        <div class="staff-item-box">Teguh Eko Prasetyo<span>PPKA</span></div>
+                        <div class="staff-item-box" data-person-id="ppka-ibrahim" role="button" tabindex="0" title="Klik untuk membuka biodata Mohammad Ibrahim">
+                            <strong data-name-for="ppka-ibrahim">Mohammad Ibrahim</strong>
+                            <span>PPKA</span>
+                        </div>
+                        <div class="staff-item-box" data-person-id="ppka-fadli" role="button" tabindex="0" title="Klik untuk membuka biodata Akhmad Fadli">
+                            <strong data-name-for="ppka-fadli">Akhmad Fadli</strong>
+                            <span>PPKA</span>
+                        </div>
+                        <div class="staff-item-box" data-person-id="ppka-alif" role="button" tabindex="0" title="Klik untuk membuka biodata Alif Solehudin">
+                            <strong data-name-for="ppka-alif">Alif Solehudin</strong>
+                            <span>PPKA</span>
+                        </div>
+                        <div class="staff-item-box" data-person-id="ppka-teguh" role="button" tabindex="0" title="Klik untuk membuka biodata Teguh Eko Prasetyo">
+                            <strong data-name-for="ppka-teguh">Teguh Eko Prasetyo</strong>
+                            <span>PPKA</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Kolom Mandiri 2: Petugas Langsir -->
+                <!-- Kolom Mandiri 2: Petugas Langsir (PLR) -->
                 <div class="independent-col">
                     <div class="col-title">🔀 Petugas Langsir</div>
                     <div class="staff-grid-mini">
-                        <div class="staff-item-box">Danial Syukron<span>PLR</span></div>
-                        <div class="staff-item-box">Qomarik Al Faruq<span>PLR</span></div>
-                        <div class="staff-item-box">Taufik HIdayat<span>PLR</span></div>
-                        <div class="staff-item-box">Yogi Lovian Galis Ismanto<span>PLR</span></div>
-                        <div class="staff-item-box">Agung Wahyu Wibowo<span>PLR</span></div>
-                        <div class="staff-item-box">Listianto Dwi L<span>PLR</span></div>
-                        <div class="staff-item-box">Ahmad Yoga Septian<span>PLR</span></div>
-                        <div class="staff-item-box">Rafi Hartono<span>PLR</span></div>
+                        <div class="staff-item-box" data-person-id="plr-danial" role="button" tabindex="0" title="Klik untuk membuka biodata Danial Syukron">
+                            <strong data-name-for="plr-danial">Danial Syukron</strong>
+                            <span>PLR</span>
+                        </div>
+                        <div class="staff-item-box" data-person-id="plr-qomarik" role="button" tabindex="0" title="Klik untuk membuka biodata Qomarik Al Faruq">
+                            <strong data-name-for="plr-qomarik">Qomarik Al Faruq</strong>
+                            <span>PLR</span>
+                        </div>
+                        <div class="staff-item-box" data-person-id="plr-taufik" role="button" tabindex="0" title="Klik untuk membuka biodata Taufik HIdayat">
+                            <strong data-name-for="plr-taufik">Taufik HIdayat</strong>
+                            <span>PLR</span>
+                        </div>
+                        <div class="staff-item-box" data-person-id="plr-yogi" role="button" tabindex="0" title="Klik untuk membuka biodata Yogi Lovian Galis Ismanto">
+                            <strong data-name-for="plr-yogi">Yogi Lovian Galis Ismanto</strong>
+                            <span>PLR</span>
+                        </div>
+                        <div class="staff-item-box" data-person-id="plr-agung" role="button" tabindex="0" title="Klik untuk membuka biodata Agung Wahyu Wibowo">
+                            <strong data-name-for="plr-agung">Agung Wahyu Widodo</strong>
+                            <span>PLR</span>
+                        </div>
+                        <div class="staff-item-box" data-person-id="plr-listianto" role="button" tabindex="0" title="Klik untuk membuka biodata Listianto Dwi L">
+                            <strong data-name-for="plr-listianto">Listianto Dwi L</strong>
+                            <span>PLR</span>
+                        </div>
+                        <div class="staff-item-box" data-person-id="plr-yoga" role="button" tabindex="0" title="Klik untuk membuka biodata Ahmad Yoga Septian">
+                            <strong data-name-for="plr-yoga">Ahmad Yoga Septian</strong>
+                            <span>PLR</span>
+                        </div>
+                        <div class="staff-item-box" data-person-id="plr-rafi" role="button" tabindex="0" title="Klik untuk membuka biodata Rafi Hartono">
+                            <strong data-name-for="plr-rafi">Rafi Hartono</strong>
+                            <span>PLR</span>
+                        </div>
                     </div>
                 </div>
 
@@ -120,21 +208,182 @@
                 <div class="independent-col">
                     <div class="col-title">🎛️ Petugas Rumah Sinyal</div>
                     <div class="staff-grid-mini">
-                        <div class="staff-item-box">Machrus Izunnadi<span>PRS</span></div>
-                        <div class="staff-item-box">Batara Linggar Mukti<span>PRS</span></div>
-                        <div class="staff-item-box">Deny Prastyo<span>PRS</span></div>
-                        <div class="staff-item-box">Roby Prasetyo<span>PRS</span></div>
-                        <div class="staff-item-box">Davin Egik Juniardi<span>PRS</span></div>
-                        <div class="staff-item-box">Arif Saga Febri A.<span></span></div>
-                        <div class="staff-item-box">Masardi Sukma Ragenda<span>PRS</span></div>
-                        <div class="staff-item-box">Kosong<span>PRS</span></div>
+                        <div class="staff-item-box" data-person-id="prs-machrus" role="button" tabindex="0" title="Klik untuk membuka biodata Machrus Izunnadi">
+                            <strong data-name-for="prs-machrus">Machrus Izunnadi</strong>
+                            <span>PRS</span>
+                        </div>
+                        <div class="staff-item-box" data-person-id="prs-batara" role="button" tabindex="0" title="Klik untuk membuka biodata Batara Linggar Mukti">
+                            <strong data-name-for="prs-batara">Batara Linggar Mukti</strong>
+                            <span>PRS</span>
+                        </div>
+                        <div class="staff-item-box" data-person-id="prs-deny" role="button" tabindex="0" title="Klik untuk membuka biodata Deny Prastyo">
+                            <strong data-name-for="prs-deny">Deny Prastyo</strong>
+                            <span>PRS</span>
+                        </div>
+                        <div class="staff-item-box" data-person-id="prs-roby" role="button" tabindex="0" title="Klik untuk membuka biodata Roby Prasetyo">
+                            <strong data-name-for="prs-roby">Roby Prasetyo</strong>
+                            <span>PRS</span>
+                        </div>
+                        <div class="staff-item-box" data-person-id="prs-davin" role="button" tabindex="0" title="Klik untuk membuka biodata Davin Egik Juniardi">
+                            <strong data-name-for="prs-davin">Davin Egik Juniardi</strong>
+                            <span>PRS</span>
+                        </div>
+                        <div class="staff-item-box" data-person-id="prs-saga" role="button" tabindex="0" title="Klik untuk membuka biodata Arif Saga Febri A.">
+                            <strong data-name-for="prs-saga">Arif Saga Febri A.</strong>
+                            <span>PRS</span>
+                        </div>
+                        <div class="staff-item-box" data-person-id="prs-masardi" role="button" tabindex="0" title="Klik untuk membuka biodata Masardi Sukma Ragenda">
+                            <strong data-name-for="prs-masardi">Masardi Sukma Ragenda</strong>
+                            <span>PRS</span>
+                        </div>
+                        <div class="staff-item-box" data-person-id="prs-kosong" role="button" tabindex="0" title="Klik untuk membuka biodata Formasi Cadangan">
+                            <strong data-name-for="prs-kosong">Kosong</strong>
+                            <span>PRS</span>
+                        </div>
                     </div>
                 </div>
 
             </div>
-        </div>
 
         </section>
+
+        <!-- MODAL POPUP BIODATA PETUGAS -->
+        <div class="biodata-modal-overlay" id="biodataModalOverlay">
+            <div class="biodata-modal-content">
+                <div class="biodata-modal-header">
+                    <div class="biodata-modal-title">
+                        <i class="ti ti-user-circle"></i>
+                        <span>Biodata Petugas Stasiun Ketapang</span>
+                    </div>
+                    <button type="button" class="biodata-modal-close" id="biodataModalCloseBtn">&times;</button>
+                </div>
+
+                <div class="biodata-modal-body">
+                    <!-- Sisi Kiri: Foto Profil & Aksi Foto -->
+                    <div class="biodata-photo-column">
+                        <div class="biodata-photo-wrapper">
+                            <img id="biodataPhotoPreview" src="images/listianto.jpg" alt="Foto Petugas" />
+                        </div>
+                        <div class="biodata-photo-badge" id="modalRoleBadge">PPKA</div>
+                        <div class="biodata-unit-badge" id="modalUnitBadge">Stasiun Ketapang</div>
+
+                        <!-- Tombol Tambah/Ganti Foto (Aktif saat edit mode) -->
+                        <input type="file" id="biodataPhotoInput" accept="image/*" style="display: none;" />
+                        <button type="button" class="btn-photo-action" id="btnTriggerUploadPhoto" style="display: none;">
+                            <i class="ti ti-camera"></i> Ganti / Unggah Foto
+                        </button>
+                        <button type="button" class="btn-photo-action" id="btnResetPhotoToDefault" style="display: none; font-size: 11px; color: #64748B;">
+                            <i class="ti ti-rotate-clockwise"></i> Reset Foto Asli
+                        </button>
+                    </div>
+
+                    <!-- Sisi Kanan: Rincian Biodata (Tampilan & Form Edit) -->
+                    <div class="biodata-details-column">
+                        <div class="biodata-person-header">
+                            <h3 id="modalHeaderName">Nama Petugas</h3>
+                            <span style="font-size: 12px; color: #64748B;">Struktur Organisasi & Operasional Daop 9 Jember</span>
+                        </div>
+
+                        <!-- Mode Tampilan (Read-Only) -->
+                        <div id="biodataViewContainer">
+                            <div class="biodata-info-grid">
+                                <div class="biodata-info-item">
+                                    <div class="biodata-info-lbl"><i class="ti ti-user"></i> Nama Lengkap</div>
+                                    <div class="biodata-info-val" id="viewName">-</div>
+                                </div>
+                                <div class="biodata-info-item">
+                                    <div class="biodata-info-lbl"><i class="ti ti-id"></i> NIPP / ID Pegawai</div>
+                                    <div class="biodata-info-val" id="viewNipp">-</div>
+                                </div>
+                                <div class="biodata-info-item">
+                                    <div class="biodata-info-lbl"><i class="ti ti-badge"></i> Jabatan / Posisi</div>
+                                    <div class="biodata-info-val" id="viewRole">-</div>
+                                </div>
+                                <div class="biodata-info-item">
+                                    <div class="biodata-info-lbl"><i class="ti ti-building"></i> Unit / Bagian</div>
+                                    <div class="biodata-info-val" id="viewUnit">-</div>
+                                </div>
+                                <div class="biodata-info-item">
+                                    <div class="biodata-info-lbl"><i class="ti ti-calendar"></i> Tempat, Tgl Lahir</div>
+                                    <div class="biodata-info-val" id="viewTtl">-</div>
+                                </div>
+                                <div class="biodata-info-item">
+                                    <div class="biodata-info-lbl"><i class="ti ti-phone"></i> No. Telepon / WA</div>
+                                    <div class="biodata-info-val" id="viewPhone">-</div>
+                                </div>
+                                <div class="biodata-info-item">
+                                    <div class="biodata-info-lbl"><i class="ti ti-certificate"></i> Status Kepegawaian</div>
+                                    <div class="biodata-info-val" id="viewStatus">-</div>
+                                </div>
+                                <div class="biodata-info-item full-width">
+                                    <div class="biodata-info-lbl"><i class="ti ti-map-pin"></i> Alamat Domisili</div>
+                                    <div class="biodata-info-val" id="viewAddress">-</div>
+                                </div>
+                                <div class="biodata-info-item full-width">
+                                    <div class="biodata-info-lbl"><i class="ti ti-notes"></i> Catatan Khusus / Deskripsi</div>
+                                    <div class="biodata-info-val" id="viewNotes">-</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mode Edit (Form Input) -->
+                        <div id="biodataEditContainer" style="display: none;">
+                            <div class="biodata-edit-form">
+                                <div class="biodata-form-group">
+                                    <label for="inputEditName"><i class="ti ti-user"></i> Nama Lengkap</label>
+                                    <input type="text" id="inputEditName" class="biodata-input" placeholder="Nama Petugas" />
+                                </div>
+                                <div class="biodata-form-group">
+                                    <label for="inputEditNipp"><i class="ti ti-id"></i> NIPP / ID Pegawai</label>
+                                    <input type="text" id="inputEditNipp" class="biodata-input" placeholder="Contoh: 67101" />
+                                </div>
+                                <div class="biodata-form-group">
+                                    <label for="inputEditRole"><i class="ti ti-badge"></i> Jabatan / Posisi</label>
+                                    <input type="text" id="inputEditRole" class="biodata-input" placeholder="Contoh: PPKA / PLR / PRS" />
+                                </div>
+                                <div class="biodata-form-group">
+                                    <label for="inputEditUnit"><i class="ti ti-building"></i> Unit / Bagian</label>
+                                    <input type="text" id="inputEditUnit" class="biodata-input" placeholder="Contoh: Operasional KA" />
+                                </div>
+                                <div class="biodata-form-group">
+                                    <label for="inputEditTtl"><i class="ti ti-calendar"></i> Tempat, Tanggal Lahir</label>
+                                    <input type="text" id="inputEditTtl" class="biodata-input" placeholder="Contoh: Banyuwangi, 12 Mei 1995" />
+                                </div>
+                                <div class="biodata-form-group">
+                                    <label for="inputEditPhone"><i class="ti ti-phone"></i> No. HP / WhatsApp</label>
+                                    <input type="text" id="inputEditPhone" class="biodata-input" placeholder="Contoh: 0812-3456-7890" />
+                                </div>
+                                <div class="biodata-form-group">
+                                    <label for="inputEditStatus"><i class="ti ti-certificate"></i> Status Kepegawaian</label>
+                                    <input type="text" id="inputEditStatus" class="biodata-input" placeholder="Contoh: Pegawai Organik" />
+                                </div>
+                                <div class="biodata-form-group full-width">
+                                    <label for="inputEditAddress"><i class="ti ti-map-pin"></i> Alamat Domisili</label>
+                                    <input type="text" id="inputEditAddress" class="biodata-input" placeholder="Alamat lengkap petugas" />
+                                </div>
+                                <div class="biodata-form-group full-width">
+                                    <label for="inputEditNotes"><i class="ti ti-notes"></i> Catatan Khusus / Deskripsi</label>
+                                    <input type="text" id="inputEditNotes" class="biodata-input" placeholder="Catatan operasional / sertifikasi" />
+                                </div>
+                                <!-- Hidden input untuk URL/Base64 foto -->
+                                <input type="hidden" id="inputEditPhoto" />
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="biodata-modal-footer">
+                    <button type="button" class="btn-secondary" id="btnCancelEditBiodata">Tutup</button>
+                    <button type="button" class="btn-secondary" id="btnToggleEditBiodata" style="background: #002F6C; color: #FFFFFF; border-color: #002F6C;">
+                        <i class="ti ti-edit"></i> Edit Biodata
+                    </button>
+                    <button type="button" class="btn-primary" id="btnSaveBiodata" style="display: none; background: #0F9D58; border-color: #0F9D58;">
+                        <i class="ti ti-check"></i> Simpan Perubahan
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- FOOTER RESPONSIF -->
         <footer class="site-footer">
@@ -169,8 +418,79 @@
             </div>
         </footer>
     </main>
-    
-        <script src="script.js"></script>
-    
+
+    <!-- SCRIPT FIREBASE REALTIME SINKRONISASI GLOBAL (IDENTIK DENGAN STOPBLOK & EMPLASEMEN) -->
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+    // Konfigurasi Kunci Proyek Firebase Stasiun Ketapang
+    const firebaseConfig = {
+        apiKey: "AIzaSyD2iwBlXPV32UpjO-6Svp-33BFpnCmo6cQ",
+        authDomain: "dashboard-ketapang.firebaseapp.com",
+        projectId: "dashboard-ketapang",
+        storageBucket: "dashboard-ketapang.firebasestorage.app",
+        messagingSenderId: "893363056589",
+        appId: "1:893363056589:web:a070059c7819255d9bde84",
+        measurementId: "G-5SE78JZH03"
+    };
+
+    // Inisialisasi Firebase & Realtime Database
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Sinkronisasi Real-Time ID Spreadsheet Struktur Organisasi Antar Semua Perangkat (PC, HP, Tablet)
+    const strukturSheetsRef = ref(database, 'struktur_ketapang_config/sheets');
+    onValue(strukturSheetsRef, (snapshot) => {
+        const conf = snapshot.val();
+        if (conf && conf.spreadsheetId && window.StrukturSheetsService) {
+            window.StrukturSheetsService.setSpreadsheetIdFromCloud(conf.spreadsheetId, conf.spreadsheetUrl);
+        }
+    });
+
+    window.saveStrukturSheetToFirebase = function(spreadsheetId, spreadsheetUrl) {
+        if (!spreadsheetId) return;
+        try {
+            set(strukturSheetsRef, {
+                spreadsheetId: spreadsheetId,
+                spreadsheetUrl: spreadsheetUrl || `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit`,
+                updatedAt: new Date().toISOString()
+            });
+        } catch (e) {
+            console.warn("[Firebase] Gagal menyimpan konfigurasi sheet struktur:", e);
+        }
+    };
+
+    // Sinkronisasi Real-Time Seluruh Biodata & Foto Petugas Antar Semua Perangkat
+    const biodataRef = ref(database, 'struktur_ketapang/biodata');
+    onValue(biodataRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data && typeof data === 'object' && window.StrukturBiodataManager) {
+            window.StrukturBiodataManager.applyBulkBiodata(data);
+        }
+    });
+
+    window.saveStrukturBiodataToFirebase = function(personId, personData) {
+        if (!personId || !personData) return;
+        try {
+            set(ref(database, `struktur_ketapang/biodata/${personId}`), personData);
+        } catch (e) {
+            console.warn("[Firebase] Gagal simpan biodata ke Firebase:", e);
+        }
+    };
+    </script>
+
+    <script src="script.js"></script>
+    <script src="struktur.js"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        if (window.StrukturBiodataManager) {
+            window.StrukturBiodataManager.init();
+        }
+        if (window.StrukturSheetsService) {
+            window.StrukturSheetsService.init();
+        }
+    });
+    </script>
 </body>
 </html>

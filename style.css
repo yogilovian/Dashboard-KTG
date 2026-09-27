@@ -533,16 +533,25 @@ body {
     border-left: 5px solid var(--kai-blue);
     text-align: center;
     min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .org-node h3 {
     color: var(--kai-orange);
     font-size: 16px;
     margin-bottom: 5px;
+    text-align: center;
+    width: 100%;
 }
 
 .org-node p {
     font-weight: 600;
+    text-align: center;
+    width: 100%;
+    margin: 0;
 }
 
 .org-level-2 {
@@ -590,25 +599,6 @@ body {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 8px;
-        }
-
-        .staff-item-box {
-            background: #F8F9FA;
-            border: 1px solid #E9ECEF;
-            border-radius: 6px;
-            padding: 10px 5px;
-            font-size: 11px;
-            text-align: center;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .staff-item-box span {
-            display: block;
-            color: #888;
-            font-size: 9px;
-            font-weight: 400;
-            margin-top: 2px;
         }
 
         /* Tombol Toggle Menu Baru (Modern, Beranimasi & Sentuh-Ramah) */
@@ -1877,6 +1867,456 @@ body {
         align-items: flex-start;
         gap: 8px;
     }
+}
+
+/* ========================================================
+   GAYA VISUAL STRUKTUR ORGANISASI & MODAL BIODATA PETUGAS
+   ======================================================== */
+
+.org-interactive-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #EEF2FF;
+    color: var(--kai-blue);
+    border: 1px solid #C7D2FE;
+    padding: 8px 18px;
+    border-radius: 24px;
+    font-size: 12.5px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 47, 108, 0.06);
+    transition: all 0.2s ease;
+}
+
+.org-interactive-hint i {
+    font-size: 16px;
+    color: var(--kai-orange);
+}
+
+.org-node {
+    position: relative;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s ease, background 0.2s ease;
+}
+
+/* Setiap kotak pimpinan & supervisor sebagai tombol interaktif */
+.org-node[data-person-id],
+.org-node-btn {
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+}
+
+.org-node[data-person-id]:hover,
+.org-node-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 47, 108, 0.16);
+    border-left-color: var(--kai-orange);
+    background: #FAFCFF;
+}
+
+.org-node[data-person-id]:active,
+.org-node-btn:active {
+    transform: translateY(0) scale(0.99);
+}
+
+.org-node[data-person-id]:focus-visible,
+.org-node-btn:focus-visible {
+    box-shadow: 0 0 0 3px rgba(0, 47, 108, 0.25), 0 8px 20px rgba(0, 47, 108, 0.12);
+}
+
+/* Kotak Staf Operasional (PPKA, PLR, PRS) sebagai Tombol Interaktif */
+.staff-item-box {
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 4px;
+    padding: 12px 8px;
+    min-height: 60px;
+    background: #F8F9FA;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.staff-item-box strong {
+    color: var(--kai-blue);
+    font-size: 11.5px;
+    font-weight: 700;
+    line-height: 1.35;
+    text-align: center !important;
+    display: block;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    transition: color 0.15s ease;
+}
+
+.staff-item-box span {
+    display: inline-block;
+    color: #64748B;
+    font-size: 9.5px;
+    font-weight: 600;
+    background: #F1F5F9;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-top: 2px;
+    border: 1px solid #E2E8F0;
+    text-align: center;
+    align-self: center;
+    transition: all 0.15s ease;
+}
+
+/* Pastikan semua elemen nama di bagan struktur organisasi selalu rata tengah (center) */
+.org-tree .org-node,
+.org-tree .org-node h3,
+.org-tree .org-node p,
+.org-tree .org-node [data-name-for],
+.org-tree .staff-item-box,
+.org-tree .staff-item-box strong,
+.org-tree .staff-item-box [data-name-for],
+.org-tree .staff-item-box span {
+    text-align: center !important;
+}
+
+.org-tree [data-name-for] {
+    display: block;
+    width: 100%;
+    text-align: center !important;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.staff-item-box:hover {
+    background: #FFFFFF;
+    border-color: var(--kai-orange);
+    box-shadow: 0 6px 16px rgba(237, 106, 22, 0.18);
+    transform: translateY(-2px);
+}
+
+.staff-item-box:hover strong {
+    color: var(--kai-orange);
+}
+
+.staff-item-box:hover span {
+    background: #FFF7ED;
+    color: #C2410C;
+    border-color: #FFEDD5;
+}
+
+.staff-item-box:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.staff-item-box:focus-visible {
+    box-shadow: 0 0 0 3px rgba(0, 47, 108, 0.25);
+    border-color: var(--kai-blue);
+}
+
+/* Modal Popup Biodata */
+.biodata-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.biodata-modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.biodata-modal-content {
+    background: #FFFFFF;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 45px rgba(0, 47, 108, 0.25);
+    border: 1px solid #E2E8F0;
+    overflow: hidden;
+    animation: modalScaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalScaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.biodata-modal-header {
+    background: linear-gradient(135deg, #002F6C 0%, #0F4C81 100%);
+    color: #FFFFFF;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid #ED6A16;
+}
+
+.biodata-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.biodata-modal-close {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: #FFFFFF;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.biodata-modal-close:hover {
+    background: #EF4444;
+}
+
+.biodata-modal-body {
+    padding: 22px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+}
+
+@media (max-width: 720px) {
+    .biodata-modal-body {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        padding: 16px;
+    }
+}
+
+/* Kolom Foto Kiri */
+.biodata-photo-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #F8FAFC;
+    padding: 18px 14px;
+    border-radius: 10px;
+    border: 1px solid #E2E8F0;
+    text-align: center;
+}
+
+.biodata-photo-wrapper {
+    width: 160px;
+    height: 200px;
+    border-radius: 10px;
+    border: 3px solid #ED6A16;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0, 47, 108, 0.15);
+    background: #EEF2FF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    position: relative;
+}
+
+.biodata-photo-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+}
+
+.biodata-photo-badge {
+    background: #002F6C;
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+    display: inline-block;
+}
+
+.biodata-unit-badge {
+    font-size: 11px;
+    color: #64748B;
+    margin-bottom: 12px;
+}
+
+.btn-photo-action {
+    background: #FFFFFF;
+    color: #002F6C;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 6px;
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    justify-content: center;
+    transition: all 0.2s ease;
+    margin-top: 6px;
+}
+
+.btn-photo-action:hover {
+    background: #EEF2FF;
+    border-color: #002F6C;
+}
+
+/* Kolom Rincian Biodata Kanan */
+.biodata-details-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.biodata-person-header {
+    border-bottom: 1.5px solid #E2E8F0;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+}
+
+.biodata-person-header h3 {
+    margin: 0;
+    color: #002F6C;
+    font-size: 19px;
+    font-weight: 800;
+}
+
+.biodata-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+@media (max-width: 520px) {
+    .biodata-info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.biodata-info-item {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+
+.biodata-info-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.biodata-info-lbl {
+    font-size: 11px;
+    color: #64748B;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.biodata-info-val {
+    font-size: 13px;
+    color: #0F172A;
+    font-weight: 700;
+    word-break: break-word;
+}
+
+/* Form Mode Edit */
+.biodata-edit-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+@media (max-width: 520px) {
+    .biodata-edit-form {
+        grid-template-columns: 1fr;
+    }
+}
+
+.biodata-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.biodata-form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.biodata-form-group label {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.biodata-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #0F172A;
+    background: #FFFFFF;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.biodata-input:focus {
+    outline: none;
+    border-color: #ED6A16;
+    box-shadow: 0 0 0 3px rgba(237, 106, 22, 0.15);
+    background: #FFFDF9;
+}
+
+.biodata-modal-footer {
+    padding: 14px 20px;
+    background: #F8FAFC;
+    border-top: 1px solid #E2E8F0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
 }
 
 
