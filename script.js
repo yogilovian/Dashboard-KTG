@@ -190,6 +190,9 @@ function initDinasanFetcher() {
                 });
                 cachedCSVText = csvStr;
                 renderDinasanForDate(activeDinasDate);
+            } else if (res.success && typeof res.data === "string" && res.data.trim().length > 0) {
+                cachedCSVText = res.data;
+                renderDinasanForDate(activeDinasDate);
             } else {
                 throw new Error("Data dinasan kosong");
             }
